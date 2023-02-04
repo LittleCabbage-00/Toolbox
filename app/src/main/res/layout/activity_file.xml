@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:gravity="center_vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,7 +28,7 @@
             android:gravity="center"
             android:textColor="#3F51B5"
             android:textSize="24sp"
-            android:text="文件加密解密"/>
+            />
 
         <LinearLayout
             android:orientation="horizontal"
@@ -39,6 +40,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:textSize="18sp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_alignParentBottom="true"
                 android:text="输入密码:" />
 
             <EditText
@@ -60,9 +63,11 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:id="@+id/readFile"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_alignParentBottom="true"
                 android:text="读取文件"/>
 
-            <EditText
+            <TextView
                 android:id="@+id/readPathEditText"
                 android:layout_width="500dp"
                 android:layout_height="wrap_content"
@@ -81,9 +86,11 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:id="@+id/saveFile"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_alignParentBottom="true"
                 android:text="写入文件"/>
 
-            <EditText
+            <TextView
                 android:id="@+id/savePathEditText"
                 android:layout_width="500dp"
                 android:layout_height="wrap_content"
@@ -101,6 +108,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_alignParentBottom="true"
                 android:text="加密"
                 android:textAllCaps="false"/>
 
@@ -109,6 +118,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_alignParentBottom="true"
                 android:text="解密"
                 android:textAllCaps="false"/>
 
@@ -121,5 +132,5 @@
 
     </LinearLayout>
 
-</androidx.drawerlayout.widget.DrawerLayout>
+</LinearLayout>
 

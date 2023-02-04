@@ -74,6 +74,8 @@ class FileActivity:BaseActivity(){
 
     override fun onStart() {
         super.onStart()
+        setTitle("文件加密解密")
+
         readFile.setOnClickListener {
             Toast.makeText(this,"you click",Toast.LENGTH_SHORT).show()
             setFromFileUri()

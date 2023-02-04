@@ -38,6 +38,11 @@ class PicActivity : BaseActivity(), View.OnClickListener {
         decryptPicButton.setOnClickListener(this)
     }
 
+    override fun onStart() {
+        super.onStart()
+        setTitle("图片解密")
+    }
+
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.readPicButton -> {

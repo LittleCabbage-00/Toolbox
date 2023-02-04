@@ -46,6 +46,11 @@ class TextActivity : BaseActivity(), View.OnClickListener {
         copyOutputButton.setOnClickListener(this)
     }
 
+    override fun onStart() {
+        super.onStart()
+        setTitle("文本加解密")
+    }
+
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.encryptButton -> {
