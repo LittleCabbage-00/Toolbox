@@ -11,6 +11,10 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.view.GravityCompat
 import com.example.cryptoapp.*
@@ -29,7 +33,8 @@ import java.io.*
 import java.lang.ref.WeakReference
 import kotlin.concurrent.thread
 
-class FileActivity : BaseActivity(), View.OnClickListener {
+//class FileActivity : BaseActivity(), View.OnClickListener {
+class FileActivity:BaseActivity(){
     private val REQUEST_CODE_FOR_LOAD_FILE = 1
     private val REQUEST_CODE_FOR_CREATE_FILE = 2
     private var fromFileUri: Uri? = null
@@ -67,21 +72,15 @@ class FileActivity : BaseActivity(), View.OnClickListener {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.readFileButton -> {
-                setFromFileUri()
-            }
-            R.id.saveFileButton -> {
-                setToFileUri()
-            }
-            R.id.encryptButton -> {
-                fileCryptoTask("ENCRYPT")
-            }
-            R.id.decryptButton -> {
-                fileCryptoTask("DECRYPT")
-            }
+    override fun onStart() {
+        super.onStart()
+        readFile.setOnClickListener {
+            Toast.makeText(this,"you click",Toast.LENGTH_SHORT).show()
+            setFromFileUri()
         }
+        saveFile.setOnClickListener { setToFileUri() }
+        encryptButton.setOnClickListener { fileCryptoTask("ENCRYPT") }
+        decryptButton.setOnClickListener { fileCryptoTask("DECRYPT") }
     }
 
     private fun fileCryptoTask(option: String) {
@@ -115,7 +114,6 @@ class FileActivity : BaseActivity(), View.OnClickListener {
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "*/*"
         startActivityForResult(intent, REQUEST_CODE_FOR_LOAD_FILE)
-
     }
 
     private fun setToFileUri() {
@@ -134,6 +132,7 @@ class FileActivity : BaseActivity(), View.OnClickListener {
         intent.putExtra(Intent.EXTRA_TITLE, outputName)
         startActivityForResult(intent, REQUEST_CODE_FOR_CREATE_FILE)
     }
+
 
 
     override fun onActivityResult(requestCode: Int,resultCode: Int, data:Intent?) {

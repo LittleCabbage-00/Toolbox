@@ -59,7 +59,7 @@
                 android:layout_width="90dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:id="@+id/readFileButton"
+                android:id="@+id/readFile"
                 android:text="读取文件"/>
 
             <EditText
@@ -80,7 +80,7 @@
                 android:layout_width="90dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:id="@+id/saveFileButton"
+                android:id="@+id/saveFile"
                 android:text="写入文件"/>
 
             <EditText

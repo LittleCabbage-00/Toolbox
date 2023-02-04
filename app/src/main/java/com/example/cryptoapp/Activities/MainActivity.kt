@@ -77,33 +77,5 @@ class MainActivity : BaseActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> drawerLayout.openDrawer(GravityCompat.START)
-            R.id.exit->ActivityCollector.finishAll()
-            R.id.toQQ->{
-                try{
-                val package_name = "com.tencent.mobileqq"
-                val packageManager: PackageManager = this.getPackageManager()
-                val it: Intent? = packageManager.getLaunchIntentForPackage(package_name)
-                startActivity(it)
-                }catch (e:java.lang.Exception){
-                    AlertDialog.Builder(this).apply {
-                        setTitle("出错了 >_<")
-                        setMessage("检测到您没有安装QQ\n是否前去安装？")
-                        setCancelable(false)
-                        setPositiveButton("确认"){_,_->
-                            val intent_downloadQQ=Intent(Intent.ACTION_VIEW)
-                            intent_downloadQQ.data= Uri.parse("https://im.qq.com/mobileqq")
-                            startActivity(intent_downloadQQ)
-                        }
-                        setNegativeButton("取消"){_,_->
-                        }
-                        show()
-                    }
-                }
-            }
-        }
-        return true
-    }
+
 }
