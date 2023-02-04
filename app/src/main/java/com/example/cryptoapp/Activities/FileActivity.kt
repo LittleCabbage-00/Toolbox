@@ -76,10 +76,7 @@ class FileActivity:BaseActivity(){
         super.onStart()
         setTitle("文件加密解密")
 
-        readFile.setOnClickListener {
-            Toast.makeText(this,"you click",Toast.LENGTH_SHORT).show()
-            setFromFileUri()
-        }
+        readFile.setOnClickListener { setFromFileUri() }
         saveFile.setOnClickListener { setToFileUri() }
         encryptButton.setOnClickListener { fileCryptoTask("ENCRYPT") }
         decryptButton.setOnClickListener { fileCryptoTask("DECRYPT") }

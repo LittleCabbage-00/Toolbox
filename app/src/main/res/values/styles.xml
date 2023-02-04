@@ -6,7 +6,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
-    <style name="MDTheme" parent="Theme.Design.Light.NoActionBar">
+    <style name="MDTheme" parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
