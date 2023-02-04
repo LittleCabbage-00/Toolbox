@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.cryptoapp">
+<uses-permission android:name="android.permission.INTERNET"/>
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/logo"
+        android:label="Crypto"
+        android:supportsRtl="true"
+        android:theme="@style/MDTheme">
+        <activity
+            android:name=".Activities.PicActivity"
+            android:label="CryptoApp"
+            android:launchMode="singleTask" />
+        <activity
+            android:name=".Activities.TextActivity"
+            android:label="CryptoApp"
+            android:launchMode="singleTask" />
+        <activity
+            android:name=".Activities.FileActivity"
+            android:label="CryptoApp"
+            android:launchMode="singleTask" />
+        <activity
+            android:name=".Activities.MainActivity"
+            android:label="CryptoApp"
+            android:launchMode="singleTask"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

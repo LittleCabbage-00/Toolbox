@@ -1,0 +1,7 @@
+<resources>
+<!--    软件  -->
+    <string name="app_name">加解密</string>
+    <string name="version_full">版本：1.1.0</string>
+    <string name="version">1.1.0</string>
+    <string name="sysInfo">系统 安卓%1$s SDK版本 %2$s</string>
+</resources>
