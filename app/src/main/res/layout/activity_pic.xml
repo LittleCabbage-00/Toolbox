@@ -74,6 +74,7 @@
             app:cornerRadius="30dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
+            app:backgroundTint="@color/colorPrimaryDark"
             android:text="解密预览"
             android:textAllCaps="false"/>
         <LinearLayout

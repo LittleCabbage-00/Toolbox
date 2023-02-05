@@ -70,6 +70,7 @@
                 android:layout_weight="1"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
+                app:backgroundTint="@color/colorPrimaryDark"
                 android:text="加密"
                 android:textAllCaps="false"/>
 
@@ -81,6 +82,7 @@
                 app:cornerRadius="30dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
+                app:backgroundTint="@color/colorPrimaryDark"
                 android:text="解密"
                 android:textAllCaps="false"/>
         </LinearLayout>
@@ -112,6 +114,7 @@
             android:id="@+id/copyOutputButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:backgroundTint="@color/colorPrimaryDark"
             android:text="复制输出结果"
             android:layout_gravity="center_horizontal"
             app:cornerRadius="30dp"

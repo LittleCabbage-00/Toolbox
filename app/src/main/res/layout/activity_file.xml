@@ -103,6 +103,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 app:cornerRadius="30dp"
+                app:backgroundTint="@color/colorPrimaryDark"
                 android:text="加密"
                 android:textAllCaps="false"/>
 
@@ -114,6 +115,7 @@
                 app:cornerRadius="30dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
+                app:backgroundTint="@color/colorPrimaryDark"
                 android:text="解密"
                 android:textAllCaps="false"/>
 
