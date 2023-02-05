@@ -305,7 +305,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
      */
     private class MkWebChromeClient extends WebChromeClient {
         private final static int WEB_PROGRESS_MAX = 100;
-
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
             super.onProgressChanged(view, newProgress);
