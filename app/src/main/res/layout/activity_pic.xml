@@ -36,7 +36,7 @@
             android:layout_marginBottom="12dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:hint="输入密码"
+            android:hint="@string/enter_password"
             app:endIconMode="password_toggle">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/passwordEditText"
@@ -54,9 +54,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:layout_alignParentBottom="true"
                 android:id="@+id/readPicButton"
-                android:text="读取文件"/>
+                android:text="@string/read_file"/>
 
             <TextView
                 android:id="@+id/readPicEditText"
@@ -75,7 +74,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             app:backgroundTint="@color/colorPrimaryDark"
-            android:text="解密预览"
+            android:text="@string/preview_file"
             android:textAllCaps="false"/>
         <LinearLayout
             android:layout_width="match_parent"

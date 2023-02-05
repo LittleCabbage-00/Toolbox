@@ -1,7 +1,31 @@
 <resources>
-<!--    软件  -->
-    <string name="app_name">加解密</string>
-    <string name="version_full">版本：1.2.0</string>
-    <string name="version">1.2.0</string>
+    <!--    软件信息  -->
+    <string name="app_name">加解密程序</string>
+    <string name="version_full">版本：2.0.0</string>
+    <string name="version">2.0.0</string>
     <string name="sysInfo">系统 安卓%1$s SDK版本 %2$s</string>
+
+    <!--    主页面web页面-->
+    <string name="input_url">搜索或输入网址</string>
+    <!-- 网站首页 -->
+    <string name="home_url">https://cn.bing.com/</string>
+    <!-- 底部导航 -->
+    <string name="nav_right">前进</string>
+    <string name="nav_left">后退</string>
+    <string name="nav_set">设置</string>
+    <string name="nav_page">窗口</string>
+    <string name="nav_home">主页</string>
+
+    <!--    功能页面-->
+    <string name="enter_password">输入密码</string>
+    <string name="read_file">读取文件</string>
+    <string name="preview_file">解密预览</string>
+    <string name="write_file">写入文件</string>
+    <string name="encrypt">加密</string>
+    <string name="decrypt">解密</string>
+    <string name="enter_word_need_to_en_decrypt">输入需要加密/解密的文字</string>
+    <string name="output_result">输出结果</string>
+    <string name="copy_output_result">复制输出结果</string>
+
+
 </resources>

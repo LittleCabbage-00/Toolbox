@@ -36,7 +36,7 @@
             android:layout_marginBottom="12dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:hint="输入密码"
+            android:hint="@string/enter_password"
             app:endIconMode="password_toggle">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/passwordEditText"
@@ -56,7 +56,7 @@
             android:maxLines="10"
             android:scrollbars="vertical"
             android:background="@android:drawable/edit_text"
-            android:hint="输入需要加密/解密的文字" />
+            android:hint="@string/enter_word_need_to_en_decrypt" />
 
         <LinearLayout
             android:orientation="horizontal"
@@ -71,7 +71,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 app:backgroundTint="@color/colorPrimaryDark"
-                android:text="加密"
+                android:text="@string/encrypt"
                 android:textAllCaps="false"/>
 
             <com.google.android.material.button.MaterialButton
@@ -83,18 +83,9 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 app:backgroundTint="@color/colorPrimaryDark"
-                android:text="解密"
+                android:text="@string/decrypt"
                 android:textAllCaps="false"/>
         </LinearLayout>
-
-<!--        <com.google.android.material.button.MaterialButton-->
-<!--            android:id="@+id/copyOutputButton"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="复制输出结果"-->
-<!--            android:layout_gravity="center_horizontal"-->
-<!--            app:cornerRadius="30dp"-->
-<!--            android:textAllCaps="false"/>-->
 
         <EditText
             android:id="@+id/outputEditText"
@@ -108,30 +99,17 @@
             android:maxLines="10"
             android:scrollbars="vertical"
             android:background="@android:drawable/edit_text"
-            android:hint="输出结果" />
+            android:hint="@string/output_result" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/copyOutputButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:backgroundTint="@color/colorPrimaryDark"
-            android:text="复制输出结果"
+            android:text="@string/copy_output_result"
             android:layout_gravity="center_horizontal"
             app:cornerRadius="30dp"
             android:textAllCaps="false"/>
-
-        <!--    <ImageView-->
-        <!--        android:id="@+id/imageView"-->
-        <!--        android:layout_width="wrap_content"-->
-        <!--        android:layout_height="wrap_content"-->
-        <!--        android:src="@drawable/img_1"/>-->
-
-        <!--    <ProgressBar-->
-        <!--        android:id="@+id/progressBar"-->
-        <!--        android:layout_width="match_parent"-->
-        <!--        android:layout_height="wrap_content"-->
-        <!--        style="?android:progressBarStyleHorizontal"-->
-        <!--        android:max="100"/>-->
 
     </LinearLayout>
 

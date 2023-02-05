@@ -7,5 +7,5 @@
     </item>
     <item android:id="@+id/exit"
     android:title="退出">
-</item>
+    </item>
 </menu>
