@@ -4,22 +4,15 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.annotation.RequiresApi
-import androidx.core.view.GravityCompat
 import com.example.cryptoapp.Base.BaseActivity
 import com.example.cryptoapp.R
 import com.example.cryptoapp.Utils.StringCrypto
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_main.drawerLayout
-import kotlinx.android.synthetic.main.activity_main.navView
 import kotlinx.android.synthetic.main.activity_main.toolbar
 import kotlinx.android.synthetic.main.activity_text.*
 import kotlinx.android.synthetic.main.activity_text.decryptButton
@@ -103,7 +96,7 @@ class TextActivity : BaseActivity(), View.OnClickListener {
 
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.toolbar, menu)
+        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)
         return true
     }
 

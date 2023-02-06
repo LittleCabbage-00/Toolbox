@@ -9,15 +9,11 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.GravityCompat
 import com.example.cryptoapp.Base.BaseActivity
 import com.example.cryptoapp.BytesCrypto
 import com.example.cryptoapp.Utils.FileUtil
 import com.example.cryptoapp.R
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_main.drawerLayout
-import kotlinx.android.synthetic.main.activity_main.navView
 import kotlinx.android.synthetic.main.activity_main.toolbar
 import kotlinx.android.synthetic.main.activity_pic.*
 import kotlinx.android.synthetic.main.activity_pic.passwordEditText
@@ -102,7 +98,7 @@ class PicActivity : BaseActivity(), View.OnClickListener {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.toolbar, menu)
+        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)
         return true
     }
 

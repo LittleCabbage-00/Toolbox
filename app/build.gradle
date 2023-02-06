@@ -10,8 +10,8 @@ android {
         applicationId "com.example.cryptoapp"
         minSdkVersion 26
         targetSdkVersion 33
-        versionCode 20230205
-        versionName "2.0.0"
+        versionCode 20230206
+        versionName "2.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

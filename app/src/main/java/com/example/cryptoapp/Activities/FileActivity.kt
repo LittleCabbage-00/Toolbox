@@ -3,7 +3,6 @@ package com.example.cryptoapp.Activities
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
@@ -11,12 +10,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.core.view.GravityCompat
 import com.example.cryptoapp.*
 import com.example.cryptoapp.Base.BaseActivity
 import com.example.cryptoapp.Utils.FileUtil
@@ -26,8 +19,6 @@ import kotlinx.android.synthetic.main.activity_file.*
 import kotlinx.android.synthetic.main.activity_file.decryptButton
 import kotlinx.android.synthetic.main.activity_file.encryptButton
 import kotlinx.android.synthetic.main.activity_file.passwordEditText
-import kotlinx.android.synthetic.main.activity_main.drawerLayout
-import kotlinx.android.synthetic.main.activity_main.navView
 import kotlinx.android.synthetic.main.activity_main.toolbar
 import java.io.*
 import java.lang.ref.WeakReference
@@ -202,7 +193,7 @@ class FileActivity:BaseActivity(){
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.toolbar, menu)
+        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)
         return true
     }
 

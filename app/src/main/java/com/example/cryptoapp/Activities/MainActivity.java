@@ -82,18 +82,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 switch (item.getItemId()){
                     //关于->弹出关于app的窗口
                     case R.id.info:
-                        AlertDialog.Builder dialog=new AlertDialog.Builder(MainActivity.this);
-                        dialog.setTitle("关于");
-                        dialog.setMessage("作者：LittleCabbage\n" +
-                                "QQ号：2485535417\n"+
-                                "本软件仅做为交流学习用，严禁用于其他用途");
-                        dialog.setCancelable(true);
-                        dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-                        dialog.show();
+//                        AlertDialog.Builder dialog=new AlertDialog.Builder(MainActivity.this);
+//                        dialog.setTitle("关于");
+//                        dialog.setMessage("作者：LittleCabbage\n" +
+//                                "QQ号：2485535417\n"+
+//                                "本软件仅做为交流学习用，严禁用于其他用途");
+//                        dialog.setCancelable(true);
+//                        dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                            }
+//                        });
+//                        dialog.show();
+//                        mDrawerLayout.close();
+                        Intent intent=new Intent(MainActivity.this,AboutActivity.class);
+                        startActivity(intent);
                         mDrawerLayout.close();
                         break;
                     //文本加密->进入相关activity
@@ -434,7 +437,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         super.onStart();
         NavigationView navView=(NavigationView) findViewById(R.id.navView);
         navView.setCheckedItem(R.id.home);
-        setTitle("主界面");
     }
 
     //toolbar上的菜单逻辑
@@ -442,7 +444,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     public boolean onCreateOptionsMenu(Menu menu) {
         TextView sysInfo_dis=(TextView) findViewById(R.id.sysInfo);
         //使用menu.layout作为界面
-        getMenuInflater().inflate(R.menu.toolbar,menu);
+        getMenuInflater().inflate(R.menu.crypt_func_toolbar,menu);
         //初始化侧滑栏中系统信息的字符串
         String sysInfo=String.format(getResources().getString(R.string.sysInfo), Build.VERSION.RELEASE,Build.VERSION.SDK);
         sysInfo_dis.setText(sysInfo);
