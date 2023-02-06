@@ -1,7 +1,6 @@
 package com.example.cryptoapp.Activities;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -166,16 +165,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                     // 光标置于末尾
                     textUrl.setSelection(textUrl.getText().length());
                     // 显示因特网图标
-                    webIcon.setImageResource(R.drawable.internet);
+                    webIcon.setImageResource(R.drawable.web_internet);
                     // 显示跳转按钮
-                    btnStart.setImageResource(R.drawable.go);
+                    btnStart.setImageResource(R.drawable.web_go);
                 } else {
                     // 显示网站名
                     textUrl.setText(webView.getTitle());
                     // 显示网站图标
                     webIcon.setImageBitmap(webView.getFavicon());
                     // 显示刷新按钮
-                    btnStart.setImageResource(R.drawable.refresh);
+                    btnStart.setImageResource(R.drawable.web_refresh);
                 }
             }
         });
@@ -283,7 +282,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             textUrl.setText("加载中...");
 
             // 切换默认网页图标
-            webIcon.setImageResource(R.drawable.internet);
+            webIcon.setImageResource(R.drawable.web_internet);
         }
 
         @Override

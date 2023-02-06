@@ -44,27 +44,90 @@
                 android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp">
-
-            <Button
-                android:layout_width="90dp"
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            app:cardCornerRadius="4dp">
+            <!--            卡片内部为线性布局-->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:id="@+id/readPicButton"
-                android:text="@string/read_file"/>
+                android:background="#fff"
+                android:orientation="vertical"
+                android:paddingBottom="20dp">
 
-            <TextView
-                android:id="@+id/readPicEditText"
-                android:layout_width="500dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_gravity="center_vertical" />
+                <!--                第一排，名称与功能为相对布局-->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="49dp">
 
-        </LinearLayout>
+                    <View
+                        android:layout_width="3dp"
+                        android:layout_height="15dp"
+                        android:layout_centerVertical="true"
+                        android:background="#4A90E2" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="17dp"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/purpose_folder"
+                        android:textColor="#333"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:layout_width="90dp"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:gravity="center"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:id="@+id/readPicButton"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:text="@string/write_file"/>
+                </RelativeLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="17dp"
+                    android:layout_marginEnd="17dp"
+                    android:background="@drawable/background_line" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="17dp"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:layout_marginEnd="17dp">
+
+                    <TextView
+                        android:id="@+id/file_name_title"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="名称"
+                        android:textColor="#666"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/readPicEditText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:singleLine="true"
+                        android:text=""
+                        android:textColor="#333333" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/decryptPicButton"
@@ -75,6 +138,7 @@
             android:layout_marginRight="10dp"
             app:backgroundTint="@color/colorPrimaryDark"
             android:text="@string/preview_file"
+            android:stateListAnimator="@null"
             android:textAllCaps="false"/>
         <LinearLayout
             android:layout_width="match_parent"
