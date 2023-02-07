@@ -2,9 +2,10 @@
     <!--    软件信息  -->
     <string name="app_name">工具箱</string>
     <string name="version_word">版本</string>
-    <string name="version_full">版本：2.1.0</string>
-    <string name="version">2.1.0</string>
-    <string name="sysInfo">系统 安卓%1$s SDK版本 %2$s</string>
+    <string name="version_full">版本：2.1.1</string>
+    <string name="version">2.1.1</string>
+    <string name="android_version">Android %1$s</string>
+    <string name="android_sdk"> API %1$s</string>
 
     <!--    主页面web页面-->
     <string name="input_url">搜索或输入网址</string>
@@ -38,6 +39,8 @@
     <string name="text_encrypt">文本加密</string>
     <string name="file_encrypt">文件加密</string>
     <string name="pic_decrypt">图片解密</string>
+    <string name="another_func">其他功能</string>
+    <string name="open_sys_filemanager">打开系统自带文件管理器</string>
 
     <!--    关于页面-->
     <string name="using_helper">使用帮助</string>
@@ -45,6 +48,7 @@
     <string name="about_author">关于开发者</string>
     <string name="author_name">LittleCabbage</string>
     <string name="email_to_author">给作者发邮件</string>
+    <string name="about_device">关于设备</string>
 
 <!--    帮助页面-->
     <string name="text_encrypt_helper">加密：在密码输入框内输入你自己定义的密码，然后在第一个文本框内输入你要加密的字符，点击加密按钮，加密后的密文就会出现在第二个文本框内\n解密：在密码输入框内输入你得到的解密密码，把密文粘贴在第一个文本框内，然后点击解密，即可在第二个文本框内看到解密之后的明文\n</string>
@@ -52,4 +56,5 @@
     <string name="pic_decrypt_helper">图片的加密就是文件的加密，只是这里解密单独把图片拎出来了，可以解密后进行预览\n</string>
     <string name="crypto_method">本应用加密方法为：字符转换为MD5值，文件用密码进行AES加密，解密时，字符倒退回去算出明文即可，文件就用密码解开AES加密\n</string>
     <string name="en_de_crypt_func_word">软件加解密方式说明</string>
+
 </resources>

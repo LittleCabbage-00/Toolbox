@@ -35,4 +35,15 @@
         </menu>
     </item>
 
+    <item android:title="@string/another_func">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/open_sys_file_mgr"
+                    android:icon="@drawable/file_folder"
+                    android:title="@string/open_sys_filemanager"/>
+            </group>
+        </menu>
+    </item>
+
 </menu>

@@ -85,7 +85,7 @@
                 android:paddingBottom="8dp"
                 android:paddingTop="8dp"
                 android:text="@string/email_to_author"
-                android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />/>
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
         </LinearLayout>
     </LinearLayout>
 

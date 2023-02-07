@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,6 +40,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.microedition.khronos.opengles.GL;
+import javax.microedition.khronos.opengles.GL10;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener{
 
@@ -117,6 +121,27 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                         startActivity(intent_pic);
                         mDrawerLayout.close();
                         break;
+                    //进入系统自带文件管理器
+                    case R.id.open_sys_file_mgr:
+                        String package_name = "com.android.documentsui";
+                        PackageManager packageManager = getPackageManager();
+                        Intent it = packageManager.getLaunchIntentForPackage(package_name);
+                        if (it != null){
+                            startActivity(it);
+                        }else{
+                            AlertDialog.Builder dialog=new AlertDialog.Builder(MainActivity.this);
+                        dialog.setTitle("警告");
+                        dialog.setMessage("检测到您没有相关的软件");
+                        dialog.setCancelable(true);
+                        dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+                        dialog.show();
+                        mDrawerLayout.close();
+                        }
+                         break;
                     //主界面->什么也不做
                     default:
                         mDrawerLayout.close();
@@ -194,8 +219,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             }
         });
     }
-
-
     //初始化 web
     @SuppressLint("SetJavaScriptEnabled")
     private void initWeb() {
@@ -442,12 +465,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     //toolbar上的菜单逻辑
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        TextView sysInfo_dis=(TextView) findViewById(R.id.sysInfo);
         //使用menu.layout作为界面
         getMenuInflater().inflate(R.menu.crypt_func_toolbar,menu);
-        //初始化侧滑栏中系统信息的字符串
-        String sysInfo=String.format(getResources().getString(R.string.sysInfo), Build.VERSION.RELEASE,Build.VERSION.SDK);
-        sysInfo_dis.setText(sysInfo);
         return true;
     }
 
