@@ -161,6 +161,7 @@ public class CaptureActivity extends BaseActivity implements Callback {
         if(TextUtils.isEmpty(path)){
             return null;
         }
+
         Hashtable<DecodeHintType, String> hints = new Hashtable<>();
         hints.put(DecodeHintType.CHARACTER_SET, "UTF8"); //设置二维码内容的编码
 
