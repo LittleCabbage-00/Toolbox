@@ -30,11 +30,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.cryptoapp.Base.BaseActivity;
 import com.example.cryptoapp.R;
 import com.google.android.material.navigation.NavigationView;
+import com.google.zxing.activity.CaptureActivity;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -43,6 +46,9 @@ import java.util.regex.Pattern;
 
 import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener{
 
@@ -62,6 +68,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //安卓13兼容性警告
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+            dialog.setTitle("警告");
+            dialog.setMessage("安卓13以上版本的系统存在功能缺失，作者正在使劲想办法修");
+            dialog.setCancelable(true);
+            dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            dialog.show();
+        }
 
         //初始化控件
         DrawerLayout mDrawerLayout=(DrawerLayout) findViewById(R.id.drawerLayout);
@@ -86,21 +106,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 switch (item.getItemId()){
                     //关于->弹出关于app的窗口
                     case R.id.info:
-//                        AlertDialog.Builder dialog=new AlertDialog.Builder(MainActivity.this);
-//                        dialog.setTitle("关于");
-//                        dialog.setMessage("作者：LittleCabbage\n" +
-//                                "QQ号：2485535417\n"+
-//                                "本软件仅做为交流学习用，严禁用于其他用途");
-//                        dialog.setCancelable(true);
-//                        dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                            }
-//                        });
-//                        dialog.show();
-//                        mDrawerLayout.close();
-                        Intent intent=new Intent(MainActivity.this,AboutActivity.class);
-                        startActivity(intent);
+                        Intent intent_info=new Intent(MainActivity.this,AboutActivity.class);
+                        startActivity(intent_info);
                         mDrawerLayout.close();
                         break;
                     //文本加密->进入相关activity
@@ -123,25 +130,54 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                         break;
                     //进入系统自带文件管理器
                     case R.id.open_sys_file_mgr:
-                        String package_name = "com.android.documentsui";
-                        PackageManager packageManager = getPackageManager();
-                        Intent it = packageManager.getLaunchIntentForPackage(package_name);
-                        if (it != null){
-                            startActivity(it);
-                        }else{
-                            AlertDialog.Builder dialog=new AlertDialog.Builder(MainActivity.this);
-                        dialog.setTitle("警告");
-                        dialog.setMessage("检测到您没有相关的软件");
-                        dialog.setCancelable(true);
-                        dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                        try{
+                            if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.S){
+                                String package_name = "com.android.documentsui";
+                                PackageManager packageManager = getPackageManager();
+                                Intent it = packageManager.getLaunchIntentForPackage(package_name);
+                                startActivity(it);
+                            } else if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU) {
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+                                dialog.setTitle("警告");
+                                dialog.setMessage("安卓13以上版本的SAF框架依然无法访问Android/data目录，暂时未找到有效解决办法");
+                                dialog.setCancelable(true);
+                                dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                    }
+                                });
+                                dialog.show();
+                                String package_name = "com.android.documentsui";
+                                PackageManager packageManager = getPackageManager();
+                                Intent it = packageManager.getLaunchIntentForPackage(package_name);
+                                startActivity(it);
                             }
-                        });
-                        dialog.show();
-                        mDrawerLayout.close();
+                        }catch (Exception e) {
+                            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+                            dialog.setTitle("警告");
+                            dialog.setMessage("检测到您没有相关的软件");
+                            dialog.setCancelable(true);
+                            dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            });
+                            dialog.show();
+                            mDrawerLayout.close();
                         }
-                         break;
+                        break;
+                    //进入简易终端界面
+                    case R.id.fake_terminal:
+                        Intent intent_fake_terminal=new Intent(MainActivity.this,FakeTerminalActivity.class);
+                        startActivity(intent_fake_terminal);
+                        mDrawerLayout.close();
+                        break;
+                    //开始二维码扫描
+                    case R.id.qr_scan:
+                        Intent intent_qr_scan=new Intent(MainActivity.this, CaptureActivity.class);
+                        startActivity(intent_qr_scan);
+                        mDrawerLayout.close();
+                        break;
                     //主界面->什么也不做
                     default:
                         mDrawerLayout.close();
@@ -288,7 +324,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
             // 调用第三方应用，防止crash (如果手机上没有安装处理某个scheme开头的url的APP, 会导致crash)
             try {
-                // TODO:弹窗提示用户，允许后再调用
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(intent);
                 return true;

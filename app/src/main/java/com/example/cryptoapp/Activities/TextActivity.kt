@@ -89,7 +89,8 @@ class TextActivity : BaseActivity(), View.OnClickListener {
     fun copyToClipboard(textToCopy: String) {
         Log.d("textToCopy", textToCopy)
         val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clipData = ClipData.newPlainText("Label", textToCopy)
+//        val clipData = ClipData.newPlainText("Label", textToCopy)
+        val clipData = ClipData.newPlainText(" ", textToCopy)
         clipboardManager.setPrimaryClip(clipData)
         Snackbar.make(textView, "输出文本已复制", Snackbar.LENGTH_SHORT).show()
     }

@@ -42,6 +42,14 @@
                     android:id="@+id/open_sys_file_mgr"
                     android:icon="@drawable/file_folder"
                     android:title="@string/open_sys_filemanager"/>
+                <item
+                    android:id="@+id/fake_terminal"
+                    android:icon="@drawable/code"
+                    android:title="@string/fake_terminal"/>
+                <item
+                    android:id="@+id/qr_scan"
+                    android:icon="@drawable/qr_scan"
+                    android:title="@string/qr_scan"/>
             </group>
         </menu>
     </item>
