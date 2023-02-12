@@ -15,7 +15,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 33
         versionCode 20230212
-        versionName "2.2.0"
+        versionName "2.2.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,7 +37,7 @@ dependencies {
     //noinspection GradleDependency
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
@@ -48,5 +48,4 @@ dependencies {
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
     implementation 'com.google.zxing:core:3.5.1'
     implementation 'com.github.jenly1314:zxing-lite:2.3.0'
-    implementation 'pub.devrel:easypermissions:2.0.1'
 }

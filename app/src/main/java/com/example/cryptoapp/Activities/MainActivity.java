@@ -47,9 +47,6 @@ import java.util.regex.Pattern;
 import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
-
 public class MainActivity extends BaseActivity implements View.OnClickListener{
 
     private WebView webView;

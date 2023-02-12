@@ -1,7 +1,6 @@
 package com.google.zxing.activity;
 
 import android.Manifest;
-
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -38,6 +37,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.cryptoapp.Activities.MainActivity;
 import com.example.cryptoapp.Base.BaseActivity;
 import com.example.cryptoapp.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -59,10 +59,17 @@ import com.google.zxing.view.ViewfinderView;
 import java.io.IOException;
 
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 
 import com.example.cryptoapp.R;
+import com.permissionx.guolindev.PermissionX;
+import com.permissionx.guolindev.callback.ExplainReasonCallbackWithBeforeParam;
+import com.permissionx.guolindev.callback.ForwardToSettingsCallback;
+import com.permissionx.guolindev.callback.RequestCallback;
+import com.permissionx.guolindev.request.ExplainScope;
+import com.permissionx.guolindev.request.ForwardScope;
 
 
 /**
@@ -97,17 +104,30 @@ public class CaptureActivity extends BaseActivity implements Callback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanner);
-        /**访问照片权限
-         *
-         */
-        final int checked = ContextCompat.checkSelfPermission(CaptureActivity.this
-                , Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (checked == PackageManager.PERMISSION_GRANTED) {
 
-        } else {
-            ActivityCompat.requestPermissions(CaptureActivity.this
-                    , new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
-        }
+        PermissionX.init(this).permissions(Manifest.permission.CAMERA)
+                .onExplainRequestReason(new ExplainReasonCallbackWithBeforeParam() {
+                @Override
+                public void onExplainReason(ExplainScope scope, List<String> deniedList, boolean beforeRequest) {
+                    scope.showRequestReasonDialog(deniedList, "即将申请的权限是程序必须依赖的权限", "我已明白");
+                    }
+                })
+                .onForwardToSettings(new ForwardToSettingsCallback() {
+                    @Override
+                    public void onForwardToSettings(ForwardScope scope, List<String> deniedList) {
+                        scope.showForwardToSettingsDialog(deniedList, "您需要去应用程序设置当中手动开启权限", "我已明白");
+                    }
+                })
+                .request(new RequestCallback() {
+                    @Override
+                    public void onResult(boolean allGranted, List<String> grantedList, List<String> deniedList) {
+                        if (allGranted) {
+
+                        } else {
+                            Toast.makeText(CaptureActivity.this, "您拒绝了权限：" + deniedList, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
 
         CameraManager.init(getApplication());
         viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_content);
