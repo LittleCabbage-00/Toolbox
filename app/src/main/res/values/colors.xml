@@ -3,6 +3,7 @@
     <color name="colorPrimary">#42A5F5</color>
     <color name="colorPrimaryDark">#2979FF</color>
     <color name="colorAccent">#03DAC5</color>
+    <color name="white">#ffffff</color>
 
     <!-- QRCode scanner color begin -->
     <color name="viewfinder_mask">#60f4f1f7</color>

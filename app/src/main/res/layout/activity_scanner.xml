@@ -6,20 +6,20 @@
               android:orientation="vertical"
     android:weightSum="1">
 
-    <include layout="@layout/scanner_toolbar"
-        android:id="@+id/include"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true" />
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="404dp"
-        android:layout_weight="1.98"
-        android:layout_alignParentLeft="true"
+        android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/include">
+        android:layout_below="@+id/toolbar">
 
         <SurfaceView
             android:id="@+id/scanner_view"

@@ -4,67 +4,107 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.net.Uri;
+import android.graphics.Matrix;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.ActivityOptionsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bumptech.glide.Glide;
 import com.example.cryptoapp.Base.BaseActivity;
 import com.example.cryptoapp.R;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.activity.CaptureActivity;
+import com.gyf.immersionbar.ImmersionBar;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import javax.microedition.khronos.opengles.GL;
-import javax.microedition.khronos.opengles.GL10;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener{
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
-    private WebView webView;
-    private ProgressBar progressBar;
-    private EditText textUrl;
-    private ImageView webIcon;
-    private ImageView btnStart;
-    private long exitTime = 0;
-    private Context mContext;
-    private InputMethodManager manager;
-    private static final String HTTP = "http://";
-    private static final String HTTPS = "https://";
-    private static final int PRESS_BACK_EXIT_GAP = 2000;
+public class MainActivity extends BaseActivity {
 
+    ImageView image_bing;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //读取自定义配置
+        SharedPreferences config_get=getSharedPreferences("config",MODE_PRIVATE);
+        //判断是否被打开过，打开过，读取值，否则执行初始化
+        if (config_get.getBoolean("isFirstIn",true)) {
+            //实施初始化，设定默认值
+            initView();
+        }
+
+        //初始化控件
+        DrawerLayout mDrawerLayout=(DrawerLayout) findViewById(R.id.drawerLayout);
+        Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
+        NavigationView navView=(NavigationView) findViewById(R.id.navView);
+        TextView search_text_tv=(TextView) findViewById(R.id.search_text_tv);
+        ImageView search_button=(ImageView) findViewById(R.id.search_button);
+
+        Snackbar.make(search_text_tv,"当前选择的搜索引擎为 "+config_get.getString("method_name",""),Snackbar.LENGTH_SHORT).show();
+
+        search_text_tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent_search_str = new Intent(MainActivity.this, EnterSearchStringFragment.class);
+                int[] location = new int[2];
+                search_text_tv.getLocationOnScreen(location);
+                intent_search_str.putExtra("x",location[0]);
+                intent_search_str.putExtra("y",location[1]);
+                startActivity(intent_search_str);
+                overridePendingTransition(0,0);
+            }
+        }
+        );
+        search_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent_search_str = new Intent(MainActivity.this, EnterSearchStringFragment.class);
+                int[] location = new int[2];
+                search_text_tv.getLocationOnScreen(location);
+                intent_search_str.putExtra("x",location[0]);
+                intent_search_str.putExtra("y",location[1]);
+                startActivity(intent_search_str);
+                overridePendingTransition(0,0);
+            }
+        });
+
+        ImmersionBar.with(this)
+                .titleBar(toolbar)
+                .init();
 
         //安卓13兼容性警告
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU) {
@@ -79,11 +119,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             });
             dialog.show();
         }
-
-        //初始化控件
-        DrawerLayout mDrawerLayout=(DrawerLayout) findViewById(R.id.drawerLayout);
-        Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
-        NavigationView navView=(NavigationView) findViewById(R.id.navView);
 
         //顶部设置为toolbar界面
         setSupportActionBar(toolbar);
@@ -104,25 +139,37 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                     //关于->弹出关于app的窗口
                     case R.id.info:
                         Intent intent_info=new Intent(MainActivity.this,AboutActivity.class);
-                        startActivity(intent_info);
+//                        startActivity(intent_info);
+
+                        new Handler().postDelayed(()->startActivity(intent_info),200);
+                        mDrawerLayout.close();
+                        break;
+                    //进入软件设置
+                    case R.id.settings:
+                        Intent intent_to_settings=new Intent(MainActivity.this,SettingsActivity.class);
+                        new Handler().postDelayed(()->startActivity(intent_to_settings),200);
                         mDrawerLayout.close();
                         break;
                     //文本加密->进入相关activity
                     case R.id.navTextLayout:
                         Intent intent_text=new Intent(MainActivity.this,TextActivity.class);
-                        startActivity(intent_text);
+//                        startActivity(intent_text);
+
+                        new Handler().postDelayed(()->startActivity(intent_text),200);
                         mDrawerLayout.close();
                         break;
                     //文件加密->进入相关activity
                     case R.id.navFileLayout:
                         Intent intent_file=new Intent(MainActivity.this,FileActivity.class);
-                        startActivity(intent_file);
+//                        startActivity(intent_file);
+
+                        new Handler().postDelayed(()->startActivity(intent_file),200);
                         mDrawerLayout.close();
                         break;
                     //图片解密预览->进入相关activity
                     case R.id.navPicLayout:
                         Intent intent_pic=new Intent(MainActivity.this,PicActivity.class);
-                        startActivity(intent_pic);
+                        new Handler().postDelayed(()->startActivity(intent_pic),200);
                         mDrawerLayout.close();
                         break;
                     //进入系统自带文件管理器
@@ -132,7 +179,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                                 String package_name = "com.android.documentsui";
                                 PackageManager packageManager = getPackageManager();
                                 Intent it = packageManager.getLaunchIntentForPackage(package_name);
-                                startActivity(it);
+                                new Handler().postDelayed(() -> startActivity(it),200);
                             } else if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU) {
                                 AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
                                 dialog.setTitle("警告");
@@ -147,7 +194,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                                 String package_name = "com.android.documentsui";
                                 PackageManager packageManager = getPackageManager();
                                 Intent it = packageManager.getLaunchIntentForPackage(package_name);
-                                startActivity(it);
+                                new Handler().postDelayed(() -> startActivity(it),200);
                             }
                         }catch (Exception e) {
                             AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
@@ -166,14 +213,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                     //进入简易终端界面
                     case R.id.fake_terminal:
                         Intent intent_fake_terminal=new Intent(MainActivity.this,FakeTerminalActivity.class);
-                        startActivity(intent_fake_terminal);
+//                        startActivity(intent_fake_terminal);
+                        new Handler().postDelayed(()->startActivity(intent_fake_terminal),200);
                         mDrawerLayout.close();
                         break;
                     //开始二维码扫描
                     case R.id.qr_scan:
-                        Intent intent_qr_scan=new Intent(MainActivity.this, CaptureActivity.class);
-                        startActivity(intent_qr_scan);
                         mDrawerLayout.close();
+                        Intent intent_qr_scan=new Intent(MainActivity.this, CaptureActivity.class);
+//                        startActivity(intent_qr_scan);
+                        new Handler().postDelayed(()->startActivity(intent_qr_scan),300);
                         break;
                     //主界面->什么也不做
                     default:
@@ -183,308 +232,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 return true;
             }
         });
-
-        //web页面初始化
-
-        // 防止底部按钮上移
-        getWindow().setSoftInputMode
-                (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN |
-                        WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-        mContext = MainActivity.this;
-        manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        // 绑定控件
-        initView();
-        // 初始化 WebView
-        initWeb();
-    }
-
-    //绑定控件
-    private void initView() {
-        webView = findViewById(R.id.webView);
-        progressBar = findViewById(R.id.progressBar);
-        textUrl = findViewById(R.id.textUrl);
-        webIcon = findViewById(R.id.webIcon);
-        btnStart = findViewById(R.id.btnStart);
-        ImageView goBack = findViewById(R.id.goBack);
-        ImageView goForward = findViewById(R.id.goForward);
-        ImageView navSet = findViewById(R.id.navSet);
-        ImageView goHome = findViewById(R.id.goHome);
-        // 绑定按钮点击事件
-        btnStart.setOnClickListener(this);
-        goBack.setOnClickListener(this);
-        goForward.setOnClickListener(this);
-        navSet.setOnClickListener(this);
-        goHome.setOnClickListener(this);
-
-        // 地址输入栏获取与失去焦点处理
-        textUrl.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (hasFocus) {
-                    // 显示当前网址链接
-                    textUrl.setText(webView.getUrl());
-                    // 光标置于末尾
-                    textUrl.setSelection(textUrl.getText().length());
-                    // 显示因特网图标
-                    webIcon.setImageResource(R.drawable.web_internet);
-                    // 显示跳转按钮
-                    btnStart.setImageResource(R.drawable.web_go);
-                } else {
-                    // 显示网站名
-                    textUrl.setText(webView.getTitle());
-                    // 显示网站图标
-                    webIcon.setImageBitmap(webView.getFavicon());
-                    // 显示刷新按钮
-                    btnStart.setImageResource(R.drawable.web_refresh);
-                }
-            }
-        });
-        // 监听键盘回车搜索
-        textUrl.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                if (keyCode == KeyEvent.KEYCODE_ENTER && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-                    // 执行搜索
-                    btnStart.callOnClick();
-                    textUrl.clearFocus();
-                }
-                return false;
-            }
-        });
-    }
-    //初始化 web
-    @SuppressLint("SetJavaScriptEnabled")
-    private void initWeb() {
-        // 重写 WebViewClient
-        webView.setWebViewClient(new MkWebViewClient());
-        // 重写 WebChromeClient
-        webView.setWebChromeClient(new MkWebChromeClient());
-
-        WebSettings settings = webView.getSettings();
-        // 启用 js 功能
-        settings.setJavaScriptEnabled(true);
-        // 设置浏览器 UserAgent
-        settings.setUserAgentString(settings.getUserAgentString() + " mkBrowser/" + getVerName(mContext));
-
-        // 将图片调整到适合 WebView 的大小
-        settings.setUseWideViewPort(true);
-        // 缩放至屏幕的大小
-        settings.setLoadWithOverviewMode(true);
-
-        // 支持缩放，默认为true。是下面那个的前提。
-        settings.setSupportZoom(true);
-        // 设置内置的缩放控件。若为false，则该 WebView 不可缩放
-        settings.setBuiltInZoomControls(true);
-        // 隐藏原生的缩放控件
-        settings.setDisplayZoomControls(false);
-
-        // 缓存
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        // 设置可以访问文件
-        settings.setAllowFileAccess(true);
-        // 支持通过JS打开新窗口
-        settings.setJavaScriptCanOpenWindowsAutomatically(true);
-        // 支持自动加载图片
-        settings.setLoadsImagesAutomatically(true);
-        // 设置默认编码格式
-        settings.setDefaultTextEncodingName("utf-8");
-        // 本地存储
-        settings.setDomStorageEnabled(true);
-        settings.setPluginState(WebSettings.PluginState.ON);
-
-        // 资源混合模式
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-
-        // 加载首页
-        webView.loadUrl(getResources().getString(R.string.home_url));
-    }
-
-
-    /**
-     * 重写 WebViewClient
-     */
-    private class MkWebViewClient extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            // 设置在webView点击打开的新网页在当前界面显示,而不跳转到新的浏览器中
-
-            if (url == null) {
-                // 返回true自己处理，返回false不处理
-                return true;
-            }
-
-            // 正常的内容，打开
-            if (url.startsWith(HTTP) || url.startsWith(HTTPS)) {
-                view.loadUrl(url);
-                return true;
-            }
-
-            // 调用第三方应用，防止crash (如果手机上没有安装处理某个scheme开头的url的APP, 会导致crash)
-            try {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                startActivity(intent);
-                return true;
-            } catch (Exception e) {
-                return true;
-            }
-        }
-
-        @Override
-        public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            super.onPageStarted(view, url, favicon);
-            // 网页开始加载，显示进度条
-            progressBar.setProgress(0);
-            progressBar.setVisibility(View.VISIBLE);
-
-            // 更新状态文字
-            textUrl.setText("加载中...");
-
-            // 切换默认网页图标
-            webIcon.setImageResource(R.drawable.web_internet);
-        }
-
-        @Override
-        public void onPageFinished(WebView view, String url) {
-            super.onPageFinished(view, url);
-            // 网页加载完毕，隐藏进度条
-            progressBar.setVisibility(View.INVISIBLE);
-
-            // 改变标题
-            setTitle(webView.getTitle());
-            // 显示页面标题
-            textUrl.setText(webView.getTitle());
-        }
-    }
-
-
-    /**
-     * 重写 WebChromeClient
-     */
-    private class MkWebChromeClient extends WebChromeClient {
-        private final static int WEB_PROGRESS_MAX = 100;
-        @Override
-        public void onProgressChanged(WebView view, int newProgress) {
-            super.onProgressChanged(view, newProgress);
-            // 加载进度变动，刷新进度条
-            progressBar.setProgress(newProgress);
-            if (newProgress > 0) {
-                if (newProgress == WEB_PROGRESS_MAX) {
-                    progressBar.setVisibility(View.INVISIBLE);
-                } else {
-                    progressBar.setVisibility(View.VISIBLE);
-                }
-            }
-        }
-        @Override
-        public void onReceivedIcon(WebView view, Bitmap icon) {
-            super.onReceivedIcon(view, icon);
-            // 改变图标
-            webIcon.setImageBitmap(icon);
-        }
-
-        @Override
-        public void onReceivedTitle(WebView view, String title) {
-            super.onReceivedTitle(view, title);
-
-            // 改变标题
-            setTitle(title);
-            // 显示页面标题
-            textUrl.setText(title);
-        }
-    }
-
-    /**
-     * 返回按钮处理
-     */
-    @Override
-    public void onBackPressed() {
-        // 能够返回则返回上一页
-        if (webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            if ((System.currentTimeMillis() - exitTime) > PRESS_BACK_EXIT_GAP) {
-                // 连点两次退出程序
-                Toast.makeText(mContext, "再按一次退出程序",
-                        Toast.LENGTH_SHORT).show();
-                exitTime = System.currentTimeMillis();
-            } else {
-                super.onBackPressed();
-            }
-
-        }
-    }
-
-    @SuppressLint("NonConstantResourceId")
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            // 跳转 或 刷新
-            case R.id.btnStart:
-                if (textUrl.hasFocus()) {
-                    // 隐藏软键盘
-                    if (manager.isActive()) {
-                        manager.hideSoftInputFromWindow(textUrl.getApplicationWindowToken(), 0);
-                    }
-                    // 地址栏有焦点，是跳转
-                    String input = textUrl.getText().toString();
-                    if (!isHttpUrl(input)) {
-                        // 不是网址，加载搜索引擎处理
-                        try {
-                            // URL 编码
-                            input = URLEncoder.encode(input, "utf-8");
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                        input = "https://cn.bing.com/search?q=" + input ;
-                    }
-                    webView.loadUrl(input);
-                    // 取消掉地址栏的焦点
-                    textUrl.clearFocus();
-                } else {
-                    // 地址栏没焦点，是刷新
-                    webView.reload();
-                }
-                break;
-            // 后退
-            case R.id.goBack:
-                webView.goBack();
-                break;
-            // 前进
-            case R.id.goForward:
-                webView.goForward();
-                break;
-            // 设置
-            case R.id.navSet:
-                Toast.makeText(mContext, "功能开发中", Toast.LENGTH_SHORT).show();
-                break;
-
-            // 主页
-            case R.id.goHome:
-                webView.loadUrl(getResources().getString(R.string.home_url));
-                break;
-
-            default:
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        try {
-            webView.getClass().getMethod("onPause").invoke(webView);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        try {
-            webView.getClass().getMethod("onResume").invoke(webView);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -492,8 +239,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         super.onStart();
         NavigationView navView=(NavigationView) findViewById(R.id.navView);
         navView.setCheckedItem(R.id.home);
-    }
 
+        //读取自定义配置
+        SharedPreferences config_get=getSharedPreferences("config",MODE_PRIVATE);
+
+        //读取bing每日一图选项，如果为true就加载，否则不做动作
+        boolean bing_pic_check=config_get.getBoolean("bing_pic_check",true);
+        if (bing_pic_check) {
+            image_bing = (ImageView) findViewById(R.id.image_bing);
+            sendRequestWithHttpURLConnection();
+        }else{
+            image_bing = (ImageView) findViewById(R.id.image_bing);
+            image_bing.setImageDrawable(null);
+        }
+    }
     //toolbar上的菜单逻辑
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -502,33 +261,85 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         return true;
     }
 
-    public static boolean isHttpUrl(String urls) {
-        boolean isUrl;
-        // 判断是否是网址的正则表达式
-        String regex = "(((https|http)?://)?([a-z0-9]+[.])|(www.))"
-                + "\\w+[.|\\/]([a-z0-9]{0,})?[[.]([a-z0-9]{0,})]+((/[\\S&&[^,;\u4E00-\u9FA5]]+)+)?([.][a-z0-9]{0,}+|/?)";
-
-        Pattern pat = Pattern.compile(regex.trim());
-        Matcher mat = pat.matcher(urls.trim());
-        isUrl = mat.matches();
-        return isUrl;
+    //请求bing的api
+    private void sendRequestWithHttpURLConnection() {
+        // 开启线程来发起网络请求
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+        //优化图片的请求方式
+                try {
+                    OkHttpClient client = new OkHttpClient();
+                    Request request = new Request.Builder()
+                            .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36")
+                            .url("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1")
+                            .build();
+                    Response response = null;
+                    response = client.newCall(request).execute();
+                    assert response.body() != null;
+                    parseJSONWithJSONObject(response.body().string());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
-    /**
-     * 获取版本号名称
-     *
-     * @param context 上下文
-     * @return 当前版本名称
-     */
-    private static String getVerName(Context context) {
-        String verName = "unKnow";
+    //解析bing的api返回值
+    private void parseJSONWithJSONObject(String jsonData) {
         try {
-            verName = context.getPackageManager().
-                    getPackageInfo(context.getPackageName(), 0).versionName;
-        } catch (PackageManager.NameNotFoundException e) {
+            // JSONArray jsonArray = new JSONArray(jsonData);
+            Log.d("MainActivity get",jsonData.toString());
+
+            JSONArray jsonArray = new JSONObject(jsonData).getJSONArray("images");
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                String url = jsonObject.getString("url");
+
+                Log.d("MainActivity", "url is " + url);
+                String url1="https://cn.bing.com"+url;
+                showResponse(url1);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return verName;
     }
 
+
+    //使用开源框架glide进行图片加载
+    private void showResponse(final String response) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // 在这里进行UI操作，将结果显示到界面上
+                Glide.with(MainActivity.this).load(response).into(image_bing);
+                //  text.setText(response);
+                Log.i("123",response);
+            }
+        });
+    }
+
+    //初始化设置
+    private void initView(){
+        //写入初始化配置
+        SharedPreferences.Editor init_get=getSharedPreferences("config",Context.MODE_PRIVATE).edit();
+        //读取自定义配置
+        SharedPreferences config_get=getSharedPreferences("config",MODE_PRIVATE);
+        //初始化bing壁纸开关，默认打开
+        init_get.putBoolean("bing_pic_check",true);
+
+        //初始化搜索引擎
+        init_get.putString("home_url", "https://cn.bing.com");
+        init_get.putString("search_method", "https://cn.bing.com/search?q=");
+        init_get.putString("method_name", "必应");
+
+        //初始化搜索引擎次序
+        init_get.putInt("method_num",0);
+
+        //初始化配置之后，做第一次打开标记
+        init_get.putBoolean("isFirstIn", false);
+
+        init_get.apply();
+    }
 }

@@ -46,6 +46,7 @@
     <string name="software">软件</string>
     <string name="main_page">主界面</string>
     <string name="info_about">关于</string>
+    <string name="settings">设置</string>
     <string name="crypt_info_function">加密信息功能</string>
     <string name="text_encrypt">文本加密</string>
     <string name="file_encrypt">文件加密</string>
@@ -69,5 +70,7 @@
     <string name="pic_decrypt_helper">图片的加密就是文件的加密，只是这里解密单独把图片拎出来了，可以解密后进行预览\n</string>
     <string name="crypto_method">本应用加密方法为：字符转换为MD5值，文件用密码进行AES加密，解密时，字符倒退回去算出明文即可，文件就用密码解开AES加密\n</string>
     <string name="en_de_crypt_func_word">软件加解密方式说明</string>
+    <string name="take_thing_you_want_search_here">在这里输入要查询的内容</string>
+
 
 </resources>

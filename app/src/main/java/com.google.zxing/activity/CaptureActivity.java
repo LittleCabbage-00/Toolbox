@@ -24,6 +24,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 
 
+import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
@@ -32,8 +33,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -105,22 +110,29 @@ public class CaptureActivity extends BaseActivity implements Callback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanner);
 
+        Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar=getSupportActionBar();
+        if (actionBar!=null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
         PermissionX.init(this).permissions(Manifest.permission.CAMERA)
                 .onExplainRequestReason(new ExplainReasonCallbackWithBeforeParam() {
                 @Override
-                public void onExplainReason(ExplainScope scope, List<String> deniedList, boolean beforeRequest) {
+                public void onExplainReason(@NonNull ExplainScope scope, @NonNull List<String> deniedList, boolean beforeRequest) {
                     scope.showRequestReasonDialog(deniedList, "即将申请的权限是程序必须依赖的权限", "我已明白");
                     }
                 })
                 .onForwardToSettings(new ForwardToSettingsCallback() {
                     @Override
-                    public void onForwardToSettings(ForwardScope scope, List<String> deniedList) {
+                    public void onForwardToSettings(@NonNull ForwardScope scope, @NonNull List<String> deniedList) {
                         scope.showForwardToSettingsDialog(deniedList, "您需要去应用程序设置当中手动开启权限", "我已明白");
                     }
                 })
                 .request(new RequestCallback() {
                     @Override
-                    public void onResult(boolean allGranted, List<String> grantedList, List<String> deniedList) {
+                    public void onResult(boolean allGranted, @NonNull List<String> grantedList, @NonNull List<String> deniedList) {
                         if (allGranted) {
 
                         } else {
@@ -132,15 +144,6 @@ public class CaptureActivity extends BaseActivity implements Callback {
         CameraManager.init(getApplication());
         viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_content);
 
-        //退出按钮
-        back = (ImageView) findViewById(R.id.scanner_toolbar_back);
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
         //闪光灯按钮
         flash=(FloatingActionButton)findViewById(R.id.flash);
         flash.setOnClickListener(new View.OnClickListener() {
@@ -151,8 +154,6 @@ public class CaptureActivity extends BaseActivity implements Callback {
         });
         hasSurface = false;
         inactivityTimer = new InactivityTimer(this);
-
-
     }
 
 
@@ -199,14 +200,16 @@ public class CaptureActivity extends BaseActivity implements Callback {
         QRCodeReader reader = new QRCodeReader();
         try {
             return reader.decode(bitmap1, hints);
-        } catch (NotFoundException e) {
-            e.printStackTrace();
-        } catch (ChecksumException e) {
-            e.printStackTrace();
-        } catch (FormatException e) {
+        } catch (NotFoundException | ChecksumException | FormatException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setTitle("二维码扫描");
     }
 
     @Override
@@ -214,6 +217,7 @@ public class CaptureActivity extends BaseActivity implements Callback {
         super.onResume();
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.scanner_view);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
+
         if (hasSurface) {
             initCamera(surfaceHolder);
         } else {
@@ -262,7 +266,7 @@ public class CaptureActivity extends BaseActivity implements Callback {
             Toast.makeText(CaptureActivity.this, "Scan failed!", Toast.LENGTH_SHORT).show();
         } else {
             //网页识别
-            if (result.getText().contains("https")){
+            if (result.getText().contains("http")){
                 //对话框
                 AlertDialog dialog = new AlertDialog.Builder(this)
                         .setTitle("扫描结果：")//设置对话框的标题
@@ -283,7 +287,7 @@ public class CaptureActivity extends BaseActivity implements Callback {
                                 intent_to_web.setData(Uri.parse(result.getText().toString()));
                                 startActivity(intent_to_web);
                             }
-                        }).create();
+                        }).show();
                 dialog.setCanceledOnTouchOutside(false);//点击其他地方对话框不消失
                 dialog.show();
             }else {
@@ -309,9 +313,7 @@ public class CaptureActivity extends BaseActivity implements Callback {
     private void initCamera(SurfaceHolder surfaceHolder) {
         try {
             CameraManager.get().openDriver(surfaceHolder);
-        } catch (IOException ioe) {
-            return;
-        } catch (RuntimeException e) {
+        } catch (IOException | RuntimeException ioe) {
             return;
         }
         if (handler == null) {
@@ -399,4 +401,13 @@ public class CaptureActivity extends BaseActivity implements Callback {
         }
     };
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

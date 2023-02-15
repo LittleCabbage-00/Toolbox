@@ -24,6 +24,7 @@ class FakeTerminalActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        setTitle("简易终端")
         run_fake_terminal.setOnClickListener {
             if (CheckRoot.isDeviceRooted()){
                 if (command_get.getText() !=null) {
