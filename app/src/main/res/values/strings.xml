@@ -2,8 +2,8 @@
     <!--    软件信息  -->
     <string name="app_name">工具箱</string>
     <string name="version_word">版本</string>
-    <string name="version_full">版本：2.2.1</string>
-    <string name="version">2.2.1</string>
+    <string name="version_full">版本：2.3.0</string>
+    <string name="version">2.3.0</string>
     <string name="android_version">Android %1$s</string>
     <string name="android_sdk"> API %1$s</string>
 

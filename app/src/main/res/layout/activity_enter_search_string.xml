@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/two"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Activities.EnterSearchStringFragment">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="800dp"
+        android:paddingTop="5dp">
+
+        <LinearLayout
+            android:id="@+id/input_layout"
+            android:background="@drawable/search_corner"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="200dp"
+            android:transitionName="shareTransition" >
+            <EditText
+                android:id="@+id/search_text_tv"
+                android:textSize="13sp"
+                android:imeOptions="actionSearch"
+                android:singleLine="true"
+                android:lines="1"
+                android:layout_gravity="center_vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="25dp"
+                android:background="@android:color/transparent"
+                android:hint="@string/take_thing_you_want_search_here"
+                android:transitionName="shareTransition" />
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/fl"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:gravity="center">
+    </FrameLayout>
+</LinearLayout>
