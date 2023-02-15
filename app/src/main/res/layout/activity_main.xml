@@ -39,7 +39,7 @@
                 android:layout_above="@+id/nav_bottom">
                 <TextView
                     android:id="@+id/search_text_tv"
-                    android:textSize="13sp"
+                    android:textSize="16sp"
                     android:lines="1"
                     android:layout_gravity="center_vertical"
                     android:layout_width="0dp"
@@ -50,6 +50,11 @@
                     android:hint="@string/take_thing_you_want_search_here"/>
                 <ImageView
                     android:id="@+id/search_button"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="30dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:src="@drawable/ic_search"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
