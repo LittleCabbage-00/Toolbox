@@ -175,7 +175,7 @@ public class MainActivity extends BaseActivity {
                     //进入系统自带文件管理器
                     case R.id.open_sys_file_mgr:
                         try{
-                            if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.S){
+                            if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.S_V2){
                                 String package_name = "com.android.documentsui";
                                 PackageManager packageManager = getPackageManager();
                                 Intent it = packageManager.getLaunchIntentForPackage(package_name);
@@ -188,13 +188,21 @@ public class MainActivity extends BaseActivity {
                                 dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+
+
+//                                String package_name = "com.android.documentsui";
+//                                PackageManager packageManager = getPackageManager();
+//                                Intent it = packageManager.getLaunchIntentForPackage(package_name);
+
+                                        Intent it = new Intent(Intent.ACTION_GET_CONTENT);
+                                        it.setType("*/*");
+                                        it.addCategory(Intent.CATEGORY_OPENABLE);
+
+                                        new Handler().postDelayed(() -> startActivity(it),200);
+                                        mDrawerLayout.close();
                                     }
                                 });
                                 dialog.show();
-                                String package_name = "com.android.documentsui";
-                                PackageManager packageManager = getPackageManager();
-                                Intent it = packageManager.getLaunchIntentForPackage(package_name);
-                                new Handler().postDelayed(() -> startActivity(it),200);
                             }
                         }catch (Exception e) {
                             AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
