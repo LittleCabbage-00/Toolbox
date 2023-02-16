@@ -5,10 +5,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.media.VolumeShaper;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -308,6 +312,10 @@ public class MainActivity extends BaseActivity {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 String url = jsonObject.getString("url");
 
+                //判断屏幕方向，获取竖屏和横屏情况，决定加载什么网址
+                if (isScreenOriPortrait(this)) {
+                    url = url.replace("1920x1080", "1080x1920");
+                }
                 Log.d("MainActivity", "url is " + url);
                 String url1="https://cn.bing.com"+url;
                 showResponse(url1);
@@ -352,5 +360,10 @@ public class MainActivity extends BaseActivity {
         init_get.putBoolean("isFirstIn", false);
 
         init_get.apply();
+    }
+
+    //竖屏判断方法
+    public static boolean isScreenOriPortrait(Context context){
+        return context.getResources().getConfiguration().orientation==Configuration.ORIENTATION_PORTRAIT;
     }
 }

@@ -87,6 +87,15 @@ public class SearchActivity extends AppCompatActivity  implements View.OnClickLi
             }
 //            input = "https://cn.bing.com/search?q=" + input ;
             input=search_method+input;
+        }else {
+            //是网址，默认请求https
+            if (!input.contains("https")){
+                if (input.contains("http")){
+                    input=input.replace("http","https");
+                }else{
+                    input="https://"+input;
+                }
+            }
         }
         webView.loadUrl(input);
         // 取消掉地址栏的焦点
@@ -332,6 +341,15 @@ public class SearchActivity extends AppCompatActivity  implements View.OnClickLi
                         SharedPreferences config_get=getSharedPreferences("config",MODE_PRIVATE);
                         final String search_method=config_get.getString("search_method","");
                         input=search_method+input;
+                    }else {
+                        //是网址，默认请求https
+                        if (!input.contains("https")){
+                            if (input.contains("http")){
+                                input=input.replace("http","https");
+                            }else{
+                                input="https://"+input;
+                            }
+                        }
                     }
                     webView.loadUrl(input);
                     // 取消掉地址栏的焦点
