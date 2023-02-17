@@ -1,7 +1,9 @@
 package com.example.cryptoapp.Activities
 
+import android.app.ProgressDialog.show
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -69,7 +71,7 @@ class SettingsActivity :  AppCompatActivity(){
         val setting_config=getSharedPreferences("config",Context.MODE_PRIVATE).edit()
         val config_get=getSharedPreferences("config",Context.MODE_PRIVATE)
 
-        val browser_avl = arrayOf("必应", "搜狗", "百度")
+        val browser_avl = arrayOf("必应", "搜狗", "百度","谷歌")
 
         AlertDialog.Builder(this).apply {
             setTitle("搜索引擎设置")
@@ -101,15 +103,45 @@ class SettingsActivity :  AppCompatActivity(){
                             putInt("method_num",2)
                         }
                     }
+                    3 -> {
+                        setting_config.apply {
+                            putString("home_url", "https://www.google.com")
+                            putString("search_method", "https://www.google.com/search?q=")
+                            putString("method_name", "谷歌")
+                            putInt("method_num",3)
+                        }
+                    }
                 }
             }
             setPositiveButton("确定") { dialogInterface, i ->
                 setting_config.apply()
-                browser_method_now.setText(config_get.getString("method_name",""))
-                Snackbar.make(snackBar_setting_text,"你选择的是 ${config_get.getString("method_name","")}",Snackbar.LENGTH_SHORT).show()
+                Log.d("SettingActivity","搜索引擎是 ${config_get.getString("home_url","")}")
+
+                if (config_get.getString("home_url","")=="https://www.google.com"){
+                    browser_method_now.setText(config_get.getString("method_name", ""))
+                    Snackbar.make(snackBar_setting_text, "你选择了 ${config_get.getString("method_name", "")}，请自行检查是否有科学上网工具",Snackbar.LENGTH_SHORT)
+                        .setAction("重置为默认"){
+                            setting_config.apply {
+                                putString("home_url", "https://cn.bing.com")
+                                putString("search_method", "https://cn.bing.com/search?q=")
+                                putString("method_name", "必应")
+                                putInt("method_num",0)
+                                apply()
+                            }
+                            browser_method_now.setText(config_get.getString("method_name",""))
+                        }
+                        .show()
+                }else {
+                    browser_method_now.setText(config_get.getString("method_name", ""))
+                    Snackbar.make(
+                        snackBar_setting_text,
+                        "你选择的是 ${config_get.getString("method_name", "")}",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
             }
             setNegativeButton("取消") { dialogInterface, i ->
-                Snackbar.make(snackBar_setting_text,"你选择的是 ${config_get.getString("method_name","")}",Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(snackBar_setting_text,"未修改，你保留了 ${config_get.getString("method_name","")}",Snackbar.LENGTH_SHORT).show()
             }
             show()
         }

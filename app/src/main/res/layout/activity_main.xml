@@ -27,6 +27,9 @@
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             android:fitsSystemWindows="true"/>
+
+
+
 <!--            搜索框-->
             <LinearLayout
                 android:background="@drawable/search_corner"
@@ -35,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginRight="30dp"
-                android:layout_marginBottom="200dp"
+                android:layout_marginBottom="160dp"
                 android:layout_above="@+id/nav_bottom">
                 <TextView
                     android:id="@+id/search_text_tv"
