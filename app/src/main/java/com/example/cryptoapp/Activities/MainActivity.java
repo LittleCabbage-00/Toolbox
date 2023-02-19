@@ -1,35 +1,27 @@
 package com.example.cryptoapp.Activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.media.VolumeShaper;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
@@ -42,17 +34,11 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.activity.CaptureActivity;
 import com.gyf.immersionbar.ImmersionBar;
+import com.permissionx.guolindev.PermissionX;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import okhttp3.Cookie;
-import okhttp3.CookieJar;
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -60,10 +46,26 @@ import okhttp3.Response;
 public class MainActivity extends BaseActivity {
 
     ImageView image_bing;
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //权限申请
+        PermissionX.init(this).permissions(Manifest.permission.CAMERA
+                        ,Manifest.permission.POST_NOTIFICATIONS
+                        ,Manifest.permission.FOREGROUND_SERVICE
+                        ,Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                .onExplainRequestReason((scope, deniedList, beforeRequest) -> scope.showRequestReasonDialog(deniedList, "即将申请的权限是程序必须依赖的权限", "我已明白"))
+                .onForwardToSettings((scope, deniedList) -> scope.showForwardToSettingsDialog(deniedList, "您需要去应用程序设置当中手动开启权限", "我已明白"))
+                .request((allGranted, grantedList, deniedList) -> {
+                    if (allGranted) {
+
+                    } else {
+                        Toast.makeText(MainActivity.this, "您拒绝了权限：" + deniedList, Toast.LENGTH_SHORT).show();
+                    }
+                });
 
         //读取自定义配置
         SharedPreferences config_get=getSharedPreferences("config",MODE_PRIVATE);
@@ -182,12 +184,12 @@ public class MainActivity extends BaseActivity {
                     //进入系统自带文件管理器
                     case R.id.open_sys_file_mgr:
                         try{
-                            if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.S_V2){
+                            if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.R){
                                 String package_name = "com.android.documentsui";
                                 PackageManager packageManager = getPackageManager();
                                 Intent it = packageManager.getLaunchIntentForPackage(package_name);
                                 new Handler().postDelayed(() -> startActivity(it),200);
-                            } else if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU) {
+                            } else if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.S_V2) {
                                 AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
                                 dialog.setTitle("警告");
                                 dialog.setMessage("安卓13以上版本的SAF框架依然无法访问Android/data目录，暂时未找到有效解决办法");
@@ -195,12 +197,6 @@ public class MainActivity extends BaseActivity {
                                 dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-
-
-//                                String package_name = "com.android.documentsui";
-//                                PackageManager packageManager = getPackageManager();
-//                                Intent it = packageManager.getLaunchIntentForPackage(package_name);
-
                                         Intent it = new Intent(Intent.ACTION_GET_CONTENT);
                                         it.setType("*/*");
                                         it.addCategory(Intent.CATEGORY_OPENABLE);

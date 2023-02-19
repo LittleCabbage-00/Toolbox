@@ -1,20 +1,27 @@
 package com.example.cryptoapp.Activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.DownloadListener;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -24,13 +31,22 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.cryptoapp.R;
+import com.example.cryptoapp.Service.DownloadService;
 import com.gyf.immersionbar.ImmersionBar;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import kotlin.text.Charsets;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class SearchActivity extends AppCompatActivity  implements View.OnClickListener {
 
@@ -45,6 +61,19 @@ public class SearchActivity extends AppCompatActivity  implements View.OnClickLi
     private static final String HTTP = "http://";
     private static final String HTTPS = "https://";
     private static final int PRESS_BACK_EXIT_GAP = 2000;
+
+    private DownloadService.DownloadBinder downloadBinder;
+    private final ServiceConnection connection=new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            downloadBinder=(DownloadService.DownloadBinder) service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +129,11 @@ public class SearchActivity extends AppCompatActivity  implements View.OnClickLi
         webView.loadUrl(input);
         // 取消掉地址栏的焦点
         textUrl.clearFocus();
+
+        //初始化下载服务
+        Intent downloadService = new Intent(SearchActivity.this, DownloadService.class);
+        startService(downloadService);
+        bindService(downloadService, connection, BIND_AUTO_CREATE);
     }
 
     //绑定控件
@@ -196,6 +230,41 @@ public class SearchActivity extends AppCompatActivity  implements View.OnClickLi
         settings.setDomStorageEnabled(true);
         settings.setPluginState(WebSettings.PluginState.ON);
 
+        //下载监听
+        webView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+                Log.d("webview","下载链接 "+url);
+
+                AlertDialog.Builder dialog=new AlertDialog.Builder(SearchActivity.this);
+                dialog.setTitle("提示");
+                dialog.setMessage("你即将下载文件:\n"+url+"\n是否下载");
+                dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String url_utf8 = null;
+                        try {
+                            url_utf8 = URLEncoder.encode(url, Charsets.UTF_8.name());
+                        } catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
+//                        downloadBinder.startDownload(url_utf8);
+                        if (downloadBinder == null) {
+                            return;
+                        }
+                        downloadBinder.startDownload(url);
+                    }
+                });
+                dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                dialog.show();
+            }
+        });
+
         // 资源混合模式
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
@@ -208,6 +277,12 @@ public class SearchActivity extends AppCompatActivity  implements View.OnClickLi
         webView.loadUrl(home_url);
     }
 
+    public String checkFileName(String fileName) {
+        Pattern pattern = Pattern.compile("[.]");
+        Matcher matcher = pattern.matcher(fileName);
+        fileName = matcher.replaceAll(""); // 将匹配到的非法字符以空替换
+        return fileName;
+    }
 
     /**
      * 重写 WebViewClient
@@ -401,6 +476,13 @@ public class SearchActivity extends AppCompatActivity  implements View.OnClickLi
             e.printStackTrace();
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(connection);
+    }
+
     public static boolean isHttpUrl(String urls) {
         boolean isUrl;
         // 判断是否是网址的正则表达式
@@ -429,4 +511,5 @@ public class SearchActivity extends AppCompatActivity  implements View.OnClickLi
         }
         return verName;
     }
+
 }

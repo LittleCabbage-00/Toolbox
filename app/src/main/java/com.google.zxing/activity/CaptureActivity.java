@@ -117,30 +117,6 @@ public class CaptureActivity extends BaseActivity implements Callback {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        PermissionX.init(this).permissions(Manifest.permission.CAMERA)
-                .onExplainRequestReason(new ExplainReasonCallbackWithBeforeParam() {
-                @Override
-                public void onExplainReason(@NonNull ExplainScope scope, @NonNull List<String> deniedList, boolean beforeRequest) {
-                    scope.showRequestReasonDialog(deniedList, "即将申请的权限是程序必须依赖的权限", "我已明白");
-                    }
-                })
-                .onForwardToSettings(new ForwardToSettingsCallback() {
-                    @Override
-                    public void onForwardToSettings(@NonNull ForwardScope scope, @NonNull List<String> deniedList) {
-                        scope.showForwardToSettingsDialog(deniedList, "您需要去应用程序设置当中手动开启权限", "我已明白");
-                    }
-                })
-                .request(new RequestCallback() {
-                    @Override
-                    public void onResult(boolean allGranted, @NonNull List<String> grantedList, @NonNull List<String> deniedList) {
-                        if (allGranted) {
-
-                        } else {
-                            Toast.makeText(CaptureActivity.this, "您拒绝了权限：" + deniedList, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
         CameraManager.init(getApplication());
         viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_content);
 
