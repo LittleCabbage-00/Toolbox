@@ -244,6 +244,7 @@ public class SearchActivity extends AppCompatActivity  implements View.OnClickLi
                     public void onClick(DialogInterface dialog, int which) {
                         String url_utf8 = null;
                         try {
+                            //防止链接中有中文，utf8编码一遍
                             url_utf8 = URLEncoder.encode(url, Charsets.UTF_8.name());
                         } catch (UnsupportedEncodingException e) {
                             throw new RuntimeException(e);

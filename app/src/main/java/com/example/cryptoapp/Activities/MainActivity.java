@@ -87,7 +87,6 @@ public class MainActivity extends BaseActivity {
         search_text_tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Intent intent_search_str = new Intent(MainActivity.this, EnterSearchStringFragment.class);
                 int[] location = new int[2];
                 search_text_tv.getLocationOnScreen(location);
@@ -111,6 +110,7 @@ public class MainActivity extends BaseActivity {
             }
         });
 
+        //沉浸化状态栏
         ImmersionBar.with(this)
                 .titleBar(toolbar)
                 .init();
