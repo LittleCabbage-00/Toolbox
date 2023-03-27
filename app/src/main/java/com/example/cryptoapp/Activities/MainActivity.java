@@ -300,6 +300,8 @@ public class MainActivity extends BaseActivity {
                     parseJSONWithJSONObject(response.body().string());
                 } catch (Exception e) {
                     e.printStackTrace();
+                    TextView search_text_tv=(TextView) findViewById(R.id.search_text_tv);
+                    Snackbar.make(search_text_tv,"当前无网络连接",Snackbar.LENGTH_SHORT).show();
                 }
             }
         }).start();
