@@ -18,6 +18,7 @@ import com.king.zxing.util.LogUtils
 import kotlinx.android.synthetic.main.activity_main.*
 
 open class BaseActivity:AppCompatActivity(){
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("BaseActivity",javaClass.simpleName)
