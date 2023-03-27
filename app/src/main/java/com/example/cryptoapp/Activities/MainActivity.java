@@ -55,8 +55,7 @@ public class MainActivity extends BaseActivity {
         //权限申请
         PermissionX.init(this).permissions(Manifest.permission.CAMERA
                         ,Manifest.permission.POST_NOTIFICATIONS
-                        ,Manifest.permission.FOREGROUND_SERVICE
-                        ,Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                        ,Manifest.permission.FOREGROUND_SERVICE)
                 .onExplainRequestReason((scope, deniedList, beforeRequest) -> scope.showRequestReasonDialog(deniedList, "即将申请的权限是程序必须依赖的权限", "我已明白"))
                 .onForwardToSettings((scope, deniedList) -> scope.showForwardToSettingsDialog(deniedList, "您需要去应用程序设置当中手动开启权限", "我已明白"))
                 .request((allGranted, grantedList, deniedList) -> {
@@ -189,23 +188,33 @@ public class MainActivity extends BaseActivity {
                                 PackageManager packageManager = getPackageManager();
                                 Intent it = packageManager.getLaunchIntentForPackage(package_name);
                                 new Handler().postDelayed(() -> startActivity(it),200);
-                            } else if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.S_V2) {
-                                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
-                                dialog.setTitle("警告");
-                                dialog.setMessage("安卓13以上版本的SAF框架依然无法访问Android/data目录，暂时未找到有效解决办法");
-                                dialog.setCancelable(true);
-                                dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Intent it = new Intent(Intent.ACTION_GET_CONTENT);
-                                        it.setType("*/*");
-                                        it.addCategory(Intent.CATEGORY_OPENABLE);
+                            } else {
+                                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU){
+                                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+                                    dialog.setTitle("警告");
+                                    dialog.setMessage("安卓13以上版本的SAF框架依然无法访问Android/data目录，暂时未找到有效解决办法");
+                                    dialog.setCancelable(true);
+                                    dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Intent it = new Intent(Intent.ACTION_GET_CONTENT);
+                                            it.setType("*/*");
+                                            it.addCategory(Intent.CATEGORY_OPENABLE);
 
-                                        new Handler().postDelayed(() -> startActivity(it),200);
-                                        mDrawerLayout.close();
-                                    }
-                                });
-                                dialog.show();
+                                            new Handler().postDelayed(() -> startActivity(it),200);
+                                            mDrawerLayout.close();
+                                        }
+                                    });
+                                    dialog.show();
+                                }else {
+                                    Intent it = new Intent(Intent.ACTION_GET_CONTENT);
+                                    it.setType("*/*");
+                                    it.addCategory(Intent.CATEGORY_OPENABLE);
+
+                                    new Handler().postDelayed(() -> startActivity(it),200);
+                                    mDrawerLayout.close();
+                                }
+
                             }
                         }catch (Exception e) {
                             AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);

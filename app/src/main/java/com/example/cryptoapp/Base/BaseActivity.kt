@@ -1,15 +1,20 @@
 package com.example.cryptoapp.Base
 
+import android.annotation.SuppressLint
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import com.example.cryptoapp.R
+import com.king.zxing.util.LogUtils
 import kotlinx.android.synthetic.main.activity_main.*
 
 open class BaseActivity:AppCompatActivity(){
@@ -51,5 +56,26 @@ open class BaseActivity:AppCompatActivity(){
             }
         }
         return true
+    }
+
+    //根据包名 判断某APP是否安装
+    fun checkApkExist(context: Context,packageName: String) :Boolean{
+        //  检查app是否有安装
+        if (TextUtils.isEmpty(packageName))
+            return  false
+        try {
+            val info = context.packageManager
+                .getApplicationInfo(
+                    packageName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES
+                )
+            // Timber.d(info.toString()) // Timber 是我打印 log 用的工具，这里只是打印一下 log
+            Log.d("Base:","yes")
+            return true
+        } catch (e: PackageManager.NameNotFoundException) {
+            // Timber.d(e.toString()) // Timber 是我打印 log 用的工具，这里只是打印一下 log
+            Log.d("Base:","No")
+            return false
+        }
     }
 }
