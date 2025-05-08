@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="#3F51B5"
+            android:textSize="24sp"
+            />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:hint="@string/enter_password"
+            app:endIconMode="password_toggle">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/passwordEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <EditText
+            android:id="@+id/inputEditText"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:gravity="top"
+            android:inputType="textMultiLine"
+            android:minHeight="20dp"
+            android:minLines="8"
+            android:maxLines="10"
+            android:scrollbars="vertical"
+            android:background="@android:drawable/edit_text"
+            android:hint="@string/enter_word_need_to_en_decrypt" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/encryptButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cornerRadius="30dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                app:backgroundTint="@color/colorPrimaryDark"
+                android:text="@string/encrypt"
+                android:textAllCaps="false"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/decryptButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:cornerRadius="30dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                app:backgroundTint="@color/colorPrimaryDark"
+                android:text="@string/decrypt"
+                android:textAllCaps="false"/>
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/outputEditText"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:gravity="top"
+            android:inputType="textMultiLine"
+            android:minHeight="20dp"
+            android:minLines="8"
+            android:maxLines="10"
+            android:scrollbars="vertical"
+            android:background="@android:drawable/edit_text"
+            android:hint="@string/output_result" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/copyOutputButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:backgroundTint="@color/colorPrimaryDark"
+            android:text="@string/copy_output_result"
+            android:layout_gravity="center_horizontal"
+            app:cornerRadius="30dp"
+            android:textAllCaps="false"/>
+
+    </LinearLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>
+

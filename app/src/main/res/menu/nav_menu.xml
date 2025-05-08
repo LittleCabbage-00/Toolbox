@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/crypt_info_function">
+        <menu>
+        <group android:checkableBehavior="single">
+            <item
+                android:id="@+id/navTextLayout"
+                android:icon="@drawable/ic_text"
+                android:title="@string/text_encrypt" />
+            <item
+                android:id="@+id/navFileLayout"
+                android:icon="@drawable/ic_file"
+                android:title="@string/file_encrypt" />
+            <item
+                android:id="@+id/navPicLayout"
+                android:icon="@drawable/ic_pic"
+                android:title="@string/pic_decrypt" />
+        </group>
+        </menu>
+    </item>
+
+</menu>

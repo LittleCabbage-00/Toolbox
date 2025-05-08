@@ -1,0 +1,57 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 33
+    buildToolsVersion "29.0.3"
+
+    viewBinding {
+        enabled = true
+    }
+
+    defaultConfig {
+        applicationId "com.example.cryptoapp"
+        minSdkVersion 26
+        //noinspection ExpiredTargetSdkVersion
+        targetSdkVersion 29
+        versionCode 20230327
+        versionName "2.4.1"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    packagingOptions {
+        exclude 'classes.dex'
+        exclude '**.**'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    //noinspection GradleDependency
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.preference:preference:1.2.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'de.hdodenhof:circleimageview:3.0.1'
+    implementation 'com.guolindev.permissionx:permissionx:1.7.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+    implementation 'com.google.zxing:core:3.5.1'
+    implementation 'com.github.jenly1314:zxing-lite:2.3.0'
+    implementation 'com.github.bumptech.glide:glide:4.14.2'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
+    implementation 'com.geyifeng.immersionbar:immersionbar:3.2.2'
+    implementation 'com.geyifeng.immersionbar:immersionbar-ktx:3.2.2'
+}

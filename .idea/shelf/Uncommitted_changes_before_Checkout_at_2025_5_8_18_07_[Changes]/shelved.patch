@@ -1,0 +1,936 @@
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Toolbox\r\n不完全的 `material design` 风格，改进仍需学习\r\n*原加解密程序，现在加了很多功能当做工具箱开发了*\r\n## 用法\r\n> 文本加密在上面输入密码和要加密的文本，然后点击加密，字符即可被加密为密文；解密时，将密码输入上面一个文本框，并输入密码，即可解密\r\n\r\n> 文件加密需用户自己找到需要加密的文件位置，在读取文件处选中文件，输入密码，然后点击写入文件，输入自定义加密后的文件名；解密时，读取被加密之后的文件，输入密码，然后点击写入，写明解密后的文件名和后缀名，否则文件可能无法被读取\r\n\r\n> 图片加密就是文件加密，解密时可以在指定位置预览图片情况\r\n\r\n## 如有bug 请多多提issus,欢迎提pr\r\n\r\n2023年2月7日，发现安卓13用sui也没有data文件夹，正在修复这个问题\r\n~~没有安卓13的手机，算了不修了~~\r\n\r\n## 版本更迭日志：\r\nv2.4.1\r\n发现安卓11及以上设备在调起QQ时会调不起来（之前作者使用的是鸿蒙2,也就是AOSP10，没有发现这个问题，现在升级到了鸿蒙3,AOSP12，发现确实有这个问题），为了规避此问题，把target从33改回了29；改进主页每日一图获取失败的提示\r\n\r\nv2.4.0\r\n添加浏览器功能中的文件下载功能，但是没写暂停和取消的按钮，有相关逻辑，就是没写怎么触发~~就是玩~~；目前这个版本是打算最后一个版本了，后面开新的坑写了，这个repo看以后有想法了再写\r\n\r\nv2.3.0\r\n修改主页设置，背景设置为全屏的bing每日一图;修改主页搜索框ui显示;修改二维码扫描界面，使之更好看;增加软件设置，用户可在必应、搜狗、百度这三个之中自行决定搜索引擎是哪个;增加每日一图开关设置\r\n\r\nv2.2.1\r\n修复2.2.0版本中，相机权限申请异常的bug\r\n\r\nv2.2.0\r\n添加简易终端，可执行有限的linux指令，添加二维码扫描功能，可扫描后做出反馈，另外对安卓13的兼容性问题也做了弹窗提示\r\n\r\nv2.1.1\r\n侧滑栏处加入打开原生文件管理器的选项（给安卓11以上无法访问data文件夹提供的）；把设备信息从侧滑栏处移除，改到了关于页面；修复文件加密页面可能按钮失效的bug\r\n\r\nv2.1.0\r\n修改软件图标和名称；大改加解密功能UI,使用CardView实现界面；大改关于应用界面，取消之前的AlertDialog写法，改为使用CardView的界面，同时新加入使用帮助，里面有使用加解密的用法说明\r\n\r\nv2.0.0\r\n修改界面颜色，看起来更舒服；修改图标，使之更美观；修改主页面为bing主页\r\n\r\nv1.2.0\r\n改进界面观感，修复已知bug\r\n\r\nv1.1.1\r\n修复已知bug,优化用户UI\r\n\r\nv1.1.0\r\n基本实现加解密字符串与文件的功能\r\n
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	
++++ b/README.md	
+@@ -1,48 +1,4 @@
+ # Toolbox
+ 不完全的 `material design` 风格，改进仍需学习
+-*原加解密程序，现在加了很多功能当做工具箱开发了*
+-## 用法
+-> 文本加密在上面输入密码和要加密的文本，然后点击加密，字符即可被加密为密文；解密时，将密码输入上面一个文本框，并输入密码，即可解密
+-
+-> 文件加密需用户自己找到需要加密的文件位置，在读取文件处选中文件，输入密码，然后点击写入文件，输入自定义加密后的文件名；解密时，读取被加密之后的文件，输入密码，然后点击写入，写明解密后的文件名和后缀名，否则文件可能无法被读取
+-
+-> 图片加密就是文件加密，解密时可以在指定位置预览图片情况
+-
+-## 如有bug 请多多提issus,欢迎提pr
+-
+-2023年2月7日，发现安卓13用sui也没有data文件夹，正在修复这个问题
+-~~没有安卓13的手机，算了不修了~~
+-
+-## 版本更迭日志：
+-v2.4.1
+-发现安卓11及以上设备在调起QQ时会调不起来（之前作者使用的是鸿蒙2,也就是AOSP10，没有发现这个问题，现在升级到了鸿蒙3,AOSP12，发现确实有这个问题），为了规避此问题，把target从33改回了29；改进主页每日一图获取失败的提示
+-
+-v2.4.0
+-添加浏览器功能中的文件下载功能，但是没写暂停和取消的按钮，有相关逻辑，就是没写怎么触发~~就是玩~~；目前这个版本是打算最后一个版本了，后面开新的坑写了，这个repo看以后有想法了再写
+-
+-v2.3.0
+-修改主页设置，背景设置为全屏的bing每日一图;修改主页搜索框ui显示;修改二维码扫描界面，使之更好看;增加软件设置，用户可在必应、搜狗、百度这三个之中自行决定搜索引擎是哪个;增加每日一图开关设置
+-
+-v2.2.1
+-修复2.2.0版本中，相机权限申请异常的bug
+-
+-v2.2.0
+-添加简易终端，可执行有限的linux指令，添加二维码扫描功能，可扫描后做出反馈，另外对安卓13的兼容性问题也做了弹窗提示
+-
+-v2.1.1
+-侧滑栏处加入打开原生文件管理器的选项（给安卓11以上无法访问data文件夹提供的）；把设备信息从侧滑栏处移除，改到了关于页面；修复文件加密页面可能按钮失效的bug
+ 
+-v2.1.0
+-修改软件图标和名称；大改加解密功能UI,使用CardView实现界面；大改关于应用界面，取消之前的AlertDialog写法，改为使用CardView的界面，同时新加入使用帮助，里面有使用加解密的用法说明
+-
+-v2.0.0
+-修改界面颜色，看起来更舒服；修改图标，使之更美观；修改主页面为bing主页
+-
+-v1.2.0
+-改进界面观感，修复已知bug
+-
+-v1.1.1
+-修复已知bug,优化用户UI
+-
+-v1.1.0
+-基本实现加解密字符串与文件的功能
++此分支为单独的加解密功能，不包与此功能无关的代码，与master分支的相关功能比，就是单独提取出来了文本/文件加密与文本/文件/图片解密功能，其他功能未提取，如需使用，请切换到master分支。
+\ No newline at end of file
+Index: app/src/main/java/com/example/cryptoapp/Base/BaseActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.cryptoapp.Base\r\n\r\nimport android.annotation.SuppressLint\r\nimport android.content.ComponentName\r\nimport android.content.Context\r\nimport android.content.Intent\r\nimport android.content.pm.PackageManager\r\nimport android.net.Uri\r\nimport android.os.Bundle\r\nimport android.text.TextUtils\r\nimport android.util.Log\r\nimport android.view.MenuItem\r\nimport androidx.appcompat.app.AlertDialog\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport androidx.core.view.GravityCompat\r\nimport com.example.cryptoapp.R\r\nimport com.king.zxing.util.LogUtils\r\nimport kotlinx.android.synthetic.main.activity_main.*\r\n\r\nopen class BaseActivity:AppCompatActivity(){\r\n\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        Log.d(\"BaseActivity\",javaClass.simpleName)\r\n        ActivityCollector.addActivity(this)\r\n    }\r\n\r\n    override fun onDestroy() {\r\n        super.onDestroy()\r\n        ActivityCollector.removeActivity(this)\r\n    }\r\n    override fun onOptionsItemSelected(item: MenuItem): Boolean {\r\n        when (item.itemId) {\r\n            android.R.id.home -> drawerLayout.openDrawer(GravityCompat.START)\r\n            R.id.exit->ActivityCollector.finishAll()\r\n            R.id.toQQ->{\r\n                try{\r\n                    val package_name = \"com.tencent.mobileqq\"\r\n                    val packageManager: PackageManager = this.getPackageManager()\r\n                    val it: Intent? = packageManager.getLaunchIntentForPackage(package_name)\r\n                    startActivity(it)\r\n                }catch (e:java.lang.Exception){\r\n                    AlertDialog.Builder(this).apply {\r\n                        setTitle(\"出错了 >_<\")\r\n                        setMessage(\"检测到您没有安装QQ\\n是否前去安装？\")\r\n                        setCancelable(false)\r\n                        setPositiveButton(\"确认\"){_,_->\r\n                            val intent_downloadQQ=Intent(Intent.ACTION_VIEW)\r\n                            intent_downloadQQ.data= Uri.parse(\"https://im.qq.com/mobileqq\")\r\n                            startActivity(intent_downloadQQ)\r\n                        }\r\n                        setNegativeButton(\"取消\"){_,_->\r\n                        }\r\n                        show()\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        return true\r\n    }\r\n}
+===================================================================
+diff --git a/app/src/main/java/com/example/cryptoapp/Base/BaseActivity.kt b/app/src/main/java/com/example/cryptoapp/Base/BaseActivity.kt
+--- a/app/src/main/java/com/example/cryptoapp/Base/BaseActivity.kt	
++++ b/app/src/main/java/com/example/cryptoapp/Base/BaseActivity.kt	
+@@ -1,21 +1,8 @@
+ package com.example.cryptoapp.Base
+ 
+-import android.annotation.SuppressLint
+-import android.content.ComponentName
+-import android.content.Context
+-import android.content.Intent
+-import android.content.pm.PackageManager
+-import android.net.Uri
+ import android.os.Bundle
+-import android.text.TextUtils
+ import android.util.Log
+-import android.view.MenuItem
+-import androidx.appcompat.app.AlertDialog
+ import androidx.appcompat.app.AppCompatActivity
+-import androidx.core.view.GravityCompat
+-import com.example.cryptoapp.R
+-import com.king.zxing.util.LogUtils
+-import kotlinx.android.synthetic.main.activity_main.*
+ 
+ open class BaseActivity:AppCompatActivity(){
+ 
+@@ -29,33 +16,4 @@
+         super.onDestroy()
+         ActivityCollector.removeActivity(this)
+     }
+-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+-        when (item.itemId) {
+-            android.R.id.home -> drawerLayout.openDrawer(GravityCompat.START)
+-            R.id.exit->ActivityCollector.finishAll()
+-            R.id.toQQ->{
+-                try{
+-                    val package_name = "com.tencent.mobileqq"
+-                    val packageManager: PackageManager = this.getPackageManager()
+-                    val it: Intent? = packageManager.getLaunchIntentForPackage(package_name)
+-                    startActivity(it)
+-                }catch (e:java.lang.Exception){
+-                    AlertDialog.Builder(this).apply {
+-                        setTitle("出错了 >_<")
+-                        setMessage("检测到您没有安装QQ\n是否前去安装？")
+-                        setCancelable(false)
+-                        setPositiveButton("确认"){_,_->
+-                            val intent_downloadQQ=Intent(Intent.ACTION_VIEW)
+-                            intent_downloadQQ.data= Uri.parse("https://im.qq.com/mobileqq")
+-                            startActivity(intent_downloadQQ)
+-                        }
+-                        setNegativeButton("取消"){_,_->
+-                        }
+-                        show()
+-                    }
+-                }
+-            }
+-        }
+-        return true
+-    }
+ }
+\ No newline at end of file
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_11\" project-jdk-name=\"1.8\" project-jdk-type=\"JavaSDK\">\r\n    <output url=\"file://$PROJECT_DIR$/build/classes\" />\r\n  </component>\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n</project>
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	
++++ b/.idea/misc.xml	
+@@ -1,4 +1,3 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/build/classes" />
+Index: .idea/deploymentTargetDropDown.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"deploymentTargetDropDown\">\r\n    <runningDeviceTargetSelectedWithDropDown>\r\n      <Target>\r\n        <type value=\"RUNNING_DEVICE_TARGET\" />\r\n        <deviceKey>\r\n          <Key>\r\n            <type value=\"SERIAL_NUMBER\" />\r\n            <value value=\"ec523349\" />\r\n          </Key>\r\n        </deviceKey>\r\n      </Target>\r\n    </runningDeviceTargetSelectedWithDropDown>\r\n    <timeTargetWasSelectedWithDropDown value=\"2023-03-27T11:43:12.830453Z\" />\r\n  </component>\r\n</project>
+===================================================================
+diff --git a/.idea/deploymentTargetDropDown.xml b/.idea/deploymentTargetDropDown.xml
+--- a/.idea/deploymentTargetDropDown.xml	
++++ b/.idea/deploymentTargetDropDown.xml	
+@@ -1,17 +1,10 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="deploymentTargetDropDown">
+-    <runningDeviceTargetSelectedWithDropDown>
+-      <Target>
+-        <type value="RUNNING_DEVICE_TARGET" />
+-        <deviceKey>
+-          <Key>
+-            <type value="SERIAL_NUMBER" />
+-            <value value="ec523349" />
+-          </Key>
+-        </deviceKey>
+-      </Target>
+-    </runningDeviceTargetSelectedWithDropDown>
+-    <timeTargetWasSelectedWithDropDown value="2023-03-27T11:43:12.830453Z" />
++    <value>
++      <entry key="app">
++        <State />
++      </entry>
++    </value>
+   </component>
+ </project>
+\ No newline at end of file
+Index: app/src/main/res/menu/nav_menu.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<menu xmlns:android=\"http://schemas.android.com/apk/res/android\">\r\n\r\n    <item android:title=\"@string/software\">\r\n        <menu>\r\n        <group android:checkableBehavior=\"single\">\r\n            <item\r\n                android:id=\"@+id/home\"\r\n                android:icon=\"@drawable/ic_home\"\r\n                android:title=\"@string/main_page\" />\r\n            <item\r\n                android:id=\"@+id/info\"\r\n                android:icon=\"@drawable/info\"\r\n                android:title=\"@string/info_about\" />\r\n            <item\r\n                android:id=\"@+id/settings\"\r\n                android:icon=\"@drawable/ic_settings\"\r\n                android:title=\"@string/settings\"/>\r\n        </group>\r\n        </menu>\r\n    </item>\r\n\r\n    <item android:title=\"@string/crypt_info_function\">\r\n        <menu>\r\n        <group android:checkableBehavior=\"single\">\r\n            <item\r\n                android:id=\"@+id/navTextLayout\"\r\n                android:icon=\"@drawable/ic_text\"\r\n                android:title=\"@string/text_encrypt\" />\r\n            <item\r\n                android:id=\"@+id/navFileLayout\"\r\n                android:icon=\"@drawable/ic_file\"\r\n                android:title=\"@string/file_encrypt\" />\r\n            <item\r\n                android:id=\"@+id/navPicLayout\"\r\n                android:icon=\"@drawable/ic_pic\"\r\n                android:title=\"@string/pic_decrypt\" />\r\n        </group>\r\n        </menu>\r\n    </item>\r\n\r\n    <item android:title=\"@string/another_func\">\r\n        <menu>\r\n            <group android:checkableBehavior=\"single\">\r\n                <item\r\n                    android:id=\"@+id/open_sys_file_mgr\"\r\n                    android:icon=\"@drawable/file_folder\"\r\n                    android:title=\"@string/open_sys_filemanager\"/>\r\n                <item\r\n                    android:id=\"@+id/fake_terminal\"\r\n                    android:icon=\"@drawable/code\"\r\n                    android:title=\"@string/fake_terminal\"/>\r\n                <item\r\n                    android:id=\"@+id/qr_scan\"\r\n                    android:icon=\"@drawable/qr_scan\"\r\n                    android:title=\"@string/qr_scan\"/>\r\n            </group>\r\n        </menu>\r\n    </item>\r\n\r\n</menu>
+===================================================================
+diff --git a/app/src/main/res/menu/nav_menu.xml b/app/src/main/res/menu/nav_menu.xml
+--- a/app/src/main/res/menu/nav_menu.xml	
++++ b/app/src/main/res/menu/nav_menu.xml	
+@@ -1,25 +1,6 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <menu xmlns:android="http://schemas.android.com/apk/res/android">
+ 
+-    <item android:title="@string/software">
+-        <menu>
+-        <group android:checkableBehavior="single">
+-            <item
+-                android:id="@+id/home"
+-                android:icon="@drawable/ic_home"
+-                android:title="@string/main_page" />
+-            <item
+-                android:id="@+id/info"
+-                android:icon="@drawable/info"
+-                android:title="@string/info_about" />
+-            <item
+-                android:id="@+id/settings"
+-                android:icon="@drawable/ic_settings"
+-                android:title="@string/settings"/>
+-        </group>
+-        </menu>
+-    </item>
+-
+     <item android:title="@string/crypt_info_function">
+         <menu>
+         <group android:checkableBehavior="single">
+@@ -39,23 +20,4 @@
+         </menu>
+     </item>
+ 
+-    <item android:title="@string/another_func">
+-        <menu>
+-            <group android:checkableBehavior="single">
+-                <item
+-                    android:id="@+id/open_sys_file_mgr"
+-                    android:icon="@drawable/file_folder"
+-                    android:title="@string/open_sys_filemanager"/>
+-                <item
+-                    android:id="@+id/fake_terminal"
+-                    android:icon="@drawable/code"
+-                    android:title="@string/fake_terminal"/>
+-                <item
+-                    android:id="@+id/qr_scan"
+-                    android:icon="@drawable/qr_scan"
+-                    android:title="@string/qr_scan"/>
+-            </group>
+-        </menu>
+-    </item>
+-
+ </menu>
+\ No newline at end of file
+Index: app/src/main/java/com/example/cryptoapp/Activities/FileActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.cryptoapp.Activities\r\n\r\nimport android.app.Activity\r\nimport android.content.Intent\r\nimport android.net.Uri\r\nimport android.os.Bundle\r\nimport android.os.Handler\r\nimport android.os.Message\r\nimport android.util.Log\r\nimport android.view.Menu\r\nimport android.view.MenuItem\r\nimport android.view.View\r\nimport com.example.cryptoapp.*\r\nimport com.example.cryptoapp.Base.BaseActivity\r\nimport com.example.cryptoapp.Utils.FileUtil\r\nimport com.example.cryptoapp.Utils.StringCrypto\r\nimport com.google.android.material.snackbar.Snackbar\r\nimport kotlinx.android.synthetic.main.activity_file.*\r\nimport kotlinx.android.synthetic.main.activity_file.decryptButton\r\nimport kotlinx.android.synthetic.main.activity_file.encryptButton\r\nimport kotlinx.android.synthetic.main.activity_file.passwordEditText\r\nimport kotlinx.android.synthetic.main.activity_main.toolbar\r\nimport java.io.*\r\nimport java.lang.ref.WeakReference\r\nimport kotlin.concurrent.thread\r\n\r\n//class FileActivity : BaseActivity(), View.OnClickListener {\r\nclass FileActivity:BaseActivity(){\r\n    private val REQUEST_CODE_FOR_LOAD_FILE = 1\r\n    private val REQUEST_CODE_FOR_CREATE_FILE = 2\r\n    private var fromFileUri: Uri? = null\r\n    private var toFileUri: Uri? = null\r\n    private val startProgress = 1\r\n    private val finishProgress = 2\r\n    private val cryptoFinishToastMessage = 3\r\n    private val cryptoErrorToastMessage = 4\r\n    private val handler = MyHandler(this)\r\n\r\n    //防止Handler造成的内存泄露，使用内部类\r\n    private class MyHandler(activity: FileActivity) : Handler() {\r\n        private val mActivity: WeakReference<FileActivity> = WeakReference(activity)\r\n\r\n        override fun handleMessage(msg: Message) {\r\n            if (mActivity.get() == null) {\r\n                return\r\n            }\r\n            val activity = mActivity.get()\r\n            if (activity != null) {\r\n                when (msg.what) {\r\n                    activity.startProgress -> activity.progressBar.visibility = View.VISIBLE\r\n                    activity.finishProgress -> activity.progressBar.visibility = View.GONE\r\n                    activity.cryptoFinishToastMessage -> Snackbar.make(activity.fileView, \"任务已完成\", Snackbar.LENGTH_SHORT).show()\r\n                    activity.cryptoErrorToastMessage -> Snackbar.make(activity.fileView, \"任务发生错误\", Snackbar.LENGTH_SHORT).show()\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContentView(R.layout.activity_file)\r\n        setSupportActionBar(toolbar)\r\n        supportActionBar?.setDisplayHomeAsUpEnabled(true)\r\n    }\r\n\r\n    override fun onStart() {\r\n        super.onStart()\r\n        setTitle(\"文件加密解密\")\r\n\r\n        readFile.setOnClickListener { setFromFileUri() }\r\n        saveFile.setOnClickListener { setToFileUri() }\r\n        encryptButton.setOnClickListener { fileCryptoTask(\"ENCRYPT\") }\r\n        decryptButton.setOnClickListener { fileCryptoTask(\"DECRYPT\") }\r\n    }\r\n\r\n    private fun fileCryptoTask(option: String) {\r\n        if (toFileUri != null && fromFileUri != null) {\r\n            thread {\r\n                val startMsg = Message()\r\n                startMsg.what = startProgress\r\n                handler.sendMessage(startMsg)\r\n                val flag = fileHandle(fromFileUri!!, option)\r\n                println(flag)\r\n                val finishMsg = Message()\r\n                finishMsg.what = finishProgress\r\n                handler.sendMessage(finishMsg)\r\n                if (flag) {\r\n                    val cryptoFinishMsg = Message()\r\n                    cryptoFinishMsg.what = cryptoFinishToastMessage\r\n                    handler.sendMessage(cryptoFinishMsg)\r\n                } else {\r\n                    val cryptoErrorMsg = Message()\r\n                    cryptoErrorMsg.what = cryptoErrorToastMessage\r\n                    handler.sendMessage(cryptoErrorMsg)\r\n                }\r\n            }\r\n        } else {\r\n            Snackbar.make(fileView, \"输入或输出路径错误\", Snackbar.LENGTH_SHORT).show()\r\n        }\r\n    }\r\n\r\n    private fun setFromFileUri() {\r\n        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)\r\n        intent.addCategory(Intent.CATEGORY_OPENABLE)\r\n        intent.type = \"*/*\"\r\n        startActivityForResult(intent, REQUEST_CODE_FOR_LOAD_FILE)\r\n    }\r\n\r\n    private fun setToFileUri() {\r\n        val password = passwordEditText.text.toString()\r\n        val readName = readPathEditText.text.toString()\r\n        // 通过输入文件名是否包含特殊后缀来判断输出文件名默认值是加密还是解密后的字符串\r\n        val outputName = if (readName.contains(\".cf\", ignoreCase = true)) {\r\n            fileNameHandle(readName.substring(0, readName.lastIndexOf('.')), password, \"DECRYPT\")\r\n        } else {\r\n            fileNameHandle(readName, password, \"ENCRYPT\") + \".cf\"\r\n        }\r\n\r\n        val intent =Intent(Intent.ACTION_CREATE_DOCUMENT)\r\n        intent.addCategory(Intent.CATEGORY_OPENABLE)\r\n        intent.type = \"*/*\"\r\n        intent.putExtra(Intent.EXTRA_TITLE, outputName)\r\n        startActivityForResult(intent, REQUEST_CODE_FOR_CREATE_FILE)\r\n    }\r\n\r\n\r\n\r\n    override fun onActivityResult(requestCode: Int,resultCode: Int, data:Intent?) {\r\n        super.onActivityResult(requestCode, resultCode, data)\r\n        when (requestCode) {\r\n            REQUEST_CODE_FOR_LOAD_FILE -> {\r\n                if (resultCode == Activity.RESULT_OK && data != null) {\r\n                    data.data?.let { uri ->\r\n                        readPathEditText.setText(FileUtil.uriToFileName(uri, this))\r\n                        fromFileUri = uri\r\n                    }\r\n                }\r\n            }\r\n            REQUEST_CODE_FOR_CREATE_FILE -> {\r\n                if (resultCode == Activity.RESULT_OK && data != null) {\r\n                    data.data?.let { uri ->\r\n                        savePathEditText.setText(FileUtil.uriToFileName(uri, this))\r\n                        toFileUri = uri\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    fun fileNameHandle(inputName: String, password:String, option: String): String {\r\n        var outputName = \"\"\r\n        if (option == \"ENCRYPT\") {\r\n            outputName = try {\r\n                StringCrypto(password).encrypt(inputName)\r\n            } catch (e: Exception) {\r\n                Log.d(\"Encrypt Error\", \"Encrypt input name exception!\")\r\n                \"EncryptNameError\"\r\n            }\r\n        } else if (option == \"DECRYPT\"){\r\n            outputName = try {\r\n                StringCrypto(password).decrypt(inputName)\r\n            } catch (e: Exception) {\r\n                Log.d(\"Decrypt Error\", \"Decrypt input name exception!\")\r\n                \"DecryptNameError\"\r\n            }\r\n        } else {\r\n            outputName = \"\"\r\n        }\r\n        return outputName\r\n    }\r\n\r\n    private fun fileHandle(uri: Uri, option: String): Boolean {\r\n        val inputFileResolver = contentResolver.openFileDescriptor(uri, \"r\")\r\n        val outputFileResolver = contentResolver.openFileDescriptor(toFileUri!!, \"w\")\r\n        val password = passwordEditText.text.toString()\r\n        var successFlag = false\r\n        if (outputFileResolver != null) {\r\n            val outputFileStream = FileOutputStream(outputFileResolver.fileDescriptor)\r\n            inputFileResolver?.fileDescriptor?.let {\r\n                val fileInputStream = FileInputStream(it)\r\n                if (option == \"ENCRYPT\") {\r\n                    successFlag = FileCrypto(password).encrypt(fileInputStream, outputFileStream)\r\n                } else if (option == \"DECRYPT\"){\r\n                    successFlag = FileCrypto(password).decrypt(fileInputStream, outputFileStream)\r\n                }\r\n                fileInputStream.close()\r\n            }\r\n            outputFileStream.close()\r\n        }\r\n        inputFileResolver?.close()\r\n        outputFileResolver?.close()\r\n        return successFlag\r\n    }\r\n\r\n    override fun onCreateOptionsMenu(menu: Menu?): Boolean {\r\n        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)\r\n        return true\r\n    }\r\n\r\n    override fun onOptionsItemSelected(item: MenuItem):Boolean {\r\n        when (item.itemId) {\r\n            android.R.id.home -> {\r\n                this.finish()\r\n                return true\r\n            }\r\n        }\r\n        return super.onOptionsItemSelected(item)\r\n    }\r\n}\r\n
+===================================================================
+diff --git a/app/src/main/java/com/example/cryptoapp/Activities/FileActivity.kt b/app/src/main/java/com/example/cryptoapp/Activities/FileActivity.kt
+--- a/app/src/main/java/com/example/cryptoapp/Activities/FileActivity.kt	
++++ b/app/src/main/java/com/example/cryptoapp/Activities/FileActivity.kt	
+@@ -7,20 +7,18 @@
+ import android.os.Handler
+ import android.os.Message
+ import android.util.Log
+-import android.view.Menu
+ import android.view.MenuItem
+ import android.view.View
+-import com.example.cryptoapp.*
+ import com.example.cryptoapp.Base.BaseActivity
++import com.example.cryptoapp.FileCrypto
++import com.example.cryptoapp.R
+ import com.example.cryptoapp.Utils.FileUtil
+ import com.example.cryptoapp.Utils.StringCrypto
+ import com.google.android.material.snackbar.Snackbar
+ import kotlinx.android.synthetic.main.activity_file.*
+-import kotlinx.android.synthetic.main.activity_file.decryptButton
+-import kotlinx.android.synthetic.main.activity_file.encryptButton
+-import kotlinx.android.synthetic.main.activity_file.passwordEditText
+ import kotlinx.android.synthetic.main.activity_main.toolbar
+-import java.io.*
++import java.io.FileInputStream
++import java.io.FileOutputStream
+ import java.lang.ref.WeakReference
+ import kotlin.concurrent.thread
+ 
+@@ -192,11 +190,6 @@
+         return successFlag
+     }
+ 
+-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+-        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)
+-        return true
+-    }
+-
+     override fun onOptionsItemSelected(item: MenuItem):Boolean {
+         when (item.itemId) {
+             android.R.id.home -> {
+Index: app/src/main/java/com/example/cryptoapp/Activities/PicActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.cryptoapp.Activities\r\n\r\nimport android.app.Activity\r\nimport android.content.Intent\r\nimport android.graphics.BitmapFactory\r\nimport android.net.Uri\r\nimport android.os.Bundle\r\nimport android.util.Log\r\nimport android.view.Menu\r\nimport android.view.MenuItem\r\nimport android.view.View\r\nimport com.example.cryptoapp.Base.BaseActivity\r\nimport com.example.cryptoapp.BytesCrypto\r\nimport com.example.cryptoapp.Utils.FileUtil\r\nimport com.example.cryptoapp.R\r\nimport com.google.android.material.snackbar.Snackbar\r\nimport kotlinx.android.synthetic.main.activity_main.toolbar\r\nimport kotlinx.android.synthetic.main.activity_pic.*\r\nimport kotlinx.android.synthetic.main.activity_pic.passwordEditText\r\nimport java.io.FileInputStream\r\n\r\n\r\nclass PicActivity : BaseActivity(), View.OnClickListener {\r\n    private val REQUEST_CODE_FOR_LOAD_FILE = 1\r\n    private var fromFileUri: Uri? = null\r\n\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContentView(R.layout.activity_pic)\r\n        setSupportActionBar(toolbar)\r\n        supportActionBar?.setDisplayHomeAsUpEnabled(true)\r\n\r\n        readPicButton.setOnClickListener(this)\r\n        decryptPicButton.setOnClickListener(this)\r\n    }\r\n\r\n    override fun onStart() {\r\n        super.onStart()\r\n        setTitle(\"图片解密\")\r\n    }\r\n\r\n    override fun onClick(v: View?) {\r\n        when (v?.id) {\r\n            R.id.readPicButton -> {\r\n                setFromFileUri()\r\n            }\r\n            R.id.decryptPicButton -> {\r\n                picDecryptShow()\r\n            }\r\n        }\r\n    }\r\n\r\n    private fun setFromFileUri() {\r\n        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)\r\n        intent.addCategory(Intent.CATEGORY_OPENABLE)\r\n        intent.type = \"*/*\"\r\n        startActivityForResult(intent, REQUEST_CODE_FOR_LOAD_FILE)\r\n\r\n    }\r\n\r\n    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {\r\n        super.onActivityResult(requestCode, resultCode, data)\r\n        when (requestCode) {\r\n            REQUEST_CODE_FOR_LOAD_FILE -> {\r\n                if (resultCode == Activity.RESULT_OK && data != null) {\r\n                    data.data?.let { uri ->\r\n                        readPicEditText.setText(FileUtil.uriToFileName(uri, this))\r\n                        fromFileUri = uri\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    private fun picDecryptShow() {\r\n        if (fromFileUri != null) {\r\n            val inputFileResolver = contentResolver.openFileDescriptor(fromFileUri!!, \"r\")\r\n            val password = passwordEditText.text.toString()\r\n            inputFileResolver?.fileDescriptor?.let {\r\n                val fileInputStream = FileInputStream(it)\r\n                // 设置图片缓冲区，最大为20M\r\n                val fromFileByteArray = ByteArray(20971520)\r\n                val len = fileInputStream.read(fromFileByteArray)\r\n                try {\r\n                    val decryptPicByteArray = BytesCrypto(password).decrypt(fromFileByteArray.sliceArray(0 until len))\r\n                    // 将字节数组转为Bitmap\r\n                    val decryptPicBitmap = BitmapFactory.decodeByteArray(decryptPicByteArray, 0, decryptPicByteArray.size)\r\n                    decryptImageView.setImageBitmap(decryptPicBitmap)\r\n                } catch (e: Exception) {\r\n                    Log.d(\"Decrypt Error\", \"decrypt img exception\")\r\n                    decryptImageView.setImageBitmap(BitmapFactory.decodeResource(this.resources,\r\n                        R.drawable.error_img\r\n                    ))\r\n                    Snackbar.make(decryptImageView, \"解密图片时出现错误\", Snackbar.LENGTH_SHORT).show()\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    override fun onCreateOptionsMenu(menu: Menu?): Boolean {\r\n        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)\r\n        return true\r\n    }\r\n\r\n    override fun onOptionsItemSelected(item: MenuItem):Boolean {\r\n        when (item.itemId) {\r\n            android.R.id.home -> {\r\n                this.finish()\r\n                return true\r\n            }\r\n        }\r\n        return super.onOptionsItemSelected(item)\r\n    }\r\n}
+===================================================================
+diff --git a/app/src/main/java/com/example/cryptoapp/Activities/PicActivity.kt b/app/src/main/java/com/example/cryptoapp/Activities/PicActivity.kt
+--- a/app/src/main/java/com/example/cryptoapp/Activities/PicActivity.kt	
++++ b/app/src/main/java/com/example/cryptoapp/Activities/PicActivity.kt	
+@@ -6,17 +6,15 @@
+ import android.net.Uri
+ import android.os.Bundle
+ import android.util.Log
+-import android.view.Menu
+ import android.view.MenuItem
+ import android.view.View
+ import com.example.cryptoapp.Base.BaseActivity
+ import com.example.cryptoapp.BytesCrypto
+-import com.example.cryptoapp.Utils.FileUtil
+ import com.example.cryptoapp.R
++import com.example.cryptoapp.Utils.FileUtil
+ import com.google.android.material.snackbar.Snackbar
+ import kotlinx.android.synthetic.main.activity_main.toolbar
+ import kotlinx.android.synthetic.main.activity_pic.*
+-import kotlinx.android.synthetic.main.activity_pic.passwordEditText
+ import java.io.FileInputStream
+ 
+ 
+@@ -97,11 +95,6 @@
+         }
+     }
+ 
+-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+-        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)
+-        return true
+-    }
+-
+     override fun onOptionsItemSelected(item: MenuItem):Boolean {
+         when (item.itemId) {
+             android.R.id.home -> {
+Index: app/src/main/java/com/example/cryptoapp/Activities/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.cryptoapp.Activities;\r\n\r\nimport android.Manifest;\r\nimport android.annotation.SuppressLint;\r\nimport android.content.Context;\r\nimport android.content.DialogInterface;\r\nimport android.content.Intent;\r\nimport android.content.SharedPreferences;\r\nimport android.content.pm.PackageManager;\r\n\r\nimport android.content.res.Configuration;\r\nimport android.os.Build;\r\nimport android.os.Bundle;\r\nimport android.os.Handler;\r\nimport android.util.Log;\r\nimport android.view.Menu;\r\nimport android.view.MenuItem;\r\nimport android.view.View;\r\nimport android.widget.ImageView;\r\nimport android.widget.TextView;\r\nimport android.widget.Toast;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.annotation.RequiresApi;\r\nimport androidx.appcompat.app.ActionBar;\r\nimport androidx.appcompat.app.AlertDialog;\r\nimport androidx.appcompat.widget.Toolbar;\r\nimport androidx.drawerlayout.widget.DrawerLayout;\r\n\r\nimport com.bumptech.glide.Glide;\r\nimport com.example.cryptoapp.Base.BaseActivity;\r\nimport com.example.cryptoapp.R;\r\nimport com.google.android.material.navigation.NavigationView;\r\nimport com.google.android.material.snackbar.Snackbar;\r\nimport com.google.zxing.activity.CaptureActivity;\r\nimport com.gyf.immersionbar.ImmersionBar;\r\nimport com.permissionx.guolindev.PermissionX;\r\n\r\nimport org.json.JSONArray;\r\nimport org.json.JSONObject;\r\n\r\nimport okhttp3.OkHttpClient;\r\nimport okhttp3.Request;\r\nimport okhttp3.Response;\r\n\r\npublic class MainActivity extends BaseActivity {\r\n\r\n    ImageView image_bing;\r\n    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)\r\n    @Override\r\n    public void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_main);\r\n\r\n        //权限申请\r\n        PermissionX.init(this).permissions(Manifest.permission.CAMERA\r\n                        ,Manifest.permission.POST_NOTIFICATIONS\r\n                        ,Manifest.permission.FOREGROUND_SERVICE)\r\n                .onExplainRequestReason((scope, deniedList, beforeRequest) -> scope.showRequestReasonDialog(deniedList, \"即将申请的权限是程序必须依赖的权限\", \"我已明白\"))\r\n                .onForwardToSettings((scope, deniedList) -> scope.showForwardToSettingsDialog(deniedList, \"您需要去应用程序设置当中手动开启权限\", \"我已明白\"))\r\n                .request((allGranted, grantedList, deniedList) -> {\r\n                    if (allGranted) {\r\n\r\n                    } else {\r\n                        Toast.makeText(MainActivity.this, \"您拒绝了权限：\" + deniedList, Toast.LENGTH_SHORT).show();\r\n                    }\r\n                });\r\n\r\n        //读取自定义配置\r\n        SharedPreferences config_get=getSharedPreferences(\"config\",MODE_PRIVATE);\r\n        //判断是否被打开过，打开过，读取值，否则执行初始化\r\n        if (config_get.getBoolean(\"isFirstIn\",true)) {\r\n            //实施初始化，设定默认值\r\n            initView();\r\n        }\r\n\r\n        //初始化控件\r\n        DrawerLayout mDrawerLayout=(DrawerLayout) findViewById(R.id.drawerLayout);\r\n        Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);\r\n        NavigationView navView=(NavigationView) findViewById(R.id.navView);\r\n        TextView search_text_tv=(TextView) findViewById(R.id.search_text_tv);\r\n        ImageView search_button=(ImageView) findViewById(R.id.search_button);\r\n\r\n        Snackbar.make(search_text_tv,\"当前选择的搜索引擎为 \"+config_get.getString(\"method_name\",\"\"),Snackbar.LENGTH_SHORT).show();\r\n\r\n        search_text_tv.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View v) {\r\n                Intent intent_search_str = new Intent(MainActivity.this, EnterSearchStringFragment.class);\r\n                int[] location = new int[2];\r\n                search_text_tv.getLocationOnScreen(location);\r\n                intent_search_str.putExtra(\"x\",location[0]);\r\n                intent_search_str.putExtra(\"y\",location[1]);\r\n                startActivity(intent_search_str);\r\n                overridePendingTransition(0,0);\r\n            }\r\n        }\r\n        );\r\n        search_button.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View v) {\r\n                Intent intent_search_str = new Intent(MainActivity.this, EnterSearchStringFragment.class);\r\n                int[] location = new int[2];\r\n                search_text_tv.getLocationOnScreen(location);\r\n                intent_search_str.putExtra(\"x\",location[0]);\r\n                intent_search_str.putExtra(\"y\",location[1]);\r\n                startActivity(intent_search_str);\r\n                overridePendingTransition(0,0);\r\n            }\r\n        });\r\n\r\n        //沉浸化状态栏\r\n        ImmersionBar.with(this)\r\n                .titleBar(toolbar)\r\n                .init();\r\n\r\n        //安卓13兼容性警告\r\n        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU) {\r\n            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);\r\n            dialog.setTitle(\"警告\");\r\n            dialog.setMessage(\"安卓13以上版本的系统存在功能缺失，作者正在使劲想办法修\");\r\n            dialog.setCancelable(true);\r\n            dialog.setPositiveButton(\"确定\", new DialogInterface.OnClickListener() {\r\n                @Override\r\n                public void onClick(DialogInterface dialog, int which) {\r\n                }\r\n            });\r\n            dialog.show();\r\n        }\r\n\r\n        //顶部设置为toolbar界面\r\n        setSupportActionBar(toolbar);\r\n        ActionBar actionBar=getSupportActionBar();\r\n        //侧滑栏相关设置\r\n        if (actionBar!=null){\r\n            actionBar.setDisplayHomeAsUpEnabled(true);\r\n            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);\r\n        }\r\n\r\n        //侧滑栏选项点击事件\r\n        navView.setCheckedItem(R.id.home);\r\n        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {\r\n            @SuppressLint(\"NonConstantResourceId\")\r\n            @Override\r\n            public boolean onNavigationItemSelected(@NonNull MenuItem item) {\r\n                switch (item.getItemId()){\r\n                    //关于->弹出关于app的窗口\r\n                    case R.id.info:\r\n                        Intent intent_info=new Intent(MainActivity.this,AboutActivity.class);\r\n//                        startActivity(intent_info);\r\n\r\n                        new Handler().postDelayed(()->startActivity(intent_info),200);\r\n                        mDrawerLayout.close();\r\n                        break;\r\n                    //进入软件设置\r\n                    case R.id.settings:\r\n                        Intent intent_to_settings=new Intent(MainActivity.this,SettingsActivity.class);\r\n                        new Handler().postDelayed(()->startActivity(intent_to_settings),200);\r\n                        mDrawerLayout.close();\r\n                        break;\r\n                    //文本加密->进入相关activity\r\n                    case R.id.navTextLayout:\r\n                        Intent intent_text=new Intent(MainActivity.this,TextActivity.class);\r\n//                        startActivity(intent_text);\r\n\r\n                        new Handler().postDelayed(()->startActivity(intent_text),200);\r\n                        mDrawerLayout.close();\r\n                        break;\r\n                    //文件加密->进入相关activity\r\n                    case R.id.navFileLayout:\r\n                        Intent intent_file=new Intent(MainActivity.this,FileActivity.class);\r\n//                        startActivity(intent_file);\r\n\r\n                        new Handler().postDelayed(()->startActivity(intent_file),200);\r\n                        mDrawerLayout.close();\r\n                        break;\r\n                    //图片解密预览->进入相关activity\r\n                    case R.id.navPicLayout:\r\n                        Intent intent_pic=new Intent(MainActivity.this,PicActivity.class);\r\n                        new Handler().postDelayed(()->startActivity(intent_pic),200);\r\n                        mDrawerLayout.close();\r\n                        break;\r\n                    //进入系统自带文件管理器\r\n                    case R.id.open_sys_file_mgr:\r\n                        try{\r\n                            if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.R){\r\n                                String package_name = \"com.android.documentsui\";\r\n                                PackageManager packageManager = getPackageManager();\r\n                                Intent it = packageManager.getLaunchIntentForPackage(package_name);\r\n                                new Handler().postDelayed(() -> startActivity(it),200);\r\n                            } else {\r\n                                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU){\r\n                                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);\r\n                                    dialog.setTitle(\"警告\");\r\n                                    dialog.setMessage(\"安卓13以上版本的SAF框架依然无法访问Android/data目录，暂时未找到有效解决办法\");\r\n                                    dialog.setCancelable(true);\r\n                                    dialog.setPositiveButton(\"确定\", new DialogInterface.OnClickListener() {\r\n                                        @Override\r\n                                        public void onClick(DialogInterface dialog, int which) {\r\n                                            Intent it = new Intent(Intent.ACTION_GET_CONTENT);\r\n                                            it.setType(\"*/*\");\r\n                                            it.addCategory(Intent.CATEGORY_OPENABLE);\r\n\r\n                                            new Handler().postDelayed(() -> startActivity(it),200);\r\n                                            mDrawerLayout.close();\r\n                                        }\r\n                                    });\r\n                                    dialog.show();\r\n                                }else {\r\n                                    Intent it = new Intent(Intent.ACTION_GET_CONTENT);\r\n                                    it.setType(\"*/*\");\r\n                                    it.addCategory(Intent.CATEGORY_OPENABLE);\r\n\r\n                                    new Handler().postDelayed(() -> startActivity(it),200);\r\n                                    mDrawerLayout.close();\r\n                                }\r\n\r\n                            }\r\n                        }catch (Exception e) {\r\n                            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);\r\n                            dialog.setTitle(\"警告\");\r\n                            dialog.setMessage(\"检测到您没有相关的软件\");\r\n                            dialog.setCancelable(true);\r\n                            dialog.setPositiveButton(\"确定\", new DialogInterface.OnClickListener() {\r\n                                @Override\r\n                                public void onClick(DialogInterface dialog, int which) {\r\n                                }\r\n                            });\r\n                            dialog.show();\r\n                            mDrawerLayout.close();\r\n                        }\r\n                        break;\r\n                    //进入简易终端界面\r\n                    case R.id.fake_terminal:\r\n                        Intent intent_fake_terminal=new Intent(MainActivity.this,FakeTerminalActivity.class);\r\n//                        startActivity(intent_fake_terminal);\r\n                        new Handler().postDelayed(()->startActivity(intent_fake_terminal),200);\r\n                        mDrawerLayout.close();\r\n                        break;\r\n                    //开始二维码扫描\r\n                    case R.id.qr_scan:\r\n                        mDrawerLayout.close();\r\n                        Intent intent_qr_scan=new Intent(MainActivity.this, CaptureActivity.class);\r\n//                        startActivity(intent_qr_scan);\r\n                        new Handler().postDelayed(()->startActivity(intent_qr_scan),300);\r\n                        break;\r\n                    //主界面->什么也不做\r\n                    default:\r\n                        mDrawerLayout.close();\r\n                        break;\r\n                }\r\n                return true;\r\n            }\r\n        });\r\n    }\r\n\r\n    @Override\r\n    public void onStart() {\r\n        super.onStart();\r\n        NavigationView navView=(NavigationView) findViewById(R.id.navView);\r\n        navView.setCheckedItem(R.id.home);\r\n\r\n        //读取自定义配置\r\n        SharedPreferences config_get=getSharedPreferences(\"config\",MODE_PRIVATE);\r\n\r\n        //读取bing每日一图选项，如果为true就加载，否则不做动作\r\n        boolean bing_pic_check=config_get.getBoolean(\"bing_pic_check\",true);\r\n        if (bing_pic_check) {\r\n            image_bing = (ImageView) findViewById(R.id.image_bing);\r\n            sendRequestWithHttpURLConnection();\r\n        }else{\r\n            image_bing = (ImageView) findViewById(R.id.image_bing);\r\n            image_bing.setImageDrawable(null);\r\n        }\r\n    }\r\n    //toolbar上的菜单逻辑\r\n    @Override\r\n    public boolean onCreateOptionsMenu(Menu menu) {\r\n        //使用menu.layout作为界面\r\n        getMenuInflater().inflate(R.menu.crypt_func_toolbar,menu);\r\n        return true;\r\n    }\r\n\r\n    //请求bing的api\r\n    private void sendRequestWithHttpURLConnection() {\r\n        // 开启线程来发起网络请求\r\n        new Thread(new Runnable() {\r\n            @Override\r\n            public void run() {\r\n        //优化图片的请求方式\r\n                try {\r\n                    OkHttpClient client = new OkHttpClient();\r\n                    Request request = new Request.Builder()\r\n                            .addHeader(\"User-Agent\", \"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36\")\r\n                            .url(\"https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1\")\r\n                            .build();\r\n                    Response response = null;\r\n                    response = client.newCall(request).execute();\r\n                    assert response.body() != null;\r\n                    parseJSONWithJSONObject(response.body().string());\r\n                } catch (Exception e) {\r\n                    e.printStackTrace();\r\n                    TextView search_text_tv=(TextView) findViewById(R.id.search_text_tv);\r\n                    Snackbar.make(search_text_tv,\"当前无网络连接\",Snackbar.LENGTH_SHORT).show();\r\n                }\r\n            }\r\n        }).start();\r\n    }\r\n\r\n    //解析bing的api返回值\r\n    private void parseJSONWithJSONObject(String jsonData) {\r\n        try {\r\n            // JSONArray jsonArray = new JSONArray(jsonData);\r\n            Log.d(\"MainActivity get\",jsonData.toString());\r\n\r\n            JSONArray jsonArray = new JSONObject(jsonData).getJSONArray(\"images\");\r\n\r\n            for (int i = 0; i < jsonArray.length(); i++) {\r\n                JSONObject jsonObject = jsonArray.getJSONObject(i);\r\n                String url = jsonObject.getString(\"url\");\r\n\r\n                //判断屏幕方向，获取竖屏和横屏情况，决定加载什么网址\r\n                if (isScreenOriPortrait(this)) {\r\n                    url = url.replace(\"1920x1080\", \"1080x1920\");\r\n                }\r\n                Log.d(\"MainActivity\", \"url is \" + url);\r\n                String url1=\"https://cn.bing.com\"+url;\r\n                showResponse(url1);\r\n            }\r\n        } catch (Exception e) {\r\n            e.printStackTrace();\r\n        }\r\n    }\r\n\r\n\r\n    //使用开源框架glide进行图片加载\r\n    private void showResponse(final String response) {\r\n        runOnUiThread(new Runnable() {\r\n            @Override\r\n            public void run() {\r\n                // 在这里进行UI操作，将结果显示到界面上\r\n                Glide.with(MainActivity.this).load(response).into(image_bing);\r\n                //  text.setText(response);\r\n                Log.i(\"123\",response);\r\n            }\r\n        });\r\n    }\r\n\r\n    //初始化设置\r\n    private void initView(){\r\n        //写入初始化配置\r\n        SharedPreferences.Editor init_get=getSharedPreferences(\"config\",Context.MODE_PRIVATE).edit();\r\n        //读取自定义配置\r\n        SharedPreferences config_get=getSharedPreferences(\"config\",MODE_PRIVATE);\r\n        //初始化bing壁纸开关，默认打开\r\n        init_get.putBoolean(\"bing_pic_check\",true);\r\n\r\n        //初始化搜索引擎\r\n        init_get.putString(\"home_url\", \"https://cn.bing.com\");\r\n        init_get.putString(\"search_method\", \"https://cn.bing.com/search?q=\");\r\n        init_get.putString(\"method_name\", \"必应\");\r\n\r\n        //初始化搜索引擎次序\r\n        init_get.putInt(\"method_num\",0);\r\n\r\n        //初始化配置之后，做第一次打开标记\r\n        init_get.putBoolean(\"isFirstIn\", false);\r\n\r\n        init_get.apply();\r\n    }\r\n\r\n    //竖屏判断方法\r\n    public static boolean isScreenOriPortrait(Context context){\r\n        return context.getResources().getConfiguration().orientation==Configuration.ORIENTATION_PORTRAIT;\r\n    }\r\n}
+===================================================================
+diff --git a/app/src/main/java/com/example/cryptoapp/Activities/MainActivity.java b/app/src/main/java/com/example/cryptoapp/Activities/MainActivity.java
+--- a/app/src/main/java/com/example/cryptoapp/Activities/MainActivity.java	
++++ b/app/src/main/java/com/example/cryptoapp/Activities/MainActivity.java	
+@@ -1,376 +1,104 @@
+ package com.example.cryptoapp.Activities;
+ 
+-import android.Manifest;
+-import android.annotation.SuppressLint;
+-import android.content.Context;
+-import android.content.DialogInterface;
+ import android.content.Intent;
+-import android.content.SharedPreferences;
+-import android.content.pm.PackageManager;
+-
+-import android.content.res.Configuration;
+-import android.os.Build;
+ import android.os.Bundle;
+ import android.os.Handler;
+-import android.util.Log;
+-import android.view.Menu;
+ import android.view.MenuItem;
+-import android.view.View;
+-import android.widget.ImageView;
+-import android.widget.TextView;
+-import android.widget.Toast;
+ 
+-import androidx.annotation.NonNull;
+-import androidx.annotation.RequiresApi;
+ import androidx.appcompat.app.ActionBar;
+-import androidx.appcompat.app.AlertDialog;
++import androidx.appcompat.app.ActionBarDrawerToggle;
+ import androidx.appcompat.widget.Toolbar;
++import androidx.core.view.GravityCompat;
+ import androidx.drawerlayout.widget.DrawerLayout;
+ 
+-import com.bumptech.glide.Glide;
+ import com.example.cryptoapp.Base.BaseActivity;
+ import com.example.cryptoapp.R;
+ import com.google.android.material.navigation.NavigationView;
+-import com.google.android.material.snackbar.Snackbar;
+-import com.google.zxing.activity.CaptureActivity;
+ import com.gyf.immersionbar.ImmersionBar;
+-import com.permissionx.guolindev.PermissionX;
+-
+-import org.json.JSONArray;
+-import org.json.JSONObject;
+-
+-import okhttp3.OkHttpClient;
+-import okhttp3.Request;
+-import okhttp3.Response;
+ 
+ public class MainActivity extends BaseActivity {
+ 
+-    ImageView image_bing;
+-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
++    private DrawerLayout mDrawerLayout;
++    private NavigationView navView;
++    private Toolbar toolbar;
+     @Override
+     public void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_main);
+ 
+-        //权限申请
+-        PermissionX.init(this).permissions(Manifest.permission.CAMERA
+-                        ,Manifest.permission.POST_NOTIFICATIONS
+-                        ,Manifest.permission.FOREGROUND_SERVICE)
+-                .onExplainRequestReason((scope, deniedList, beforeRequest) -> scope.showRequestReasonDialog(deniedList, "即将申请的权限是程序必须依赖的权限", "我已明白"))
+-                .onForwardToSettings((scope, deniedList) -> scope.showForwardToSettingsDialog(deniedList, "您需要去应用程序设置当中手动开启权限", "我已明白"))
+-                .request((allGranted, grantedList, deniedList) -> {
+-                    if (allGranted) {
+-
+-                    } else {
+-                        Toast.makeText(MainActivity.this, "您拒绝了权限：" + deniedList, Toast.LENGTH_SHORT).show();
+-                    }
+-                });
+-
+-        //读取自定义配置
+-        SharedPreferences config_get=getSharedPreferences("config",MODE_PRIVATE);
+-        //判断是否被打开过，打开过，读取值，否则执行初始化
+-        if (config_get.getBoolean("isFirstIn",true)) {
+-            //实施初始化，设定默认值
+-            initView();
+-        }
+-
+-        //初始化控件
+-        DrawerLayout mDrawerLayout=(DrawerLayout) findViewById(R.id.drawerLayout);
+-        Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
+-        NavigationView navView=(NavigationView) findViewById(R.id.navView);
+-        TextView search_text_tv=(TextView) findViewById(R.id.search_text_tv);
+-        ImageView search_button=(ImageView) findViewById(R.id.search_button);
+-
+-        Snackbar.make(search_text_tv,"当前选择的搜索引擎为 "+config_get.getString("method_name",""),Snackbar.LENGTH_SHORT).show();
++        // 初始化控件
++        mDrawerLayout = findViewById(R.id.drawerLayout);
++        toolbar = findViewById(R.id.toolbar);
++        navView = findViewById(R.id.navView);
+ 
+-        search_text_tv.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View v) {
+-                Intent intent_search_str = new Intent(MainActivity.this, EnterSearchStringFragment.class);
+-                int[] location = new int[2];
+-                search_text_tv.getLocationOnScreen(location);
+-                intent_search_str.putExtra("x",location[0]);
+-                intent_search_str.putExtra("y",location[1]);
+-                startActivity(intent_search_str);
+-                overridePendingTransition(0,0);
+-            }
+-        }
+-        );
+-        search_button.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View v) {
+-                Intent intent_search_str = new Intent(MainActivity.this, EnterSearchStringFragment.class);
+-                int[] location = new int[2];
+-                search_text_tv.getLocationOnScreen(location);
+-                intent_search_str.putExtra("x",location[0]);
+-                intent_search_str.putExtra("y",location[1]);
+-                startActivity(intent_search_str);
+-                overridePendingTransition(0,0);
+-            }
+-        });
+-
+-        //沉浸化状态栏
++        // 沉浸式状态栏
+         ImmersionBar.with(this)
+                 .titleBar(toolbar)
+                 .init();
+ 
+-        //安卓13兼容性警告
+-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU) {
+-            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+-            dialog.setTitle("警告");
+-            dialog.setMessage("安卓13以上版本的系统存在功能缺失，作者正在使劲想办法修");
+-            dialog.setCancelable(true);
+-            dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+-                @Override
+-                public void onClick(DialogInterface dialog, int which) {
+-                }
+-            });
+-            dialog.show();
+-        }
+-
+-        //顶部设置为toolbar界面
++        // 设置 Toolbar
+         setSupportActionBar(toolbar);
+-        ActionBar actionBar=getSupportActionBar();
+-        //侧滑栏相关设置
+-        if (actionBar!=null){
++        ActionBar actionBar = getSupportActionBar();
++        if (actionBar != null) {
+             actionBar.setDisplayHomeAsUpEnabled(true);
+             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+         }
+ 
+-        //侧滑栏选项点击事件
++        // 绑定 ActionBarDrawerToggle
++        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
++                this,
++                mDrawerLayout,
++                toolbar,
++                0,
++                0
++        );
++
++        mDrawerLayout.addDrawerListener(toggle);
++        toggle.syncState();
++
++        // 侧滑栏选项点击事件
+         navView.setCheckedItem(R.id.home);
+-        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+-            @SuppressLint("NonConstantResourceId")
+-            @Override
+-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+-                switch (item.getItemId()){
+-                    //关于->弹出关于app的窗口
+-                    case R.id.info:
+-                        Intent intent_info=new Intent(MainActivity.this,AboutActivity.class);
+-//                        startActivity(intent_info);
+-
+-                        new Handler().postDelayed(()->startActivity(intent_info),200);
+-                        mDrawerLayout.close();
+-                        break;
+-                    //进入软件设置
+-                    case R.id.settings:
+-                        Intent intent_to_settings=new Intent(MainActivity.this,SettingsActivity.class);
+-                        new Handler().postDelayed(()->startActivity(intent_to_settings),200);
+-                        mDrawerLayout.close();
+-                        break;
+-                    //文本加密->进入相关activity
+-                    case R.id.navTextLayout:
+-                        Intent intent_text=new Intent(MainActivity.this,TextActivity.class);
+-//                        startActivity(intent_text);
+-
+-                        new Handler().postDelayed(()->startActivity(intent_text),200);
+-                        mDrawerLayout.close();
+-                        break;
+-                    //文件加密->进入相关activity
+-                    case R.id.navFileLayout:
+-                        Intent intent_file=new Intent(MainActivity.this,FileActivity.class);
+-//                        startActivity(intent_file);
+-
+-                        new Handler().postDelayed(()->startActivity(intent_file),200);
+-                        mDrawerLayout.close();
+-                        break;
+-                    //图片解密预览->进入相关activity
+-                    case R.id.navPicLayout:
+-                        Intent intent_pic=new Intent(MainActivity.this,PicActivity.class);
+-                        new Handler().postDelayed(()->startActivity(intent_pic),200);
+-                        mDrawerLayout.close();
+-                        break;
+-                    //进入系统自带文件管理器
+-                    case R.id.open_sys_file_mgr:
+-                        try{
+-                            if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.R){
+-                                String package_name = "com.android.documentsui";
+-                                PackageManager packageManager = getPackageManager();
+-                                Intent it = packageManager.getLaunchIntentForPackage(package_name);
+-                                new Handler().postDelayed(() -> startActivity(it),200);
+-                            } else {
+-                                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU){
+-                                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+-                                    dialog.setTitle("警告");
+-                                    dialog.setMessage("安卓13以上版本的SAF框架依然无法访问Android/data目录，暂时未找到有效解决办法");
+-                                    dialog.setCancelable(true);
+-                                    dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+-                                        @Override
+-                                        public void onClick(DialogInterface dialog, int which) {
+-                                            Intent it = new Intent(Intent.ACTION_GET_CONTENT);
+-                                            it.setType("*/*");
+-                                            it.addCategory(Intent.CATEGORY_OPENABLE);
+-
+-                                            new Handler().postDelayed(() -> startActivity(it),200);
+-                                            mDrawerLayout.close();
+-                                        }
+-                                    });
+-                                    dialog.show();
+-                                }else {
+-                                    Intent it = new Intent(Intent.ACTION_GET_CONTENT);
+-                                    it.setType("*/*");
+-                                    it.addCategory(Intent.CATEGORY_OPENABLE);
+-
+-                                    new Handler().postDelayed(() -> startActivity(it),200);
+-                                    mDrawerLayout.close();
+-                                }
+-
+-                            }
+-                        }catch (Exception e) {
+-                            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+-                            dialog.setTitle("警告");
+-                            dialog.setMessage("检测到您没有相关的软件");
+-                            dialog.setCancelable(true);
+-                            dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+-                                @Override
+-                                public void onClick(DialogInterface dialog, int which) {
+-                                }
+-                            });
+-                            dialog.show();
+-                            mDrawerLayout.close();
+-                        }
+-                        break;
+-                    //进入简易终端界面
+-                    case R.id.fake_terminal:
+-                        Intent intent_fake_terminal=new Intent(MainActivity.this,FakeTerminalActivity.class);
+-//                        startActivity(intent_fake_terminal);
+-                        new Handler().postDelayed(()->startActivity(intent_fake_terminal),200);
+-                        mDrawerLayout.close();
+-                        break;
+-                    //开始二维码扫描
+-                    case R.id.qr_scan:
+-                        mDrawerLayout.close();
+-                        Intent intent_qr_scan=new Intent(MainActivity.this, CaptureActivity.class);
+-//                        startActivity(intent_qr_scan);
+-                        new Handler().postDelayed(()->startActivity(intent_qr_scan),300);
+-                        break;
+-                    //主界面->什么也不做
+-                    default:
+-                        mDrawerLayout.close();
+-                        break;
+-                }
+-                return true;
+-            }
++        navView.setNavigationItemSelectedListener(item -> {
++            switch (item.getItemId()) {
++                case R.id.navTextLayout:
++                    Intent intent_text = new Intent(MainActivity.this, TextActivity.class);
++                    new Handler().postDelayed(() -> startActivity(intent_text), 200);
++                    mDrawerLayout.closeDrawer(GravityCompat.START);
++                    break;
++                case R.id.navFileLayout:
++                    Intent intent_file = new Intent(MainActivity.this, FileActivity.class);
++                    new Handler().postDelayed(() -> startActivity(intent_file), 200);
++                    mDrawerLayout.closeDrawer(GravityCompat.START);
++                    break;
++                case R.id.navPicLayout:
++                    Intent intent_pic = new Intent(MainActivity.this, PicActivity.class);
++                    new Handler().postDelayed(() -> startActivity(intent_pic), 200);
++                    mDrawerLayout.closeDrawer(GravityCompat.START);
++                    break;
++                default:
++                    mDrawerLayout.closeDrawer(GravityCompat.START);
++                    break;
++            }
++            return true;
+         });
+     }
+ 
++    @Override
++    public boolean onOptionsItemSelected(MenuItem item) {
++        if (item.getItemId() == android.R.id.home) {
++            if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
++                mDrawerLayout.closeDrawer(GravityCompat.START);
++            } else {
++                mDrawerLayout.openDrawer(GravityCompat.START);
++            }
++            return true;
++        }
++        return super.onOptionsItemSelected(item);
++    }
++
+     @Override
+     public void onStart() {
+         super.onStart();
+-        NavigationView navView=(NavigationView) findViewById(R.id.navView);
+         navView.setCheckedItem(R.id.home);
+-
+-        //读取自定义配置
+-        SharedPreferences config_get=getSharedPreferences("config",MODE_PRIVATE);
+-
+-        //读取bing每日一图选项，如果为true就加载，否则不做动作
+-        boolean bing_pic_check=config_get.getBoolean("bing_pic_check",true);
+-        if (bing_pic_check) {
+-            image_bing = (ImageView) findViewById(R.id.image_bing);
+-            sendRequestWithHttpURLConnection();
+-        }else{
+-            image_bing = (ImageView) findViewById(R.id.image_bing);
+-            image_bing.setImageDrawable(null);
+-        }
+-    }
+-    //toolbar上的菜单逻辑
+-    @Override
+-    public boolean onCreateOptionsMenu(Menu menu) {
+-        //使用menu.layout作为界面
+-        getMenuInflater().inflate(R.menu.crypt_func_toolbar,menu);
+-        return true;
+-    }
+-
+-    //请求bing的api
+-    private void sendRequestWithHttpURLConnection() {
+-        // 开启线程来发起网络请求
+-        new Thread(new Runnable() {
+-            @Override
+-            public void run() {
+-        //优化图片的请求方式
+-                try {
+-                    OkHttpClient client = new OkHttpClient();
+-                    Request request = new Request.Builder()
+-                            .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36")
+-                            .url("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1")
+-                            .build();
+-                    Response response = null;
+-                    response = client.newCall(request).execute();
+-                    assert response.body() != null;
+-                    parseJSONWithJSONObject(response.body().string());
+-                } catch (Exception e) {
+-                    e.printStackTrace();
+-                    TextView search_text_tv=(TextView) findViewById(R.id.search_text_tv);
+-                    Snackbar.make(search_text_tv,"当前无网络连接",Snackbar.LENGTH_SHORT).show();
+-                }
+-            }
+-        }).start();
+-    }
+-
+-    //解析bing的api返回值
+-    private void parseJSONWithJSONObject(String jsonData) {
+-        try {
+-            // JSONArray jsonArray = new JSONArray(jsonData);
+-            Log.d("MainActivity get",jsonData.toString());
+-
+-            JSONArray jsonArray = new JSONObject(jsonData).getJSONArray("images");
+-
+-            for (int i = 0; i < jsonArray.length(); i++) {
+-                JSONObject jsonObject = jsonArray.getJSONObject(i);
+-                String url = jsonObject.getString("url");
+-
+-                //判断屏幕方向，获取竖屏和横屏情况，决定加载什么网址
+-                if (isScreenOriPortrait(this)) {
+-                    url = url.replace("1920x1080", "1080x1920");
+-                }
+-                Log.d("MainActivity", "url is " + url);
+-                String url1="https://cn.bing.com"+url;
+-                showResponse(url1);
+-            }
+-        } catch (Exception e) {
+-            e.printStackTrace();
+-        }
+-    }
+-
+-
+-    //使用开源框架glide进行图片加载
+-    private void showResponse(final String response) {
+-        runOnUiThread(new Runnable() {
+-            @Override
+-            public void run() {
+-                // 在这里进行UI操作，将结果显示到界面上
+-                Glide.with(MainActivity.this).load(response).into(image_bing);
+-                //  text.setText(response);
+-                Log.i("123",response);
+-            }
+-        });
+-    }
+-
+-    //初始化设置
+-    private void initView(){
+-        //写入初始化配置
+-        SharedPreferences.Editor init_get=getSharedPreferences("config",Context.MODE_PRIVATE).edit();
+-        //读取自定义配置
+-        SharedPreferences config_get=getSharedPreferences("config",MODE_PRIVATE);
+-        //初始化bing壁纸开关，默认打开
+-        init_get.putBoolean("bing_pic_check",true);
+-
+-        //初始化搜索引擎
+-        init_get.putString("home_url", "https://cn.bing.com");
+-        init_get.putString("search_method", "https://cn.bing.com/search?q=");
+-        init_get.putString("method_name", "必应");
+-
+-        //初始化搜索引擎次序
+-        init_get.putInt("method_num",0);
+-
+-        //初始化配置之后，做第一次打开标记
+-        init_get.putBoolean("isFirstIn", false);
+-
+-        init_get.apply();
+-    }
+-
+-    //竖屏判断方法
+-    public static boolean isScreenOriPortrait(Context context){
+-        return context.getResources().getConfiguration().orientation==Configuration.ORIENTATION_PORTRAIT;
+-    }
+-}
+\ No newline at end of file
++    }
++}
+Index: app/src/main/res/layout/activity_main.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.drawerlayout.widget.DrawerLayout\r\n    xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    android:id=\"@+id/drawerLayout\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:background=\"#D9D9D9\">\r\n\r\n    <RelativeLayout\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"match_parent\">\r\n\r\n        <!-- 图片区域 -->\r\n        <ImageView\r\n            android:id=\"@+id/image_bing\"\r\n            android:scaleType=\"center\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"match_parent\">\r\n        </ImageView>\r\n\r\n        <androidx.appcompat.widget.Toolbar\r\n            android:id=\"@+id/toolbar\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"?attr/actionBarSize\"\r\n            android:background=\"#00000000\"\r\n            app:theme=\"@style/ThemeOverlay.AppCompat.Dark.ActionBar\"\r\n            app:popupTheme=\"@style/ThemeOverlay.AppCompat.Light\"\r\n            android:fitsSystemWindows=\"true\"/>\r\n\r\n\r\n\r\n<!--            搜索框-->\r\n            <LinearLayout\r\n                android:background=\"@drawable/search_corner\"\r\n                android:orientation=\"horizontal\"\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:layout_marginLeft=\"30dp\"\r\n                android:layout_marginRight=\"30dp\"\r\n                android:layout_marginBottom=\"160dp\"\r\n                android:layout_above=\"@+id/nav_bottom\">\r\n                <TextView\r\n                    android:id=\"@+id/search_text_tv\"\r\n                    android:textSize=\"16sp\"\r\n                    android:lines=\"1\"\r\n                    android:layout_gravity=\"center_vertical\"\r\n                    android:layout_width=\"0dp\"\r\n                    android:layout_height=\"wrap_content\"\r\n                    android:layout_weight=\"1\"\r\n                    android:layout_marginStart=\"25dp\"\r\n                    android:background=\"@android:color/transparent\"\r\n                    android:hint=\"@string/take_thing_you_want_search_here\"/>\r\n                <ImageView\r\n                    android:id=\"@+id/search_button\"\r\n                    android:adjustViewBounds=\"true\"\r\n                    android:maxHeight=\"30dp\"\r\n                    android:layout_marginEnd=\"10dp\"\r\n                    android:layout_marginTop=\"10dp\"\r\n                    android:layout_marginBottom=\"10dp\"\r\n                    android:src=\"@drawable/ic_search\"\r\n                    android:layout_width=\"wrap_content\"\r\n                    android:layout_height=\"wrap_content\" />\r\n            </LinearLayout>\r\n\r\n        <!-- 底部导航栏 -->\r\n        <LinearLayout\r\n            android:id=\"@+id/nav_bottom\"\r\n            android:layout_alignParentBottom=\"true\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"40dp\"\r\n            android:baselineAligned=\"false\"\r\n            android:orientation=\"horizontal\"\r\n            android:background=\"@android:color/transparent\">\r\n        </LinearLayout>\r\n    </RelativeLayout>\r\n\r\n\r\n    <com.google.android.material.navigation.NavigationView\r\n        android:id=\"@+id/navView\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"match_parent\"\r\n        android:layout_gravity=\"start\"\r\n        app:menu=\"@menu/nav_menu\"\r\n        app:headerLayout=\"@layout/nav_header\"/>\r\n\r\n</androidx.drawerlayout.widget.DrawerLayout>\r\n\r\n
+===================================================================
+diff --git a/app/src/main/res/layout/activity_main.xml b/app/src/main/res/layout/activity_main.xml
+--- a/app/src/main/res/layout/activity_main.xml	
++++ b/app/src/main/res/layout/activity_main.xml	
+@@ -4,65 +4,20 @@
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:id="@+id/drawerLayout"
+     android:layout_width="match_parent"
+-    android:layout_height="match_parent"
+-    android:background="#D9D9D9">
+-
+-    <RelativeLayout
+-        android:layout_width="match_parent"
+-        android:layout_height="match_parent">
++    android:layout_height="match_parent">
+ 
+-        <!-- 图片区域 -->
+-        <ImageView
+-            android:id="@+id/image_bing"
+-            android:scaleType="center"
+-            android:layout_width="match_parent"
+-            android:layout_height="match_parent">
+-        </ImageView>
++    <RelativeLayout
++        android:layout_width="match_parent"
++        android:layout_height="match_parent">
+ 
+         <androidx.appcompat.widget.Toolbar
+             android:id="@+id/toolbar"
+             android:layout_width="match_parent"
+             android:layout_height="?attr/actionBarSize"
+-            android:background="#00000000"
+-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
++            android:background="#42A5F5"
+             android:fitsSystemWindows="true"/>
+ 
+ 
+-
+-<!--            搜索框-->
+-            <LinearLayout
+-                android:background="@drawable/search_corner"
+-                android:orientation="horizontal"
+-                android:layout_width="match_parent"
+-                android:layout_height="wrap_content"
+-                android:layout_marginLeft="30dp"
+-                android:layout_marginRight="30dp"
+-                android:layout_marginBottom="160dp"
+-                android:layout_above="@+id/nav_bottom">
+-                <TextView
+-                    android:id="@+id/search_text_tv"
+-                    android:textSize="16sp"
+-                    android:lines="1"
+-                    android:layout_gravity="center_vertical"
+-                    android:layout_width="0dp"
+-                    android:layout_height="wrap_content"
+-                    android:layout_weight="1"
+-                    android:layout_marginStart="25dp"
+-                    android:background="@android:color/transparent"
+-                    android:hint="@string/take_thing_you_want_search_here"/>
+-                <ImageView
+-                    android:id="@+id/search_button"
+-                    android:adjustViewBounds="true"
+-                    android:maxHeight="30dp"
+-                    android:layout_marginEnd="10dp"
+-                    android:layout_marginTop="10dp"
+-                    android:layout_marginBottom="10dp"
+-                    android:src="@drawable/ic_search"
+-                    android:layout_width="wrap_content"
+-                    android:layout_height="wrap_content" />
+-            </LinearLayout>
+-
+         <!-- 底部导航栏 -->
+         <LinearLayout
+             android:id="@+id/nav_bottom"
+Index: app/src/main/java/com/example/cryptoapp/Activities/TextActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.cryptoapp.Activities\r\n\r\nimport android.annotation.SuppressLint\r\nimport android.content.ClipData\r\nimport android.content.ClipboardManager\r\nimport android.content.Context\r\nimport android.os.Bundle\r\nimport android.util.Log\r\nimport android.view.Menu\r\nimport android.view.MenuItem\r\nimport android.view.View\r\nimport com.example.cryptoapp.Base.BaseActivity\r\nimport com.example.cryptoapp.R\r\nimport com.example.cryptoapp.Utils.StringCrypto\r\nimport com.google.android.material.snackbar.Snackbar\r\nimport kotlinx.android.synthetic.main.activity_main.toolbar\r\nimport kotlinx.android.synthetic.main.activity_text.*\r\nimport kotlinx.android.synthetic.main.activity_text.decryptButton\r\nimport kotlinx.android.synthetic.main.activity_text.encryptButton\r\nimport kotlinx.android.synthetic.main.activity_text.passwordEditText\r\n\r\nclass TextActivity : BaseActivity(), View.OnClickListener {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContentView(R.layout.activity_text)\r\n        setSupportActionBar(toolbar)\r\n        supportActionBar?.setDisplayHomeAsUpEnabled(true)\r\n        fun onOptionsItemSelected(item: MenuItem):Boolean {\r\n            when (item.itemId) {\r\n                android.R.id.home -> {\r\n                    this.finish()\r\n                    return true\r\n                }\r\n            }\r\n            return super.onOptionsItemSelected(item)\r\n        }\r\n        encryptButton.setOnClickListener(this)\r\n        decryptButton.setOnClickListener(this)\r\n        copyOutputButton.setOnClickListener(this)\r\n    }\r\n\r\n    override fun onStart() {\r\n        super.onStart()\r\n        setTitle(\"文本加解密\")\r\n    }\r\n\r\n    override fun onClick(v: View?) {\r\n        when (v?.id) {\r\n            R.id.encryptButton -> {\r\n                val password = passwordEditText.text.toString()\r\n                val input = inputEditText.text.toString()\r\n                try {\r\n                    val e = StringCrypto(password).encrypt(input)\r\n                    outputEditText.setText(e)\r\n                } catch (e: Exception) {\r\n                    Log.d(\"Encrypt Error\", \"encrypt text exception\")\r\n                    outputEditText.setText(\"\")\r\n                    Snackbar.make(textView, \"加密文本时出现错误\", Snackbar.LENGTH_SHORT).show()\r\n                }\r\n            }\r\n\r\n            R.id.decryptButton -> {\r\n                val password = passwordEditText.text.toString()\r\n                val input = inputEditText.text.toString()\r\n                try {\r\n                    val d = StringCrypto(password).decrypt(input)\r\n                    outputEditText.setText(d)\r\n                } catch (e: Exception) {\r\n                    Log.d(\"Decrypt Error\", \"decrypt text exception\")\r\n                    outputEditText.setText(\"\")\r\n                    Snackbar.make(textView, \"解密文本时出现错误\", Snackbar.LENGTH_SHORT).show()\r\n                }\r\n            }\r\n\r\n            R.id.copyOutputButton -> {\r\n                try {\r\n                    val textToCopy = outputEditText.text.toString()\r\n                    copyToClipboard(textToCopy)\r\n                } catch (e: Exception) {\r\n                    Log.d(\"Copy Output Error\", \"copy text exception\")\r\n                    outputEditText.setText(\"\")\r\n                    Snackbar.make(textView, \"复制输出文本时出现错误\", Snackbar.LENGTH_SHORT).show()\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    @SuppressLint(\"ServiceCast\")\r\n    fun copyToClipboard(textToCopy: String) {\r\n        Log.d(\"textToCopy\", textToCopy)\r\n        val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager\r\n//        val clipData = ClipData.newPlainText(\"Label\", textToCopy)\r\n        val clipData = ClipData.newPlainText(\" \", textToCopy)\r\n        clipboardManager.setPrimaryClip(clipData)\r\n        Snackbar.make(textView, \"输出文本已复制\", Snackbar.LENGTH_SHORT).show()\r\n    }\r\n\r\n\r\n    override fun onCreateOptionsMenu(menu: Menu?): Boolean {\r\n        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)\r\n        return true\r\n    }\r\n\r\n    override fun onOptionsItemSelected(item: MenuItem):Boolean {\r\n        when (item.itemId) {\r\n            android.R.id.home -> {\r\n                this.finish()\r\n                return true\r\n            }\r\n        }\r\n        return super.onOptionsItemSelected(item)\r\n    }\r\n}
+===================================================================
+diff --git a/app/src/main/java/com/example/cryptoapp/Activities/TextActivity.kt b/app/src/main/java/com/example/cryptoapp/Activities/TextActivity.kt
+--- a/app/src/main/java/com/example/cryptoapp/Activities/TextActivity.kt	
++++ b/app/src/main/java/com/example/cryptoapp/Activities/TextActivity.kt	
+@@ -6,7 +6,6 @@
+ import android.content.Context
+ import android.os.Bundle
+ import android.util.Log
+-import android.view.Menu
+ import android.view.MenuItem
+ import android.view.View
+ import com.example.cryptoapp.Base.BaseActivity
+@@ -15,9 +14,6 @@
+ import com.google.android.material.snackbar.Snackbar
+ import kotlinx.android.synthetic.main.activity_main.toolbar
+ import kotlinx.android.synthetic.main.activity_text.*
+-import kotlinx.android.synthetic.main.activity_text.decryptButton
+-import kotlinx.android.synthetic.main.activity_text.encryptButton
+-import kotlinx.android.synthetic.main.activity_text.passwordEditText
+ 
+ class TextActivity : BaseActivity(), View.OnClickListener {
+     override fun onCreate(savedInstanceState: Bundle?) {
+@@ -95,12 +91,6 @@
+         Snackbar.make(textView, "输出文本已复制", Snackbar.LENGTH_SHORT).show()
+     }
+ 
+-
+-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+-        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)
+-        return true
+-    }
+-
+     override fun onOptionsItemSelected(item: MenuItem):Boolean {
+         when (item.itemId) {
+             android.R.id.home -> {
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    package=\"com.example.cryptoapp\">\r\n\r\n    <uses-permission android:name=\"android.permission.INTERNET\" />\r\n    <uses-permission android:name=\"android.permission.CAMERA\" />\r\n    <uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\" />\r\n    <uses-permission android:name=\"android.permission.VIBRATE\" />\r\n    <uses-feature android:name=\"android.hardware.camera\" />\r\n    <uses-feature android:name=\"android.hardware.camera.autofocus\" />\r\n    <uses-permission android:name=\"android.permission.FOREGROUND_SERVICE\"/>\r\n    <uses-permission android:name=\"android.permission.FLASHLIGHT\" />\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:icon=\"@drawable/logo\"\r\n        android:label=\"@string/app_name\"\r\n        android:supportsRtl=\"true\"\r\n        android:usesCleartextTraffic=\"true\"\r\n        android:requestLegacyExternalStorage=\"true\"\r\n        android:theme=\"@style/MDTheme\">\r\n        <service\r\n            android:name=\".Service.DownloadService\"\r\n            android:enabled=\"true\"\r\n            android:exported=\"true\">\r\n        </service>\r\n\r\n        <activity\r\n            android:name=\".Activities.SettingsActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities.EnterSearchStringFragment\"\r\n            android:exported=\"false\"\r\n            android:windowSoftInputMode=\"adjustResize\" />\r\n        <activity\r\n            android:name=\".Activities.SearchActivity\"\r\n            android:exported=\"false\" />\r\n        <activity android:name=\"com.google.zxing.activity.CaptureActivity\" />\r\n        <activity\r\n            android:name=\".Activities.FakeTerminalActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities.UsingHelperActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities.AboutActivity\"\r\n            android:launchMode=\"singleTask\" />\r\n        <activity\r\n            android:name=\".Activities.MainActivity\"\r\n            android:exported=\"true\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n        <activity\r\n            android:name=\".Activities.PicActivity\"\r\n            android:launchMode=\"singleTask\" />\r\n        <activity\r\n            android:name=\".Activities.TextActivity\"\r\n            android:launchMode=\"singleTask\" />\r\n        <activity\r\n            android:name=\".Activities.FileActivity\"\r\n            android:launchMode=\"singleTask\" />\r\n    </application>\r\n\r\n</manifest>
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	
++++ b/app/src/main/AndroidManifest.xml	
+@@ -3,15 +3,6 @@
+     xmlns:tools="http://schemas.android.com/tools"
+     package="com.example.cryptoapp">
+ 
+-    <uses-permission android:name="android.permission.INTERNET" />
+-    <uses-permission android:name="android.permission.CAMERA" />
+-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+-    <uses-permission android:name="android.permission.VIBRATE" />
+-    <uses-feature android:name="android.hardware.camera" />
+-    <uses-feature android:name="android.hardware.camera.autofocus" />
+-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+-    <uses-permission android:name="android.permission.FLASHLIGHT" />
+-
+     <application
+         android:allowBackup="true"
+         android:icon="@drawable/logo"
+@@ -20,32 +11,7 @@
+         android:usesCleartextTraffic="true"
+         android:requestLegacyExternalStorage="true"
+         android:theme="@style/MDTheme">
+-        <service
+-            android:name=".Service.DownloadService"
+-            android:enabled="true"
+-            android:exported="true">
+-        </service>
+ 
+-        <activity
+-            android:name=".Activities.SettingsActivity"
+-            android:exported="false" />
+-        <activity
+-            android:name=".Activities.EnterSearchStringFragment"
+-            android:exported="false"
+-            android:windowSoftInputMode="adjustResize" />
+-        <activity
+-            android:name=".Activities.SearchActivity"
+-            android:exported="false" />
+-        <activity android:name="com.google.zxing.activity.CaptureActivity" />
+-        <activity
+-            android:name=".Activities.FakeTerminalActivity"
+-            android:exported="false" />
+-        <activity
+-            android:name=".Activities.UsingHelperActivity"
+-            android:exported="false" />
+-        <activity
+-            android:name=".Activities.AboutActivity"
+-            android:launchMode="singleTask" />
+         <activity
+             android:name=".Activities.MainActivity"
+             android:exported="true">

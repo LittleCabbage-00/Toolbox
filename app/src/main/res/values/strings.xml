@@ -1,0 +1,76 @@
+<resources>
+    <!--    软件信息  -->
+    <string name="app_name">工具箱</string>
+    <string name="version_word">版本</string>
+    <string name="version_full">版本：2.4.1</string>
+    <string name="version">2.4.1</string>
+    <string name="android_version">Android %1$s</string>
+    <string name="android_sdk"> API %1$s</string>
+
+    <!--    主页面web页面-->
+    <string name="input_url">搜索或输入网址</string>
+    <!-- 网站首页 -->
+    <string name="home_url">https://cn.bing.com/</string>
+    <!-- 底部导航 -->
+    <string name="nav_right">前进</string>
+    <string name="nav_left">后退</string>
+    <string name="nav_set">设置</string>
+    <string name="nav_page">窗口</string>
+    <string name="nav_home">主页</string>
+
+    <!--    功能页面-->
+    <string name="enter_password">输入密码</string>
+    <string name="read_file">读取</string>
+    <string name="preview_file">解密预览</string>
+    <string name="write_file">保存为</string>
+    <string name="encrypt">加密</string>
+    <string name="decrypt">解密</string>
+    <string name="enter_word_need_to_en_decrypt">输入需要加密/解密的文字</string>
+    <string name="output_result">输出结果</string>
+    <string name="copy_output_result">复制输出结果</string>
+    <string name="source_folder">源目录</string>
+    <string name="purpose_folder">目标目录</string>
+    <string name="enter_command">输入指令</string>
+    <string name="terminal_run">运行</string>
+    <string name="back">返回</string>
+    <string name="forward">前进</string>
+    <string name="renew">刷新</string>
+    <string name="home">主页</string>
+    <string name="menu">菜单</string>
+    <string name="encode_qrcode">生成二维码</string>
+    <string name="dencode_qrcode">扫描二维码</string>
+    <string name="code_text">请输入生成二维码的文本信息</string>
+    <string name="qrcodetext">这里显示扫描结果</string>
+
+    <!--    侧滑栏-->
+    <string name="software">软件</string>
+    <string name="main_page">主界面</string>
+    <string name="info_about">关于</string>
+    <string name="settings">设置</string>
+    <string name="crypt_info_function">加密信息功能</string>
+    <string name="text_encrypt">文本加密</string>
+    <string name="file_encrypt">文件加密</string>
+    <string name="pic_decrypt">图片解密</string>
+    <string name="another_func">其他功能</string>
+    <string name="open_sys_filemanager">打开系统自带文件管理器</string>
+    <string name="fake_terminal">简易终端</string>
+    <string name="qr_scan">二维码扫描</string>
+
+    <!--    关于页面-->
+    <string name="using_helper">使用帮助</string>
+    <string name="opensource_address">开源地址</string>
+    <string name="about_author">关于开发者</string>
+    <string name="author_name">LittleCabbage</string>
+    <string name="email_to_author">给作者发邮件</string>
+    <string name="about_device">关于设备</string>
+
+    <!--    帮助页面-->
+    <string name="text_encrypt_helper">加密：在密码输入框内输入你自己定义的密码，然后在第一个文本框内输入你要加密的字符，点击加密按钮，加密后的密文就会出现在第二个文本框内\n解密：在密码输入框内输入你得到的解密密码，把密文粘贴在第一个文本框内，然后点击解密，即可在第二个文本框内看到解密之后的明文\n</string>
+    <string name="file_encrypt_helper">加密：在密码输入框内输入你自己定义的密码，然后点击“读取”，在出现的文件管理器中寻找你需要加密的文件，选择好之后，点击“保存为”，默认和刚刚选择的文件在相同目录，可自定义修改文件名称，确定之后，点击加密，即可在你指定的目标目录输出一个加密后的文件\n解密：在密码输入框内输入你获取的密码，然后点击“读取”，在文件管理器中找到你要解密的文件，确定之后，点击保存为，自定义名称之后，<b>一定要记得最后加上文件后缀名，否则打不开文件</b>，点击解密，然后就能在你自定义的目标目录出现一个解密后的文件\n</string>
+    <string name="pic_decrypt_helper">图片的加密就是文件的加密，只是这里解密单独把图片拎出来了，可以解密后进行预览\n</string>
+    <string name="crypto_method">本应用加密方法为：字符转换为MD5值，文件用密码进行AES加密，解密时，字符倒退回去算出明文即可，文件就用密码解开AES加密\n</string>
+    <string name="en_de_crypt_func_word">软件加解密方式说明</string>
+    <string name="take_thing_you_want_search_here">在这里输入要查询的内容</string>
+
+
+</resources>
