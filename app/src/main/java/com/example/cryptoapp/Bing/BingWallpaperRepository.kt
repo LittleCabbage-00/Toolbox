@@ -41,6 +41,11 @@ class BingWallpaperRepository private constructor(context: Context) {
 
     // 首次启动/大图下载需要更宽的超时：4K 原图（8-15MB）在默认 10s 读超时下极易
     // 失败，这正是"第一次打开壁纸加载不出来"的主因之一。
+    /** 设备屏幕实际宽高比（height/width），如 19.5:9 ≈ 2.1667。 */
+    private val screenAspect: Float = run {
+        val dm = appContext.resources.displayMetrics
+        maxOf(dm.widthPixels, dm.heightPixels).toFloat() / minOf(dm.widthPixels, dm.heightPixels)
+    }
     private val httpClient = okhttp3.OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
@@ -116,7 +121,10 @@ class BingWallpaperRepository private constructor(context: Context) {
                         val image = JSONObject(response.body!!.string())
                             .getJSONArray("images").getJSONObject(0)
                         val day = parseDay(image)
-                        mainHandler.post { onTodayReady(day, onReady, onError) }
+                        // 在 OkHttp 回调线程执行下载，绝不阻塞主线程：首次打开无缓存时
+                        // 要下载 3.5MB+ 的 4K 原图，若 post 回主线程同步下载，慢网络下
+                        // 主线程会长时间冻结（甚至 ANR），表现为"首屏壁纸加载不出来"。
+                        onTodayReady(day, onReady, onError)
                     } catch (e: Exception) {
                         mainHandler.post { onError(e) }
                     }
@@ -298,6 +306,20 @@ class BingWallpaperRepository private constructor(context: Context) {
         }
     }
 
+    /** 轮询等待文件出现且非空（另一并发任务正在写入它）。 */
+    private fun waitForFile(file: File, timeoutMs: Long): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (file.exists() && file.length() > 0) return true
+            try {
+                Thread.sleep(200)
+            } catch (ignored: InterruptedException) {
+                return false
+            }
+        }
+        return file.exists() && file.length() > 0
+    }
+
     /**
      * 流式落盘并最多重试 2 次。4K 原图（8-15MB）用 bytes() 全量读入内存，既吃内存又
      * 容易触发读超时；改为 byteStream 边下边写，失败时删掉半成品再重试一次。
@@ -328,17 +350,25 @@ class BingWallpaperRepository private constructor(context: Context) {
     private fun onTodayReady(day: BingWallpaperDay, onReady: (BingWallpaperDay) -> Unit, onError: (Exception) -> Unit) {
         val file = day.landscapeUhdFile(cacheDir)
         if (!file.exists()) {
-            if (!downloadGuard.add(day.startDate)) return
-            var ok = false
-            try {
-                ok = downloadFile(day.landscapeUhdUrl, file)
-            } finally {
-                downloadGuard.remove(day.startDate)
-            }
-            if (!ok) {
-                // 下载失败不再静默 return：明确回调 onError，调用方才能感知并重试。
-                mainHandler.post { onError(IOException("UHD 下载失败")) }
-                return
+            if (downloadGuard.add(day.startDate)) {
+                var ok = false
+                try {
+                    ok = downloadFile(day.landscapeUhdUrl, file)
+                } finally {
+                    downloadGuard.remove(day.startDate)
+                }
+                if (!ok) {
+                    // 下载失败不再静默 return：明确回调 onError，调用方才能感知并重试。
+                    mainHandler.post { onError(IOException("UHD 下载失败")) }
+                    return
+                }
+            } else {
+                // 后台预取/自动保存正在下载同一天，持锁者把文件写入后我们直接复用。
+                // 若这里静默 return，onReady 永不触发，首屏即使图片已缓存也不显示。
+                if (!waitForFile(file, 60_000)) {
+                    mainHandler.post { onError(IOException("UHD 等待超时")) }
+                    return
+                }
             }
         }
         if (!file.exists()) {
@@ -366,27 +396,55 @@ class BingWallpaperRepository private constructor(context: Context) {
             .getBoolean("bing_save_portrait", false)
     }
 
-    /** 竖屏 4K 生成：BitmapRegionDecoder 只解码横屏 UHD 中心 9:16 区域，再放大到 2160×3840。低内存。 */
+    /**
+     * 竖屏 4K 生成：按设备屏幕实际宽高比（如 19.5:9 ≈ 2.17）从横屏 UHD 中心裁剪，
+     * 再放大到该比例。原图 3840×2160，竖屏要宽 = 高(2160) × aspect ≈ 4680，超出原图
+     * 宽度，因此先取中心区域，若不足该宽度则放大填满。低内存：只解码一次 region。
+     */
     fun generatePortrait(day: BingWallpaperDay): File? {
         val src = day.landscapeUhdFile(cacheDir)
         val out = day.portraitUhdFile(cacheDir)
-        if (out.exists()) return out
         if (!src.exists()) return null
+        val targetAspect = screenAspect.coerceIn(0.8f, 3.0f)
+        // 若缓存存在且比例已是屏幕比例则直接复用；旧版本 9:16 缓存比例不符，需要重建。
+        if (out.exists() && isAspectMatch(out, targetAspect)) return out
         return try {
             val decoder = BitmapRegionDecoder.newInstance(src.absolutePath, false)
-            val cropW = decoder.height * 9 / 16
-            val offX = (decoder.width - cropW) / 2
+            val srcW = decoder.width
+            val srcH = decoder.height
+            // 竖屏目标宽高比 = 屏幕高/宽。宽取原图中心可容纳的最大竖屏比例。
+            // 目标竖屏宽度 = 高度 × aspect；若超原图宽则用原图全宽（比例接近，centerCrop 可兜底）。
+            val cropW = minOf(srcW, (srcH * targetAspect).toInt())
+            val cropH = srcH
+            val offX = (srcW - cropW) / 2
             val cropped = decoder.decodeRegion(
-                Rect(offX, 0, offX + cropW, decoder.height),
+                Rect(offX, 0, offX + cropW, cropH),
                 BitmapFactory.Options().apply { inSampleSize = 1 })
             decoder.recycle()
-            val portrait = Bitmap.createScaledBitmap(cropped, 2160, 3840, true)
+            if (cropped == null) return null
+            // 输出为 1080 × (1080 × aspect)，等比放大，保持纵横比。
+            val outH = 3840
+            val outW = (outH * cropped.width / cropped.height.toFloat()).toInt()
+            val portrait = Bitmap.createScaledBitmap(cropped, outW, outH, true)
             if (cropped !== portrait) cropped.recycle()
             FileOutputStream(out).use { portrait.compress(Bitmap.CompressFormat.JPEG, 95, it) }
             portrait.recycle()
             out
         } catch (e: Exception) {
             null
+        }
+    }
+
+    /** 检查图片宽高比是否接近目标 aspect（±2% 视为匹配）。 */
+    private fun isAspectMatch(file: File, targetAspect: Float): Boolean {
+        return try {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(file.absolutePath, bounds)
+            if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return false
+            val actual = bounds.outWidth.toFloat() / bounds.outHeight
+            kotlin.math.abs(actual - targetAspect) / targetAspect < 0.02f
+        } catch (e: Exception) {
+            false
         }
     }
 

@@ -46,6 +46,9 @@ class MainActivity : BaseActivity() {
     private lateinit var config: SharedPreferences
     @Volatile
     private var wallpaperLoading = false
+    /** 真正显示过壁纸图片才算 true；深色底占位不算，避免铺底后永久锁死后续加载。 */
+    @Volatile
+    private var wallpaperReady = false
     /** 首次启动网络未就绪时的延时重试计数，最多重试 2 次避免无限循环。 */
     private var wallpaperRetryCount = 0
 
@@ -98,9 +101,8 @@ class MainActivity : BaseActivity() {
     override fun onStart() {
         super.onStart()
         if (config.getBoolean("bing_pic_check", true)) {
-            // 壁纸已加载好就不再做任何事（不重载、不重交叉淡化）。仅进程被杀后重启时
-            // 内存 drawable 为空，才会重新走缓存加载 + 后台换图检查。
-            if (bingImage.drawable != null) return
+            // 壁纸真正显示过就不再重载。深色底占位不视为已就绪，网络恢复后会继续加载。
+            if (wallpaperReady) return
             if (!wallpaperLoading) ensureBingWallpaper()
         } else {
             cancelWallpaperLoad()
@@ -178,14 +180,33 @@ class MainActivity : BaseActivity() {
                 wallpaperLoading = false
                 return@ensureTodayUhd
             }
-            var display = if (isScreenPortrait(this)) day.portraitUhdFile(repo.cacheDir)
-                else day.landscapeUhdFile(repo.cacheDir)
-            if (!display.exists()) display = day.landscapeUhdFile(repo.cacheDir)
-            if (!display.exists()) {
+            val landscape = day.landscapeUhdFile(repo.cacheDir)
+            if (isScreenPortrait(this) && landscape.exists()) {
+                // 竖屏：确保按屏幕比例生成/重建竖屏图（旧 9:16 缓存比例不符会被重建），
+                // 显示才不会"只占一部分"。确保成功后回调并显示。
+                repo.ensurePortrait(day) { portrait ->
+                    if (portrait == null || !portrait.exists() || isFinishing || isDestroyed) {
+                        wallpaperLoading = false
+                        return@ensurePortrait
+                    }
+                    val bitmap = repo.decodeSampled(portrait, screenMaxDim())
+                    if (bitmap == null) {
+                        wallpaperLoading = false
+                        return@ensurePortrait
+                    }
+                    wallpaperLoading = false
+                    crossFadeWallpaper(bitmap)
+                    bingImage.postDelayed({
+                        if (!isFinishing && !isDestroyed) applyToolbarContrast(bitmap)
+                    }, 650L)
+                }
+                return@ensureTodayUhd
+            }
+            if (!landscape.exists()) {
                 wallpaperLoading = false
                 return@ensureTodayUhd
             }
-            val bitmap = repo.decodeSampled(display, screenMaxDim())
+            val bitmap = repo.decodeSampled(landscape, screenMaxDim())
             if (bitmap == null) {
                 wallpaperLoading = false
                 return@ensureTodayUhd
@@ -198,12 +219,12 @@ class MainActivity : BaseActivity() {
             }, 650L)
         }, {
             wallpaperLoading = false
-            // 首次启动网络可能尚未就绪，若首屏仍无图则限次延时重试一次完整加载流程。
-            if (bingImage.drawable == null && wallpaperRetryCount < 2
+            // 首次启动网络可能尚未就绪，若真正壁纸未显示过（深色底不算）则限次延时重试。
+            if (!wallpaperReady && wallpaperRetryCount < 2
                 && !isFinishing && !isDestroyed) {
                 wallpaperRetryCount++
                 bingImage.postDelayed({
-                    if (bingImage.drawable == null && !wallpaperLoading
+                    if (!wallpaperReady && !wallpaperLoading
                         && !isFinishing && !isDestroyed) {
                         ensureBingWallpaper()
                     }
@@ -221,7 +242,8 @@ class MainActivity : BaseActivity() {
      * 只有首次安装（无缓存）才会短暂白屏，之后复用缓存首帧即有图。
      */
     private fun showCachedWallpaper() {
-        if (bingImage.drawable != null) return
+        // 只有真正显示过图片才跳过；深色底占位不算，允许重试时重新进入检查缓存。
+        if (wallpaperReady) return
         val repo = BingWallpaperRepository.get(this)
         val image = firstCachedDisplay(repo)
         if (!image.exists()) {
@@ -233,6 +255,7 @@ class MainActivity : BaseActivity() {
         val placeholder = repo.decodeSampled(image, 640)
         if (placeholder != null) {
             bingImage.setImageBitmap(placeholder)
+            wallpaperReady = true
             applyToolbarContrast(placeholder)
             // 窗口 insets 可能尚未就绪，等第一帧布局完成后按占位图重算一次状态栏亮度。
             bingImage.post {
@@ -308,6 +331,7 @@ class MainActivity : BaseActivity() {
 
     /** 600ms 交叉淡化：有旧图时新旧交叉，首次加载从透明淡入，避免直接闪现。 */
     private fun crossFadeWallpaper(newBitmap: Bitmap) {
+        wallpaperReady = true
         val oldDrawable = bingImage.drawable
         val newDrawable = BitmapDrawable(resources, newBitmap)
         val transition = TransitionDrawable(arrayOf<Drawable>(
@@ -379,6 +403,8 @@ class MainActivity : BaseActivity() {
 
     private fun cancelWallpaperLoad() {
         wallpaperLoading = false
+        // 关闭壁纸功能或销毁时复位就绪状态，重新开启后才会再次加载。
+        wallpaperReady = false
     }
 
     override fun onDestroy() {
