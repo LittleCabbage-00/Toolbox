@@ -4,6 +4,18 @@
     <color name="colorPrimaryDark">#2979FF</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="white">#ffffff</color>
+    <color name="browser_surface_variant">#EEF3F8</color>
+    <color name="browser_outline">#C3C7CF</color>
+    <color name="browser_on_surface">#1A1C1E</color>
+    <color name="browser_on_surface_variant">#42474E</color>
+    <color name="browser_secondary_container">#CDE8FF</color>
+    <color name="browser_on_secondary_container">#001D32</color>
+    <color name="toolbox_card">#FFFDFB</color>
+    <color name="toolbox_card_outline">#D9E2EC</color>
+    <color name="toolbox_terminal">#101418</color>
+    <color name="toolbox_terminal_text">#D7F9E9</color>
+    <!-- 单色矢量图标的默认前景色；组件自身的 iconTint 仍可覆盖它。 -->
+    <color name="toolbox_icon">#42474E</color>
 
     <!-- QRCode scanner color begin -->
     <color name="viewfinder_mask">#60f4f1f7</color>

@@ -6,13 +6,24 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
-    <style name="MDTheme" parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
+    <style name="MDTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSecondary">@color/colorAccent</item>
+        <!-- 为 Material 3 风格组件补齐颜色令牌；Material Components 父主题不保证提供。 -->
+        <item name="colorOnSurface">@color/browser_on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/browser_on_surface_variant</item>
+        <item name="colorSecondaryContainer">@color/browser_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/browser_on_secondary_container</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button</item>
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
     </style>
 
 
@@ -29,6 +40,34 @@
         <item name="android:layout_width">20dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_centerInParent">true</item>
+    </style>
+
+    <!-- 统一的 48dp Material 图标按钮：视觉紧凑，同时满足无障碍触控面积。 -->
+    <style name="Widget.Toolbox.IconButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:padding">12dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconTint">?attr/colorOnSurface</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <!-- 全应用统一卡片：低海拔、柔和描边、16dp 圆角，颜色自动跟随深色模式。 -->
+    <style name="Widget.Toolbox.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/toolbox_card</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">1dp</item>
+        <item name="strokeColor">@color/toolbox_card_outline</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="Widget.Toolbox.MenuButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:gravity">center_vertical|start</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="iconTint">?attr/colorPrimary</item>
+        <item name="iconSize">22dp</item>
+        <item name="iconPadding">16dp</item>
+        <item name="cornerRadius">12dp</item>
     </style>
 
 </resources>
