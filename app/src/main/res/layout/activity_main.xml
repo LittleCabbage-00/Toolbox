@@ -5,7 +5,7 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#D9D9D9">
+    android:background="?android:attr/colorBackground">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -14,7 +14,7 @@
         <!-- 图片区域 -->
         <ImageView
             android:id="@+id/image_bing"
-            android:scaleType="center"
+            android:scaleType="centerCrop"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         </ImageView>
@@ -25,13 +25,14 @@
             android:layout_height="?attr/actionBarSize"
             android:background="#00000000"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            android:fitsSystemWindows="true"/>
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
 
 
 <!--            搜索框-->
             <LinearLayout
+                android:id="@+id/searchContainer"
+                android:tag="responsive_content"
                 android:background="@drawable/search_corner"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -59,6 +60,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:src="@drawable/ic_search"
+                    app:tint="?attr/colorOnSurface"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>
@@ -78,9 +80,10 @@
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navView"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/navigation_drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:fitsSystemWindows="true"
         app:menu="@menu/nav_menu"
         app:headerLayout="@layout/nav_header"/>
 

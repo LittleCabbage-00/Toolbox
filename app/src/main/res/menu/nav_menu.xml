@@ -43,6 +43,26 @@
         <menu>
             <group android:checkableBehavior="single">
                 <item
+                    android:id="@+id/data_tools"
+                    android:icon="@drawable/code"
+                    android:title="@string/data_tools" />
+                <item
+                    android:id="@+id/unit_converter"
+                    android:icon="@drawable/ic_settings"
+                    android:title="@string/unit_converter" />
+                <item
+                    android:id="@+id/media_converter"
+                    android:icon="@drawable/ic_video_search_24"
+                    android:title="音视频转换" />
+                <item
+                    android:id="@+id/api_debug"
+                    android:icon="@drawable/ic_language_24"
+                    android:title="接口调试工具" />
+                <item
+                    android:id="@+id/network_utils"
+                    android:icon="@drawable/ic_link_24"
+                    android:title="网络工具" />
+                <item
                     android:id="@+id/open_sys_file_mgr"
                     android:icon="@drawable/file_folder"
                     android:title="@string/open_sys_filemanager"/>

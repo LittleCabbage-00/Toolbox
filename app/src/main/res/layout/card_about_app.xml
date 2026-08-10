@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.Toolbox.Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    app:cardCornerRadius="4dp"
     android:layout_marginTop="10dp"
     android:layout_marginBottom="10dp"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp"
     android:clickable="true"
-    app:cardUseCompatPadding="true">
+    >
 
 <!--    根布局，防止重叠-->
 <LinearLayout
@@ -64,6 +64,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             app:srcCompat="@drawable/version_info"
+            app:tint="?attr/colorOnSurfaceVariant"
             tools:ignore="ContentDescription,UnusedAttribute" />
         <LinearLayout
             android:layout_width="match_parent"
@@ -102,7 +103,8 @@
             android:id="@+id/intro_page_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            app:srcCompat="@drawable/intro_icon"/>
+            app:srcCompat="@drawable/intro_icon"
+            app:tint="?attr/colorOnSurfaceVariant"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -110,7 +112,7 @@
             android:paddingBottom="8dp"
             android:paddingTop="8dp"
             android:text="@string/using_helper"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
     </LinearLayout>
 
 <!--    github链接-->
@@ -128,7 +130,8 @@
             android:id="@+id/github_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            app:srcCompat="@drawable/github" />
+            app:srcCompat="@drawable/github"
+            app:tint="?attr/colorOnSurfaceVariant" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -136,8 +139,8 @@
             android:paddingBottom="8dp"
             android:paddingTop="8dp"
             android:text="@string/opensource_address"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
     </LinearLayout>
 
 </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

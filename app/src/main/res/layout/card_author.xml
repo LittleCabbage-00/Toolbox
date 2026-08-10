@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.Toolbox.Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:clickable="true"
-    app:cardCornerRadius="4dp"
     android:layout_marginTop="10dp"
     android:layout_marginBottom="10dp"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp"
-    app:cardUseCompatPadding="true">
+    >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,10 +37,11 @@
             android:paddingLeft="16dp"
             android:paddingRight="16dp">
             <ImageView
-                android:id="@+id/intro_page_icon"
+                android:id="@+id/author_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                app:srcCompat="@drawable/person"/>
+                app:srcCompat="@drawable/person"
+                app:tint="?attr/colorOnSurfaceVariant"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -74,10 +75,11 @@
             android:paddingLeft="16dp"
             android:paddingRight="16dp">
             <ImageView
-                android:id="@+id/github_icon"
+                android:id="@+id/email_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                app:srcCompat="@drawable/email" />
+                app:srcCompat="@drawable/email"
+                app:tint="?attr/colorOnSurfaceVariant" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -89,4 +91,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>
