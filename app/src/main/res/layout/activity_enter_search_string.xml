@@ -1,50 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/two"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/searchRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".Activities.EnterSearchStringFragment">
+    android:background="?android:attr/colorBackground">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="800dp"
-        android:paddingTop="5dp">
-
-        <LinearLayout
-            android:id="@+id/input_layout"
-            android:background="@drawable/search_corner"
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="36dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
-            android:layout_marginBottom="200dp"
-            android:transitionName="shareTransition" >
-            <EditText
-                android:id="@+id/search_text_tv"
-                android:textSize="13sp"
-                android:imeOptions="actionSearch"
-                android:singleLine="true"
-                android:lines="1"
-                android:layout_gravity="center_vertical"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="25dp"
-                android:background="@android:color/transparent"
-                android:hint="@string/take_thing_you_want_search_here"
-                android:transitionName="shareTransition" />
-        </LinearLayout>
-
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/fl"
+    <View
+        android:id="@+id/scrim"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/white"
-        android:gravity="center">
-    </FrameLayout>
-</LinearLayout>
+        android:background="?android:attr/colorBackground" />
+
+    <LinearLayout
+        android:tag="responsive_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical">
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Toolbox.Card"
+            android:id="@+id/input_layout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            app:cardBackgroundColor="@color/browser_surface_variant"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/browser_outline"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="4dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="搜索"
+                    android:src="@drawable/ic_search_24"
+                    app:tint="?attr/colorOnSurface" />
+
+                <EditText
+                    android:id="@+id/search_text_tv"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="搜索或输入网址"
+                    android:imeOptions="actionSearch"
+                    android:inputType="textUri"
+                    android:maxLines="1"
+                    android:singleLine="true" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/cancelSearch"
+                    style="@style/Widget.Toolbox.IconButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="关闭搜索"
+                    android:text=""
+                    app:icon="@drawable/ic_close_24" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Toolbox.Card"
+            android:id="@+id/searchHistoryCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="4dp"
+                android:paddingBottom="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="4dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="最近浏览"
+                        android:src="@drawable/ic_history_24"
+                        app:tint="?attr/colorPrimary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:text="最近浏览"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/clearSearchHistory"
+                        style="@style/Widget.Toolbox.IconButton"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:contentDescription="删除全部历史记录"
+                        android:text=""
+                        app:icon="@drawable/ic_delete_24"
+                        app:iconTint="?attr/colorError" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/searchHistoryList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxHeight="360dp"
+                    android:nestedScrollingEnabled="false" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</FrameLayout>

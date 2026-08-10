@@ -1,157 +1,230 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:background="#fafafa"
-    android:hardwareAccelerated="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
     android:orientation="vertical">
 
-    <LinearLayout
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/browserToolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#fafafa"
-        android:hardwareAccelerated="true"
-        android:orientation="vertical">
-        <!-- 顶部地址栏 -->
+        android:layout_height="72dp"
+        android:background="?attr/colorSurface"
+        android:elevation="3dp"
+        app:contentInsetEnd="0dp"
+        app:contentInsetStart="0dp">
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/top_bar_height"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:background="@drawable/top_bar_bg">
+            android:paddingStart="4dp"
+            android:paddingEnd="12dp">
 
-            <ImageView
-                android:id="@+id/webIcon"
-                android:layout_width="@dimen/top_bar_height"
-                android:layout_height="@dimen/top_bar_height"
-                android:contentDescription="favicon"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:padding="11dp"
-                android:src="@drawable/web_internet"
-                android:background="#01000000"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/browserExit"
+                style="@style/Widget.Toolbox.IconButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="返回工具箱"
+                android:text=""
+                app:icon="@drawable/ic_close_24" />
 
-            <EditText
-                android:id="@+id/textUrl"
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
-                android:layout_height="34dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="4dp"
                 android:layout_weight="1"
-                android:layout_marginTop="3dp"
-                android:background="#01000000"
-                android:hint="@string/input_url"
-                android:imeOptions="actionGo"
-                android:inputType="textUri"
-                android:maxLines="1"
-                android:textSize="15sp"
-                android:textColor="#606060"
-                android:textColorHint="#9f9f9f"/>
+                app:cardBackgroundColor="@color/browser_surface_variant"
+                app:cardCornerRadius="25dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/browser_outline"
+                app:strokeWidth="1dp">
 
-            <ImageView
-                android:id="@+id/btnStart"
-                android:layout_width="@dimen/top_bar_height"
-                android:layout_height="@dimen/top_bar_height"
-                android:contentDescription="refresh"
-                android:padding="11dp"
-                android:layout_marginRight="2dp"
-                android:layout_marginEnd="2dp"
-                android:src="@drawable/web_refresh"
-                android:background="#01000000"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="4dp">
 
+                    <ImageView
+                        android:id="@+id/webIcon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="网站图标"
+                        android:padding="9dp"
+                        android:src="@drawable/web_internet"
+                        app:tint="?attr/colorOnSurfaceVariant" />
+
+                    <EditText
+                        android:id="@+id/textUrl"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent"
+                        android:hint="搜索或输入网址"
+                        android:imeOptions="actionGo"
+                        android:inputType="textUri"
+                        android:maxLines="1"
+                        android:paddingStart="4dp"
+                        android:selectAllOnFocus="true"
+                        android:singleLine="true" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnStart"
+                        style="@style/Widget.Toolbox.IconButton"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:contentDescription="前往或刷新"
+                        android:text=""
+                        app:icon="@drawable/ic_refresh_24" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
+    </com.google.android.material.appbar.MaterialToolbar>
 
-        <!-- 浏览器容器区域 -->
-        <FrameLayout
+    <FrameLayout
+        android:id="@+id/webContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progressBar"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="1dp"
-            android:layout_marginBottom="1dp"
-            android:background="#d1d1d1">
+            android:layout_height="3dp"
+            android:layout_gravity="top"
+            android:max="100" />
+    </FrameLayout>
 
-            <WebView
-                android:id="@+id/webView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            <!-- 网页进度条 -->
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:max="100"
-                android:progress="50" />
-        </FrameLayout>
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/browserBottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="?attr/colorSurface"
+        android:elevation="8dp"
+        app:contentInsetEnd="0dp"
+        app:contentInsetStart="0dp">
 
-        <!-- 底部导航栏 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="match_parent"
             android:baselineAligned="false"
+            android:gravity="center"
             android:orientation="horizontal">
 
-            <!-- 后退按钮 -->
-            <RelativeLayout style="@style/NavItem">
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:foregroundGravity="center">
 
-                <ImageView
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/goBack"
-                    style="@style/NavIcon"
-                    android:contentDescription="@string/nav_left"
-                    android:src="@drawable/web_left" />
+                    style="@style/Widget.Toolbox.IconButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="后退"
+                    android:text=""
+                    app:icon="@drawable/ic_arrow_back_24"
+                    app:iconSize="20dp" />
+            </FrameLayout>
 
-            </RelativeLayout>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:foregroundGravity="center">
 
-            <!-- 前进按钮 -->
-            <RelativeLayout style="@style/NavItem">
-
-                <ImageView
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/goForward"
-                    style="@style/NavIcon"
-                    android:contentDescription="@string/nav_right"
-                    android:src="@drawable/web_right" />
+                    style="@style/Widget.Toolbox.IconButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="前进"
+                    android:text=""
+                    app:icon="@drawable/ic_arrow_forward_24"
+                    app:iconSize="20dp" />
+            </FrameLayout>
 
-            </RelativeLayout>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:foregroundGravity="center">
 
-            <!-- 菜单 -->
-            <RelativeLayout style="@style/NavItem">
-
-                <ImageView
-                    android:id="@+id/navSet"
-                    style="@style/NavIcon"
-                    android:contentDescription="@string/nav_set"
-                    android:src="@drawable/web_setting" />
-
-            </RelativeLayout>
-
-            <!-- 窗口按钮 -->
-            <RelativeLayout style="@style/NavItem">
-
-
-                <ImageView
-                    style="@style/NavIcon"
-                    android:contentDescription="@string/nav_page"
-                    android:src="@drawable/web_page" />
-
-                <TextView
-                    style="@style/NavIcon"
-                    android:gravity="center"
-                    android:text="1"
-                    android:textAlignment="center"
-                    android:textColor="#555"
-                    android:textSize="12sp" />
-
-            </RelativeLayout>
-
-            <!-- 主页按钮 -->
-            <RelativeLayout style="@style/NavItem">
-
-                <ImageView
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/goHome"
-                    style="@style/NavIcon"
-                    android:contentDescription="@string/nav_home"
-                    android:src="@drawable/web_home" />
+                    style="@style/Widget.Toolbox.IconButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="浏览器主页"
+                    android:text=""
+                    app:icon="@drawable/ic_home_24"
+                    app:iconSize="20dp" />
+            </FrameLayout>
 
-            </RelativeLayout>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:foregroundGravity="center">
+
+                <FrameLayout
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/navTabs"
+                        style="@style/Widget.Toolbox.IconButton"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="标签页"
+                        android:text=""
+                        app:icon="@drawable/ic_tabs_24"
+                        app:iconSize="20dp" />
+
+                    <TextView
+                        android:id="@+id/tabCount"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="-1dp"
+                        android:layout_marginEnd="-1dp"
+                        android:background="@drawable/browser_tab_badge"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:text="1"
+                        android:textColor="@android:color/white"
+                        android:textSize="11sp" />
+                </FrameLayout>
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:foregroundGravity="center">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/navSet"
+                    style="@style/Widget.Toolbox.IconButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="更多浏览器功能"
+                    android:text=""
+                    app:icon="@drawable/ic_more_vert_24"
+                    app:iconSize="20dp" />
+            </FrameLayout>
         </LinearLayout>
-    </LinearLayout>
+    </com.google.android.material.appbar.MaterialToolbar>
 </LinearLayout>

@@ -1,213 +1,171 @@
 package com.example.cryptoapp.Activities;
 
-import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewTreeObserver;
+import android.view.ViewGroup;
+import android.view.animation.PathInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cryptoapp.Base.BaseActivity;
+import com.example.cryptoapp.Browser.BrowserHistoryEntry;
+import com.example.cryptoapp.Browser.BrowserHistoryStore;
+import com.example.cryptoapp.Browser.BrowserPreferences;
 import com.example.cryptoapp.R;
-import com.gyf.immersionbar.ImmersionBar;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.ArrayList;
+import java.util.List;
 
+/** 带共享元素感动画和可删除历史建议的搜索入口。 */
 public class EnterSearchStringFragment extends BaseActivity {
-    private LinearLayout et_bg;
-    private EditText et_content;
-    private FrameLayout fl;
+    private static final long DURATION = 280L;
+    private final PathInterpolator emphasized = new PathInterpolator(0.2f, 0f, 0f, 1f);
+    private final SearchHistoryAdapter historyAdapter = new SearchHistoryAdapter();
+    private MaterialCardView searchCard;
+    private MaterialCardView historyCard;
+    private EditText searchInput;
+    private View scrim;
+    private BrowserHistoryStore historyStore;
+    private float initialTranslation;
     private boolean finishing;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_enter_search_string);
-        et_bg=(LinearLayout) findViewById(R.id.input_layout);
-        et_content=(EditText) findViewById(R.id.search_text_tv);
-        fl=(FrameLayout)findViewById(R.id.fl);
-
-        ImmersionBar.with(this)
-                .transparentStatusBar()
-                .fitsSystemWindows(true)
-                .statusBarDarkFont(true)
-                .init();
-
-        //监听布局是否发生变化
-        et_bg.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                et_bg.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                inAnimation();
-
-                et_content.requestFocus();
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    public void run() {
-                        InputMethodManager inputManager = (InputMethodManager) et_content.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        inputManager.showSoftInput(et_content, 0);
-                    }
-                }, 1500);
-            }
+        searchCard = findViewById(R.id.input_layout);
+        historyCard = findViewById(R.id.searchHistoryCard);
+        searchInput = findViewById(R.id.search_text_tv);
+        scrim = findViewById(R.id.scrim);
+        historyStore = new BrowserHistoryStore(this);
+        RecyclerView historyList = findViewById(R.id.searchHistoryList);
+        // RecyclerView 不会自行排列子项；缺少 LayoutManager 时即使仓库中有记录也只会跳过绘制。
+        historyList.setLayoutManager(new LinearLayoutManager(this));
+        historyList.setAdapter(historyAdapter);
+        findViewById(R.id.cancelSearch).setOnClickListener(v -> closeWithAnimation());
+        findViewById(R.id.clearSearchHistory).setOnClickListener(v -> confirmClearHistory());
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override public void handleOnBackPressed() { closeWithAnimation(); }
         });
-
+        searchInput.setOnEditorActionListener(this::onEditorAction);
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { refreshHistory(); }
+            @Override public void afterTextChanged(Editable s) { }
+        });
+        searchCard.post(this::playEnterAnimation);
+        refreshHistory();
     }
 
-    private void inAnimation() {
-        float originY=getIntent().getIntExtra("y",0);
-        //获取到搜索框在这个Activity界面的位置
-        int[] location=new int[2];
-        et_bg.getLocationOnScreen(location);
-        //计算位置的差值
-        final float translateY=originY-(float)location[1];
-        //将第一个界面的位置设置给搜索框
-        et_bg.setY(et_bg.getY()+translateY);
-        //同步设置搜索框中的文字
-        et_content.setY(et_bg.getY()+(et_bg.getHeight()-et_content.getHeight())/2);
-        float top = getResources().getDisplayMetrics().density * 20;
-        //ValueAnimator是一个很厉害的东西，你只需要给他初始值和结束值，他会自动计算中间的过度
-        final ValueAnimator translateVa = ValueAnimator.ofFloat(et_bg.getY(), top);
-        //这个是由下移动到上面的监听
-        translateVa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                et_bg.setY((Float) valueAnimator.getAnimatedValue());
-//                et_content.setY(et_bg.getY() + (et_bg.getHeight() - et_content.getHeight()) / 2);
-//                tv_search.setY(et_bg.getY() + (et_bg.getHeight() - tv_search.getHeight()) / 2);
-                et_content.setY(et_bg.getY() /2);
-            }
-        });
-        //这个是缩小搜索框的监听
-        ValueAnimator scaleVa = ValueAnimator.ofFloat(1, 1);
-        scaleVa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                et_bg.setScaleX((Float) valueAnimator.getAnimatedValue());
-            }
-        });
-        //这个是设置透明度
-        ValueAnimator alphaVa = ValueAnimator.ofFloat(0, 1f);
-        alphaVa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                fl.setAlpha((Float) valueAnimator.getAnimatedValue());
-            }
-        });
-
-        alphaVa.setDuration(500);
-        translateVa.setDuration(500);
-        scaleVa.setDuration(500);
-
-        alphaVa.start();
-        translateVa.start();
-        scaleVa.start();
+    @Override protected void onResume() {
+        super.onResume();
+        refreshHistory();
     }
 
-    private void outAnimation() {
-        float originY=getIntent().getIntExtra("y",0);
+    private void refreshHistory() {
+        SharedPreferences settings = getSharedPreferences(BrowserPreferences.CONFIG, MODE_PRIVATE);
+        boolean visible = settings.getBoolean(BrowserPreferences.SHOW_SEARCH_HISTORY, true);
+        List<BrowserHistoryEntry> entries = visible
+                ? historyStore.search(searchInput == null ? "" : searchInput.getText().toString())
+                : new ArrayList<>();
+        if (entries.size() > 6) entries = entries.subList(0, 6);
+        historyAdapter.setEntries(entries);
+        historyCard.setVisibility(visible && !entries.isEmpty() ? View.VISIBLE : View.GONE);
+    }
 
-        int[] location=new int[2];
-        et_bg.getLocationOnScreen(location);
+    private void confirmClearHistory() {
+        new MaterialAlertDialogBuilder(this).setTitle("删除全部历史记录？")
+                .setMessage("此操作无法撤销。")
+                .setNegativeButton("取消", null)
+                .setPositiveButton("全部删除", (dialog, which) -> { historyStore.clear(); refreshHistory(); })
+                .show();
+    }
 
-        final float translateY=originY-(float)location[1];
-        et_bg.setY(et_bg.getY()+translateY);
-        et_content.setY(et_bg.getY()+(et_bg.getHeight()-et_content.getHeight())/2);
-        float top = getResources().getDisplayMetrics().density * 20;
-        final ValueAnimator translateVa = ValueAnimator.ofFloat(top, et_bg.getY());
+    private void openHistory(BrowserHistoryEntry entry) {
+        startActivity(new Intent(this, SearchActivity.class).putExtra("web_address", entry.getUrl()));
+        finish();
+    }
 
-        translateVa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                et_bg.setY((Float) valueAnimator.getAnimatedValue());
-                et_content.setY(et_bg.getY() + (et_bg.getHeight() - et_content.getHeight()) / 2);
-            }
-        });
+    private void playEnterAnimation() {
+        int originY = getIntent().getIntExtra("y", 0);
+        int[] target = new int[2];
+        searchCard.getLocationOnScreen(target);
+        initialTranslation = originY == 0 ? dp(24) : originY - target[1];
+        searchCard.setTranslationY(initialTranslation);
+        searchCard.setScaleX(0.94f);
+        searchCard.setScaleY(0.94f);
+        scrim.setAlpha(0f);
+        historyCard.setAlpha(0f);
+        searchCard.animate().translationY(0f).scaleX(1f).scaleY(1f).setDuration(DURATION).setInterpolator(emphasized).start();
+        scrim.animate().alpha(1f).setDuration(DURATION).setInterpolator(emphasized).start();
+        historyCard.animate().alpha(1f).setStartDelay(100L).setDuration(220L).start();
+        searchInput.requestFocus();
+        searchInput.postDelayed(() -> ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                .showSoftInput(searchInput, InputMethodManager.SHOW_IMPLICIT), 180L);
+    }
 
-        translateVa.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
+    private boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
+        boolean enter = event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN;
+        if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_GO || enter) {
+            String query = searchInput.getText().toString().trim();
+            if (!query.isEmpty()) {
+                startActivity(new Intent(this, SearchActivity.class).putExtra("web_address", query));
                 finish();
-                overridePendingTransition(0, 0);
             }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {
-
-            }
-        });
-
-        ValueAnimator scaleVa = ValueAnimator.ofFloat(0.8f, 1);
-        scaleVa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                et_bg.setScaleX((Float) valueAnimator.getAnimatedValue());
-            }
-        });
-
-        ValueAnimator alphaVa = ValueAnimator.ofFloat(1f, 0);
-        alphaVa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                fl.setAlpha((Float) valueAnimator.getAnimatedValue());
-            }
-        });
-
-        alphaVa.setDuration(500);
-        translateVa.setDuration(500);
-        scaleVa.setDuration(500);
-
-        alphaVa.start();
-        translateVa.start();
-        scaleVa.start();
+            return true;
+        }
+        return false;
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        et_content.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if(actionId== EditorInfo.IME_ACTION_SEARCH) {
-                    Intent intent_to_search=new Intent(EnterSearchStringFragment.this,SearchActivity.class);
-                    intent_to_search.putExtra("web_address",et_content.getText().toString());
-                    startActivity(intent_to_search);
-                    return true;
-                }
-                if(event.getKeyCode()==KeyEvent.KEYCODE_ENTER&&v.getText()!=null&& event.getAction() == KeyEvent.ACTION_DOWN){
-                    Intent intent_to_search=new Intent(EnterSearchStringFragment.this,SearchActivity.class);
-                    intent_to_search.putExtra("web_address",et_content.getText().toString());
-                    startActivity(intent_to_search);
-                }
-                return true;
-            }
-        });
+    private void closeWithAnimation() {
+        if (finishing) return;
+        finishing = true;
+        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(searchInput.getWindowToken(), 0);
+        searchCard.animate().translationY(initialTranslation).scaleX(0.94f).scaleY(0.94f).setDuration(DURATION)
+                .setInterpolator(emphasized).withEndAction(() -> { finish(); overridePendingTransition(0, 0); }).start();
+        scrim.animate().alpha(0f).setDuration(DURATION).setInterpolator(emphasized).start();
+        historyCard.animate().alpha(0f).setDuration(140L).start();
     }
 
-    @Override
-    public void onBackPressed() {
-        if(!finishing){
-            finishing=true;
-            outAnimation();
+    private float dp(float value) { return value * getResources().getDisplayMetrics().density; }
+
+    private final class SearchHistoryAdapter extends RecyclerView.Adapter<SearchHistoryAdapter.Holder> {
+        private final List<BrowserHistoryEntry> entries = new ArrayList<>();
+        void setEntries(List<BrowserHistoryEntry> values) { entries.clear(); entries.addAll(values); notifyDataSetChanged(); }
+        @NonNull @Override public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new Holder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_search_history, parent, false));
+        }
+        @Override public void onBindViewHolder(@NonNull Holder holder, int position) { holder.bind(entries.get(position)); }
+        @Override public int getItemCount() { return entries.size(); }
+
+        final class Holder extends RecyclerView.ViewHolder {
+            private final TextView title = itemView.findViewById(R.id.historyTitle);
+            private final TextView url = itemView.findViewById(R.id.historyUrl);
+            Holder(View itemView) { super(itemView); }
+            void bind(BrowserHistoryEntry entry) {
+                title.setText(entry.getTitle());
+                url.setText(entry.getUrl());
+                itemView.setOnClickListener(v -> openHistory(entry));
+                itemView.findViewById(R.id.deleteHistory).setOnClickListener(v -> {
+                    historyStore.delete(entry.getId());
+                    refreshHistory();
+                });
+            }
         }
     }
 }
