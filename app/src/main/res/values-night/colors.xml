@@ -8,6 +8,12 @@
     <color name="browser_on_secondary_container">#D0E4FF</color>
     <color name="toolbox_card">#1C2025</color>
     <color name="toolbox_card_outline">#3B424A</color>
+    <!-- 首页搜索框背景/描边：浅色下白底，深色下深灰底，随主题切换。 -->
+    <color name="search_bg">#2A2F36</color>
+    <color name="search_stroke">#3B424A</color>
+    <!-- 首页搜索框提示文字/图标前景：浅色下深灰，深色下浅灰，确保白底/深底都清晰。 -->
+    <color name="search_hint">#C2C7CF</color>
+    <color name="search_icon">#C2C7CF</color>
     <color name="toolbox_terminal">#090C0F</color>
     <color name="toolbox_terminal_text">#C5F5DE</color>
     <color name="toolbox_icon">#C2C7CF</color>

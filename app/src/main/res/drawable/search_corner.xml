@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/white"/>
+    <solid android:color="@color/search_bg"/>
     <!--  圆角 <corners android:radius="15dp"/>-->
     <corners
         android:radius="40dp">
     </corners>
-    <stroke android:width="1dp" android:color="#eeeeee"/>
+    <stroke android:width="1dp" android:color="@color/search_stroke"/>
 </shape>

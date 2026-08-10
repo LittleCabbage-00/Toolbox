@@ -4,7 +4,7 @@
     android:id="@+id/searchRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground">
+    android:background="@android:color/transparent">
 
     <View
         android:id="@+id/scrim"
@@ -25,6 +25,7 @@
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.Toolbox.Card"
             android:id="@+id/input_layout"
+            android:transitionName="search_box"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             app:cardBackgroundColor="@color/browser_surface_variant"

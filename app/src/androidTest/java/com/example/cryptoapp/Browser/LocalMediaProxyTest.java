@@ -3,6 +3,7 @@ package com.example.cryptoapp.Browser;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assume.assumeNotNull;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -170,12 +171,62 @@ public class LocalMediaProxyTest {
 
         try (LocalMediaProxy proxy = new LocalMediaProxy(new OkHttpClient(), "Toolbox-Test", "", "")) {
             String remote = "http://127.0.0.1:" + upstream.getLocalPort() + "/playlist.m3u8";
+            // bytes=0- 现在会被归一化为完整请求，因此这里用真实的分段 Range 验证回退路径。
             Request request = new Request.Builder()
-                    .url(proxy.urlFor(remote)).header("Range", "bytes=0-").build();
+                    .url(proxy.urlFor(remote)).header("Range", "bytes=10-").build();
             try (Response response = new OkHttpClient().newCall(request).execute()) {
                 assertTrue("带 Range 被 CDN 拒绝后应回退为完整请求重试", response.isSuccessful());
             }
             assertEquals("应当发起过一次带 Range 的请求", 1, rangedRequests.get());
+        } finally {
+            upstream.close();
+            worker.shutdownNow();
+        }
+    }
+
+    @Test public void servesByteZeroRangeAsFullContentWithoutUpstreamRange() throws Exception {
+        byte[] payload = new byte[256];
+        for (int i = 0; i < payload.length; i++) payload[i] = (byte) i;
+        ServerSocket upstream = new ServerSocket(0, 2, InetAddress.getByName("127.0.0.1"));
+        ExecutorService worker = Executors.newSingleThreadExecutor();
+        AtomicInteger rangedRequests = new AtomicInteger();
+        worker.execute(() -> {
+            while (!upstream.isClosed()) {
+                try (Socket socket = upstream.accept()) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(
+                            socket.getInputStream(), StandardCharsets.US_ASCII));
+                    reader.readLine();
+                    boolean ranged = false;
+                    while (true) {
+                        String header = reader.readLine();
+                        if (header == null || header.isEmpty()) break;
+                        int colon = header.indexOf(':');
+                        if (colon <= 0) continue;
+                        if ("Range".equalsIgnoreCase(header.substring(0, colon).trim())) ranged = true;
+                    }
+                    if (ranged) rangedRequests.incrementAndGet();
+                    // 模拟对 Range 一律拒绝的 CDN：带 Range 返回 471，不带 Range 返回完整内容。
+                    String status = ranged ? "471 No Range" : "200 OK";
+                    socket.getOutputStream().write(("HTTP/1.1 " + status
+                            + "\r\nContent-Type: application/octet-stream\r\nContent-Length: "
+                            + payload.length + "\r\nConnection: close\r\n\r\n")
+                            .getBytes(StandardCharsets.US_ASCII));
+                    socket.getOutputStream().write(payload);
+                    socket.getOutputStream().flush();
+                } catch (Exception ignored) { }
+            }
+        });
+
+        try (LocalMediaProxy proxy = new LocalMediaProxy(new OkHttpClient(), "Toolbox-Test", "", "")) {
+            String remote = "http://127.0.0.1:" + upstream.getLocalPort() + "/sample.bin";
+            Request request = new Request.Builder()
+                    .url(proxy.urlFor(remote)).header("Range", "bytes=0-").build();
+            try (Response response = new OkHttpClient().newCall(request).execute()) {
+                assertTrue("bytes=0- 等价于完整请求，不应被 471 拒绝", response.isSuccessful());
+                assertArrayEquals("应原样返回完整内容", payload,
+                        response.body() == null ? null : response.body().bytes());
+            }
+            assertEquals("bytes=0- 不应把 Range 透传给上游", 0, rangedRequests.get());
         } finally {
             upstream.close();
             worker.shutdownNow();

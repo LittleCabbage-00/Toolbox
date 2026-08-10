@@ -1,5 +1,6 @@
 package com.example.cryptoapp.Utils
 
+import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -34,7 +35,7 @@ object ShellCommandExecutor {
             return ShizukuShellClient.execute(context.applicationContext, command, timeoutSeconds)
         }
         val startedAt = System.currentTimeMillis()
-        val arguments = if (mode == ShellExecutionMode.ROOT) listOf("su", "-c", command)
+        val arguments = if (mode == ShellExecutionMode.ROOT) listOf(resolveSuPath(), "-c", command)
         else listOf("/system/bin/sh", "-c", command)
         val process = ProcessBuilder(arguments).start()
         val readers = Executors.newFixedThreadPool(2)
@@ -62,5 +63,18 @@ object ShellCommandExecutor {
             readers.shutdownNow()
             process.destroy()
         }
+    }
+
+    /**
+     * 解析可用的 su 绝对路径。KernelSU 的 su 位于 /data/adb/ksu/bin，APatch 位于
+     * /data/adb/ap/bin，二者默认不在系统 PATH 中；Magisk 的 su 通常由 PATH 提供。
+     * 所有候选都不存在时兜底回退到裸 "su"，让系统 PATH 决定并自然报错。
+     */
+    private fun resolveSuPath(): String {
+        val candidates = listOf(
+            "/data/adb/ksu/bin/su", "/data/adb/ap/bin/su", "/data/adb/magisk/bin/su",
+            "/sbin/su", "/system/bin/su", "/system/xbin/su", "su"
+        )
+        return candidates.firstOrNull { path -> !path.contains('/') || File(path).exists() } ?: "su"
     }
 }

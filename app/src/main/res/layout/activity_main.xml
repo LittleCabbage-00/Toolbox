@@ -33,13 +33,13 @@
             <LinearLayout
                 android:id="@+id/searchContainer"
                 android:tag="responsive_content"
+                android:transitionName="search_box"
                 android:background="@drawable/search_corner"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginRight="30dp"
-                android:layout_marginBottom="160dp"
                 android:layout_above="@+id/nav_bottom">
                 <TextView
                     android:id="@+id/search_text_tv"
@@ -51,7 +51,8 @@
                     android:layout_weight="1"
                     android:layout_marginStart="25dp"
                     android:background="@android:color/transparent"
-                    android:hint="@string/take_thing_you_want_search_here"/>
+                    android:hint="@string/take_thing_you_want_search_here"
+                    android:textColorHint="@color/search_hint"/>
                 <ImageView
                     android:id="@+id/search_button"
                     android:adjustViewBounds="true"
@@ -60,7 +61,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:src="@drawable/ic_search"
-                    app:tint="?attr/colorOnSurface"
+                    app:tint="@color/search_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             </LinearLayout>

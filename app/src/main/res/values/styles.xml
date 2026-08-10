@@ -26,6 +26,18 @@
         <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
     </style>
 
+    <!-- 首页专属主题：冷启动窗口背景用深色，避免壁纸加载完成前的白屏；只影响首页。 -->
+    <style name="Theme.Toolbox.Main" parent="MDTheme">
+        <item name="android:windowBackground">@color/wallpaper_launch_background</item>
+    </style>
+
+    <!-- 搜索页专属主题：透明窗口让首页内容作背景透出配合遮罩淡入；状态栏由 scrim 覆盖归搜索页。 -->
+    <style name="Theme.Toolbox.EnterSearch" parent="MDTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
 
 
     <!-- 底部导航栏一项 -->

@@ -1,13 +1,22 @@
 package com.example.cryptoapp.Activities
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.webkit.CookieManager
 import android.webkit.WebStorage
 import android.webkit.WebView
 import android.widget.EditText
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.example.cryptoapp.Base.BaseActivity
+import com.example.cryptoapp.Bing.BingWallpaperDay
+import com.example.cryptoapp.Bing.BingWallpaperRepository
+import com.example.cryptoapp.Bing.Orientation
+import com.example.cryptoapp.Bing.SaveResult
 import com.example.cryptoapp.Browser.BrowserHistoryStore
 import com.example.cryptoapp.Browser.BrowserPreferences
 import com.example.cryptoapp.databinding.SettingsActivityBinding
@@ -21,6 +30,11 @@ class SettingsActivity : BaseActivity() {
         getSharedPreferences(BrowserPreferences.CONFIG, Context.MODE_PRIVATE)
     }
 
+    /** API ≤ 28 保存到公共目录前需要 WRITE_EXTERNAL_STORAGE 运行时权限；API ≥ 29 MediaStore 无需权限。 */
+    private val storagePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> if (granted) saveTodayWallpaper() else message("未授予存储权限，无法保存壁纸") }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = SettingsActivityBinding.inflate(layoutInflater)
@@ -30,6 +44,12 @@ class SettingsActivity : BaseActivity() {
 
         bindCurrentValues()
         binding.wallpaperSwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.BING_WALLPAPER, value) }
+        binding.bingAutoSaveSwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.BING_SAVE_AUTO, value) }
+        binding.bingPortraitSaveSwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.BING_SAVE_PORTRAIT, value) }
+        binding.saveTodayWallpaperButton.setOnClickListener { saveTodayWallpaper() }
+        binding.openWallpaperGalleryButton.setOnClickListener {
+            startActivity(Intent(this, BingWallpaperGalleryActivity::class.java))
+        }
         binding.themeModeRow.setOnClickListener { showThemePicker() }
         binding.saveHistorySwitch.setOnCheckedChangeListener { _, value ->
             save(BrowserPreferences.SAVE_HISTORY, value)
@@ -51,6 +71,8 @@ class SettingsActivity : BaseActivity() {
 
     private fun bindCurrentValues() = with(binding) {
         wallpaperSwitch.isChecked = preferences.getBoolean(BrowserPreferences.BING_WALLPAPER, true)
+        bingAutoSaveSwitch.isChecked = preferences.getBoolean(BrowserPreferences.BING_SAVE_AUTO, true)
+        bingPortraitSaveSwitch.isChecked = preferences.getBoolean(BrowserPreferences.BING_SAVE_PORTRAIT, false)
         themeModeValue.text = when (preferences.getString(BrowserPreferences.THEME_MODE, "system")) {
             "light" -> "浅色"
             "dark" -> "深色"
@@ -161,5 +183,46 @@ class SettingsActivity : BaseActivity() {
 
     private fun save(key: String, value: Boolean) = preferences.edit().putBoolean(key, value).apply()
     private fun message(value: String) = Snackbar.make(binding.root, value, Snackbar.LENGTH_SHORT).show()
+
+    /** 手动保存今天的壁纸（横屏 UHD；开启竖屏时同时保存竖屏）。已存在时弹窗询问替换。 */
+    private fun saveTodayWallpaper() {
+        // API ≤ 28 写公共图片目录需要运行时权限；API ≥ 29 走 MediaStore 无需权限。
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
+            && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            return
+        }
+        val repo = BingWallpaperRepository.get(this)
+        val includePortrait = preferences.getBoolean(BrowserPreferences.BING_SAVE_PORTRAIT, false)
+        repo.ensureTodayUhd({ day ->
+            saveDayWithDedup(repo, day, Orientation.LANDSCAPE)
+            if (includePortrait) saveDayWithDedup(repo, day, Orientation.PORTRAIT)
+        }, { message("保存失败，请检查网络") })
+    }
+
+    private fun saveDayWithDedup(repo: BingWallpaperRepository, day: BingWallpaperDay, orientation: Orientation) {
+        repo.saveDayWithDedup(day, orientation,
+            onDuplicate = { showReplaceDialog(repo, day, orientation) },
+            onResult = { result -> message(result.toLabel()) })
+    }
+
+    private fun showReplaceDialog(repo: BingWallpaperRepository, day: BingWallpaperDay, orientation: Orientation) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("图片已保存过")
+            .setMessage("该壁纸（${day.startDate}）已经保存到 Pictures/Toolbox，是否替换为新版本？")
+            .setNegativeButton("取消", null)
+            .setPositiveButton("替换") { _, _ ->
+                repo.saveDayForce(day, orientation) { result -> message(result.toLabel()) }
+            }
+            .show()
+    }
+
+    private fun SaveResult.toLabel(): String = when (this) {
+        SaveResult.SAVED -> "已保存到 Pictures/Toolbox"
+        SaveResult.ALREADY_SAVED -> "已保存过"
+        SaveResult.FAILED -> "保存失败"
+    }
+
     private data class SearchEngine(val name: String, val homeUrl: String, val searchUrl: String)
 }
