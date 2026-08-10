@@ -80,6 +80,52 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="8dp"
+                android:text="壁纸保存"
+                android:textColor="?attr/colorPrimary"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Toolbox.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/bingAutoSaveSwitch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="自动保存每日壁纸" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/bingPortraitSaveSwitch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="同时保存竖屏 4K 版" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/saveTodayWallpaperButton"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="保存今天的壁纸"
+                        app:icon="@drawable/ic_download_24"
+                        app:iconSize="20dp" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/openWallpaperGalleryButton"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="14 天壁纸"
+                        app:icon="@drawable/ic_photo_library_24"
+                        app:iconSize="20dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp"
                 android:text="搜索与隐私"
                 android:textColor="?attr/colorPrimary"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2" />

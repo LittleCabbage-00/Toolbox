@@ -61,7 +61,7 @@ class BrowserDownloadsActivity : BaseActivity() {
     }
 
     private fun refresh() {
-        val records = store.all
+        val records = store.getAll()
         adapter.submitList(records)
         binding.emptyView.visibility = if (records.isEmpty()) View.VISIBLE else View.GONE
         val hasFinished = records.any {

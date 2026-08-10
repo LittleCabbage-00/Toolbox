@@ -12,10 +12,18 @@
     <color name="browser_on_secondary_container">#001D32</color>
     <color name="toolbox_card">#FFFDFB</color>
     <color name="toolbox_card_outline">#D9E2EC</color>
+    <!-- 首页搜索框背景/描边：浅色下白底，深色下深灰底，随主题切换。 -->
+    <color name="search_bg">#FFFFFF</color>
+    <color name="search_stroke">#EEEEEE</color>
+    <!-- 首页搜索框提示文字/图标前景：浅色下深灰，深色下浅灰，确保白底/深底都清晰。 -->
+    <color name="search_hint">#42474E</color>
+    <color name="search_icon">#42474E</color>
     <color name="toolbox_terminal">#101418</color>
     <color name="toolbox_terminal_text">#D7F9E9</color>
     <!-- 单色矢量图标的默认前景色；组件自身的 iconTint 仍可覆盖它。 -->
     <color name="toolbox_icon">#42474E</color>
+    <!-- 首页壁纸启动背景：窗口首帧前显示深色，避免冷启动白屏刺眼，随后被壁纸占位/淡入覆盖。 -->
+    <color name="wallpaper_launch_background">#1A1A1A</color>
 
     <!-- QRCode scanner color begin -->
     <color name="viewfinder_mask">#60f4f1f7</color>

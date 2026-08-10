@@ -51,7 +51,9 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:text="暂无历史记录"
-            android:textAppearance="?attr/textAppearanceBodyLarge" />
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textSize="18sp" />
     </FrameLayout>
 
     <com.google.android.material.button.MaterialButton

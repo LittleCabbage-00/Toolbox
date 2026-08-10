@@ -87,6 +87,7 @@
         <activity
             android:name=".Activities.EnterSearchStringFragment"
             android:exported="false"
+            android:theme="@style/Theme.Toolbox.EnterSearch"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".Activities.SearchActivity"
@@ -100,6 +101,12 @@
             android:exported="false" />
         <activity
             android:name=".Activities.BrowserDownloadsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities.BingWallpaperGalleryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities.BingWallpaperDetailActivity"
             android:exported="false" />
         <activity
             android:name="com.google.zxing.activity.CaptureActivity"
@@ -116,7 +123,9 @@
             android:launchMode="singleTask" />
         <activity
             android:name=".Activities.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Toolbox.Main"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
