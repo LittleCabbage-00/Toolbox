@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?android:attr/colorBackground" android:orientation="vertical">
+    <com.google.android.material.appbar.MaterialToolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="?attr/actionBarSize" android:background="?attr/colorPrimary" app:navigationIcon="@drawable/ic_arrow_back_24" app:title="网络工具" app:titleTextColor="?attr/colorOnPrimary" />
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <LinearLayout android:tag="responsive_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+            <com.google.android.material.card.MaterialCardView style="@style/Widget.Toolbox.Card" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="网址或域名">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textUri" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/parseUrlButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="解析 URL 结构" app:icon="@drawable/ic_link_24" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/dnsButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="查询 DNS 地址" app:icon="@drawable/ic_language_24" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/certButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="检查 HTTPS 证书" app:icon="@drawable/ic_key_24" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/traceRouteButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="路由跟踪（最多 30 跳）" app:icon="@drawable/ic_swap_vert_24" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView style="@style/Widget.Toolbox.Card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <TextView android:id="@+id/resultText" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:gravity="top" android:minHeight="160dp" android:text="结果显示在这里" android:textIsSelectable="true" android:textSize="15sp" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/copyButton" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end" android:text="复制结果" app:icon="@drawable/ic_copy_24" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>
