@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Toolbox.Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:clickable="true"
-    app:cardCornerRadius="4dp"
     android:layout_marginTop="10dp"
     android:layout_marginBottom="10dp"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp"
-    app:cardUseCompatPadding="true">
+    >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -40,7 +40,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center_vertical"
-                app:srcCompat="@drawable/android_logo"/>
+                app:srcCompat="@drawable/android_logo"
+                app:tint="?attr/colorOnSurfaceVariant"/>
             <TextView
                 android:id="@+id/android_version"
                 android:layout_width="wrap_content"
@@ -64,7 +65,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center_vertical"
-                app:srcCompat="@drawable/android_sdk"/>
+                app:srcCompat="@drawable/android_sdk"
+                app:tint="?attr/colorOnSurfaceVariant"/>
             <TextView
                 android:id="@+id/android_sdk"
                 android:layout_width="wrap_content"
@@ -88,7 +90,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center_vertical"
-                app:srcCompat="@drawable/linux"/>
+                app:srcCompat="@drawable/linux"
+                app:tint="?attr/colorOnSurfaceVariant"/>
             <TextView
                 android:id="@+id/kernel_version"
                 android:layout_width="wrap_content"
@@ -112,7 +115,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center_vertical"
-                app:srcCompat="@drawable/cpu"/>
+                app:srcCompat="@drawable/cpu"
+                app:tint="?attr/colorOnSurfaceVariant"/>
             <TextView
                 android:id="@+id/cpu_name"
                 android:layout_width="wrap_content"
@@ -136,7 +140,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center_vertical"
-                app:srcCompat="@drawable/chromium"/>
+                app:srcCompat="@drawable/chromium"
+                app:tint="?attr/colorOnSurfaceVariant"/>
             <TextView
                 android:id="@+id/chromium_agent"
                 android:layout_width="wrap_content"
@@ -150,4 +155,4 @@
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

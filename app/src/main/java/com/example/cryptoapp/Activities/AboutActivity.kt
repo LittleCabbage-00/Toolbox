@@ -4,104 +4,51 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.MenuItem
 import android.webkit.WebSettings
-import android.webkit.WebView
+import android.widget.TextView
 import android.widget.Toast
 import com.example.cryptoapp.Base.BaseActivity
+import com.example.cryptoapp.BuildConfig
 import com.example.cryptoapp.R
-import com.example.cryptoapp.Utils.ShellUtils
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.card_about_app.*
-import kotlinx.android.synthetic.main.card_about_device.*
-import kotlinx.android.synthetic.main.card_author.*
-import java.io.*
+import com.example.cryptoapp.databinding.ActivityAboutBinding
 
-
+/** 关于与设备信息页。不再通过阻塞 Shell 获取基础系统信息。 */
 class AboutActivity : BaseActivity() {
-
-    private val GITHUB = "https://github.com/LittleCabbage-00/CryptoApp"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_about)
-
-        setSupportActionBar(toolbar)
+        val binding = ActivityAboutBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
+        title = "关于"
 
-    override fun onStart() {
-        super.onStart()
-        setTitle("关于")
-
-        version_info.setOnClickListener {
-            Toast.makeText(this, "别点了，没写检查版本更新的逻辑", Toast.LENGTH_SHORT).show()
+        binding.root.findViewById<android.view.View>(R.id.version_info).setOnClickListener {
+            Toast.makeText(this, "当前版本：${BuildConfig.VERSION_NAME}", Toast.LENGTH_SHORT).show()
         }
-        using_helper.setOnClickListener {
-            val intent=Intent(this,UsingHelperActivity::class.java)
-            startActivity(intent)
+        binding.root.findViewById<android.view.View>(R.id.using_helper).setOnClickListener {
+            startActivity(Intent(this, UsingHelperActivity::class.java))
         }
-        github_address.setOnClickListener {
-            openUrl(GITHUB)
+        binding.root.findViewById<android.view.View>(R.id.github_address).setOnClickListener {
+            // 项目已经提供完整的内置浏览器，这类普通 HTTPS 页面不应无故打断用户并跳出应用。
+            startActivity(Intent(this, SearchActivity::class.java).putExtra("web_address", GITHUB))
         }
-        email_to_author.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SENDTO)
-            intent.data = Uri.parse("mailto:jiangfy299792458@gmail.com")
-            intent.putExtra(Intent.EXTRA_EMAIL, "jiangfy299792458@gmail.com")
-            intent.putExtra(Intent.EXTRA_SUBJECT, "ToolKit(Crypto)")
-            startActivity(Intent.createChooser(intent, "E-Mail"))
+        binding.root.findViewById<android.view.View>(R.id.email_to_author).setOnClickListener {
+            startActivity(Intent.createChooser(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$EMAIL")), "发送邮件"))
         }
 
-        //给安卓版本赋值
-        val android = String.format(
-            resources.getString(R.string.android_version), Build.VERSION.RELEASE
-        )
-        android_version.text = android
-        //给API版本赋值
-        val android_api = String.format(
-            resources.getString(R.string.android_sdk), Build.VERSION.SDK
-        )
-        android_sdk.text = android_api
-        //给内核版本赋值
-        kernel_version.text = KernelVersion().toString()
-        //给cpu型号赋值
-        if(CPUInfo().toString()==""){
-            cpu_name.text="不支持"
-        }else {
-            cpu_name.text = CPUInfo().toString()
-        }
-
-        //webview useragent
-        chromium_agent.text=WVAgent()
-    }
-    override fun onOptionsItemSelected(item: MenuItem):Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                this.finish()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-    private fun openUrl(url: String) {
-        val i = Intent(Intent.ACTION_VIEW)
-        i.data = Uri.parse(url)
-        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(i)
+        text(binding, R.id.android_version, getString(R.string.android_version, Build.VERSION.RELEASE))
+        text(binding, R.id.android_sdk, getString(R.string.android_sdk, Build.VERSION.SDK_INT))
+        text(binding, R.id.kernel_version, System.getProperty("os.version") ?: "未知")
+        text(binding, R.id.cpu_name, Build.SUPPORTED_ABIS.joinToString())
+        text(binding, R.id.chromium_agent, WebSettings.getDefaultUserAgent(this))
     }
 
-    //获取Android Linux内核版本信息
-    fun KernelVersion(): String? {
-        val result:ShellUtils.CommandResult=ShellUtils.execCommand("uname -r",false)
-        return result.successMsg
+    private fun text(binding: ActivityAboutBinding, id: Int, value: String) {
+        binding.root.findViewById<TextView>(id).text = value
     }
-    //获取cpu型号
-    fun CPUInfo():String{
-        val result:ShellUtils.CommandResult=ShellUtils.execCommand("cat /proc/cpuinfo | grep \"Hardware\" | cut -f2 -d: ",false)
-        return result.successMsg
-    }
-    fun WVAgent():String?{
-        val userAgent= WebView(this).getSettings().getUserAgentString()
-        return userAgent
+
+    companion object {
+        private const val GITHUB = "https://github.com/LittleCabbage-00/CryptoApp"
+        private const val EMAIL = "jiangfy299792458@gmail.com"
     }
 }

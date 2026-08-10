@@ -1,28 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <androidx.appcompat.widget.Toolbar
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:background="?attr/colorPrimary"
+        android:title="软件设置"
+        android:titleTextColor="@android:color/white" />
 
-        <include layout="@layout/setting_browser" />
-    </LinearLayout>
-    </ScrollView>
-    <TextView
-        android:id="@+id/snackBar_setting_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:tag="responsive_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="主页"
+                android:textColor="?attr/colorPrimary"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Toolbox.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/wallpaperSwitch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="显示 Bing 每日壁纸" />
+                    <LinearLayout
+                        android:id="@+id/themeModeRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:orientation="vertical"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="外观主题" android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                        <TextView android:id="@+id/themeModeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/homepageRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:orientation="vertical"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="浏览器主页" android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                        <TextView android:id="@+id/homepageValue" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp"
+                android:text="搜索与隐私"
+                android:textColor="?attr/colorPrimary"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Toolbox.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <LinearLayout android:id="@+id/searchEngineRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" android:orientation="vertical" android:paddingBottom="12dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="默认搜索引擎" android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                        <TextView android:id="@+id/searchEngineValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                    </LinearLayout>
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/saveHistorySwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="保存浏览历史记录" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/showSearchHistorySwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="搜索界面显示历史记录" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/openHistoryButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="查看历史记录" app:icon="@drawable/ic_history_24" app:iconSize="20dp" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/clearHistoryButton" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="清空全部历史记录" android:textColor="?attr/colorError" app:icon="@drawable/ic_delete_24" app:iconTint="?attr/colorError" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp"
+                android:text="网页行为"
+                android:textColor="?attr/colorPrimary"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Toolbox.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/javascriptSwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="允许 JavaScript" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/blockThirdPartyCookiesSwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="阻止第三方 Cookie" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/desktopModeSwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="新标签默认使用桌面模式" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/clearBrowserDataButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="清理 Cookie、缓存和网页存储" app:icon="@drawable/ic_delete_24" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:layout_marginBottom="8dp" android:text="媒体下载" android:textColor="?attr/colorPrimary" android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2" />
+            <com.google.android.material.card.MaterialCardView style="@style/Widget.Toolbox.Card" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <LinearLayout android:id="@+id/videoFormatRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" android:orientation="vertical" android:padding="12dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="嗅探视频自动转换格式" android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                        <TextView android:id="@+id/videoFormatValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/audioFormatRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true" android:orientation="vertical" android:padding="12dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="嗅探音频自动转换格式" android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                        <TextView android:id="@+id/audioFormatValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

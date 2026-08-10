@@ -1,32 +1,17 @@
 package com.example.cryptoapp.Activities
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.MenuItem
-import com.example.cryptoapp.R
-import kotlinx.android.synthetic.main.activity_main.*
+import com.example.cryptoapp.Base.BaseActivity
+import com.example.cryptoapp.databinding.ActivityUsingHelperBinding
 
-class UsingHelperActivity : AppCompatActivity() {
+/** 应用内使用说明页面，正文统一来自资源文件，便于后续维护和本地化。 */
+class UsingHelperActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_using_helper)
-
-        setSupportActionBar(toolbar)
+        val binding = ActivityUsingHelperBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        setTitle("使用帮助")
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem):Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                this.finish()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
+        title = "使用帮助"
     }
 }
