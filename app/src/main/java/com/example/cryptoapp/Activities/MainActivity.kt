@@ -46,6 +46,8 @@ class MainActivity : BaseActivity() {
     private lateinit var config: SharedPreferences
     @Volatile
     private var wallpaperLoading = false
+    /** 首次启动网络未就绪时的延时重试计数，最多重试 2 次避免无限循环。 */
+    private var wallpaperRetryCount = 0
 
     /** API ≤ 28 自动保存到公共目录前需要 WRITE_EXTERNAL_STORAGE 运行时权限。 */
     private val storagePermissionLauncher: ActivityResultLauncher<String> = registerForActivityResult(
@@ -171,6 +173,7 @@ class MainActivity : BaseActivity() {
         val repo = BingWallpaperRepository.get(this)
         wallpaperLoading = true
         repo.ensureTodayUhd({ day ->
+            wallpaperRetryCount = 0
             if (isFinishing || isDestroyed) {
                 wallpaperLoading = false
                 return@ensureTodayUhd
@@ -193,7 +196,20 @@ class MainActivity : BaseActivity() {
             bingImage.postDelayed({
                 if (!isFinishing && !isDestroyed) applyToolbarContrast(bitmap)
             }, 650L)
-        }, { wallpaperLoading = false })
+        }, {
+            wallpaperLoading = false
+            // 首次启动网络可能尚未就绪，若首屏仍无图则限次延时重试一次完整加载流程。
+            if (bingImage.drawable == null && wallpaperRetryCount < 2
+                && !isFinishing && !isDestroyed) {
+                wallpaperRetryCount++
+                bingImage.postDelayed({
+                    if (bingImage.drawable == null && !wallpaperLoading
+                        && !isFinishing && !isDestroyed) {
+                        ensureBingWallpaper()
+                    }
+                }, 3000L)
+            }
+        })
         repo.startBackgroundPrefetch()
         maybeAutoSaveToday()
     }

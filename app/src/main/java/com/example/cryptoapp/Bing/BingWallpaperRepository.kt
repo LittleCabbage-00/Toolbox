@@ -18,6 +18,7 @@ import java.util.LinkedHashMap
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -38,7 +39,13 @@ class BingWallpaperRepository private constructor(context: Context) {
     private val appContext = context.applicationContext
     val cacheDir: File = File(context.filesDir, "bing_wallpaper").apply { mkdirs() }
 
-    private val httpClient = okhttp3.OkHttpClient()
+    // 首次启动/大图下载需要更宽的超时：4K 原图（8-15MB）在默认 10s 读超时下极易
+    // 失败，这正是"第一次打开壁纸加载不出来"的主因之一。
+    private val httpClient = okhttp3.OkHttpClient.Builder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private val prefetchExecutor: ExecutorService =
@@ -98,7 +105,10 @@ class BingWallpaperRepository private constructor(context: Context) {
     fun ensureTodayUhd(onReady: (BingWallpaperDay) -> Unit, onError: (Exception) -> Unit) {
         val request = BingUrls.request(BingUrls.api(0, 1))
         httpClient.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) = onError(e)
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
+                // OkHttp 回调线程，统一切回主线程再交给调用方，避免其 onError 直接操作 UI。
+                mainHandler.post { onError(e) }
+            }
             override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 response.use {
                     try {
@@ -106,9 +116,9 @@ class BingWallpaperRepository private constructor(context: Context) {
                         val image = JSONObject(response.body!!.string())
                             .getJSONArray("images").getJSONObject(0)
                         val day = parseDay(image)
-                        mainHandler.post { onTodayReady(day, onReady) }
+                        mainHandler.post { onTodayReady(day, onReady, onError) }
                     } catch (e: Exception) {
-                        onError(e)
+                        mainHandler.post { onError(e) }
                     }
                 }
             }
@@ -288,28 +298,53 @@ class BingWallpaperRepository private constructor(context: Context) {
         }
     }
 
-    private fun downloadFile(url: String, target: File) {
-        val call = httpClient.newCall(BingUrls.request(url))
-        call.execute().use { response ->
-            if (!response.isSuccessful || response.body == null) throw IOException("HTTP ${response.code}")
-            val bytes = response.body!!.bytes()
-            FileOutputStream(target).use { it.write(bytes) }
+    /**
+     * 流式落盘并最多重试 2 次。4K 原图（8-15MB）用 bytes() 全量读入内存，既吃内存又
+     * 容易触发读超时；改为 byteStream 边下边写，失败时删掉半成品再重试一次。
+     * 返回是否成功；异常在内部处理，调用方无需再 try/catch。
+     */
+    private fun downloadFile(url: String, target: File): Boolean {
+        for (attempt in 1..2) {
+            try {
+                val call = httpClient.newCall(BingUrls.request(url))
+                call.execute().use { response ->
+                    if (!response.isSuccessful || response.body == null) throw IOException("HTTP ${response.code}")
+                    response.body!!.byteStream().use { input ->
+                        FileOutputStream(target).use { output -> input.copyTo(output) }
+                    }
+                }
+                if (target.length() > 0) return true
+                target.delete()
+            } catch (e: Exception) {
+                target.delete()
+            }
+            if (attempt == 1) {
+                try { Thread.sleep(800) } catch (ignored: InterruptedException) { return false }
+            }
         }
+        return false
     }
 
-    private fun onTodayReady(day: BingWallpaperDay, onReady: (BingWallpaperDay) -> Unit) {
+    private fun onTodayReady(day: BingWallpaperDay, onReady: (BingWallpaperDay) -> Unit, onError: (Exception) -> Unit) {
         val file = day.landscapeUhdFile(cacheDir)
-        if (!file.exists() && downloadGuard.add(day.startDate)) {
+        if (!file.exists()) {
+            if (!downloadGuard.add(day.startDate)) return
+            var ok = false
             try {
-                downloadFile(day.landscapeUhdUrl, file)
-            } catch (e: Exception) {
-                downloadGuard.remove(day.startDate)
-                return
+                ok = downloadFile(day.landscapeUhdUrl, file)
             } finally {
                 downloadGuard.remove(day.startDate)
             }
+            if (!ok) {
+                // 下载失败不再静默 return：明确回调 onError，调用方才能感知并重试。
+                mainHandler.post { onError(IOException("UHD 下载失败")) }
+                return
+            }
         }
-        if (!file.exists()) return
+        if (!file.exists()) {
+            mainHandler.post { onError(IOException("UHD 文件缺失")) }
+            return
+        }
         // 镜像到 legacy 单图，保证 showCachedWallpaper() 首帧秒显。
         copyFile(file, File(cacheDir, "wallpaper.jpg"))
         writeText(File(cacheDir, "wallpaper.date"), day.startDate)
