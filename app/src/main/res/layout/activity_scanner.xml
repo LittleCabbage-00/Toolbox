@@ -51,7 +51,23 @@
         android:layout_marginBottom="76dp"
         android:clickable="true"
         android:visibility="visible"
+        app:backgroundTint="?attr/colorSecondaryContainer"
         app:fabSize="normal"
-        app:srcCompat="@drawable/flash" />
+        app:srcCompat="@drawable/flash"
+        app:tint="?attr/colorOnSecondaryContainer" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/gallery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@id/flash"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="76dp"
+        android:contentDescription="从相册识别"
+        app:backgroundTint="?attr/colorSecondaryContainer"
+        app:fabSize="normal"
+        app:srcCompat="@drawable/add_picture"
+        app:tint="?attr/colorOnSecondaryContainer" />
 
 </RelativeLayout>

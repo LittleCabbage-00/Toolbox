@@ -35,9 +35,6 @@ import com.google.zxing.common.HybridBinarizer;
 
 import java.util.Hashtable;
 
-import com.example.cryptoapp.R;
-
-
 final class DecodeHandler extends Handler {
 
   private static final String TAG = DecodeHandler.class.getSimpleName();
@@ -53,14 +50,11 @@ final class DecodeHandler extends Handler {
 
   @Override
   public void handleMessage(Message message) {
-    switch (message.what) {
-      case R.id.decode:
-        //Log.d(TAG, "Got decode message");
-        decode((byte[]) message.obj, message.arg1, message.arg2);
-        break;
-      case R.id.quit:
-        Looper.myLooper().quit();
-        break;
+    if (message.what == R.id.decode) {
+      decode((byte[]) message.obj, message.arg1, message.arg2);
+    } else if (message.what == R.id.quit) {
+      Looper looper = Looper.myLooper();
+      if (looper != null) looper.quit();
     }
   }
 
