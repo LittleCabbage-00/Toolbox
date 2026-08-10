@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?android:attr/colorBackground" android:orientation="vertical">
+    <com.google.android.material.appbar.MaterialToolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="?attr/actionBarSize" android:background="?attr/colorPrimary" app:navigationIcon="@drawable/ic_arrow_back_24" app:title="接口调试工具" app:titleTextColor="?attr/colorOnPrimary" />
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <LinearLayout android:tag="responsive_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+            <com.google.android.material.card.MaterialCardView style="@style/Widget.Toolbox.Card" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="目标地址（URL）">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textUri" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:hint="请求方法">
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView android:id="@+id/methodInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.button.MaterialButtonToggleGroup android:id="@+id/headerModeGroup" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" app:checkedButton="@id/headerModeForm" app:selectionRequired="true" app:singleSelection="true">
+                        <com.google.android.material.button.MaterialButton android:id="@+id/headerModeForm" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:text="请求头表单" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/headerModeRaw" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="原始" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                    <com.google.android.material.textfield.TextInputLayout android:id="@+id/rawHeaderPanel" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:hint="请求头（每行 Key: Value）" android:visibility="gone">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/headersInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="top" android:inputType="textMultiLine" android:minLines="3" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <LinearLayout android:id="@+id/headerFormPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="vertical">
+                        <LinearLayout android:id="@+id/headerRowsContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/addHeaderButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="＋ 添加请求头" app:icon="@drawable/ic_add_24" />
+                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButtonToggleGroup android:id="@+id/bodyModeGroup" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" app:checkedButton="@id/modeForm" app:selectionRequired="true" app:singleSelection="true">
+                        <com.google.android.material.button.MaterialButton android:id="@+id/modeForm" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:text="表单" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/modeRaw" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="原始 JSON" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                    <com.google.android.material.textfield.TextInputLayout android:id="@+id/rawBodyPanel" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:hint="请求体（原始 JSON，GET/HEAD 忽略）" android:visibility="gone">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/bodyInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:gravity="top" android:inputType="textMultiLine" android:minLines="4" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <LinearLayout android:id="@+id/jsonBodyPanel" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="vertical">
+                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="按字段填写，类型可选文本 / 数字 / 布尔 / JSON（对象、数组直接粘贴）" android:textSize="12sp" />
+                        <LinearLayout android:id="@+id/jsonRowsContainer" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="vertical" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/addFieldButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="＋ 添加字段" app:icon="@drawable/ic_add_24" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/generateButton" style="@style/Widget.MaterialComponents.Button" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="生成 JSON 并发送" app:icon="@drawable/ic_search_24" />
+                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/sendButton" style="@style/Widget.MaterialComponents.Button" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="发送请求" app:icon="@drawable/ic_search_24" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="end" android:orientation="horizontal">
+                        <com.google.android.material.button.MaterialButton android:id="@+id/saveRequestButton" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="保存请求" app:icon="@drawable/ic_bookmark_add_24" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/historyRequestsButton" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="历史请求" app:icon="@drawable/ic_history_24" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView style="@style/Widget.Toolbox.Card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                    <TextView android:id="@+id/resultText" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:gravity="top" android:minHeight="160dp" android:text="结果显示在这里" android:textIsSelectable="true" android:textSize="15sp" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/copyButton" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end" android:text="复制结果" app:icon="@drawable/ic_copy_24" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>
