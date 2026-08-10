@@ -1,57 +1,79 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion "29.0.3"
-
-    viewBinding {
-        enabled = true
+    namespace "com.example.cryptoapp"
+    compileSdk 37
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
+        aidl = true
     }
 
     defaultConfig {
         applicationId "com.example.cryptoapp"
-        minSdkVersion 26
-        //noinspection ExpiredTargetSdkVersion
-        targetSdkVersion 29
-        versionCode 20230327
-        versionName "2.4.1"
+        minSdk 26
+        targetSdk 37
+        versionCode 3000000
+        versionName "3.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            // 正式包启用 R8：删除未使用的依赖代码、缩短符号并裁剪无用资源。
+            // FFmpeg 的原生能力保持完整，轻量化不以删除用户功能为代价。
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    packagingOptions {
-        exclude 'classes.dex'
-        exclude '**.**'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    // FFmpeg 维护版目前只面向 arm64 正式发布；国产主流 ROM 的在售设备也均为 arm64。
+    // 不再生成缺失 FFmpeg 原生库的 armeabi-v7a“空壳包”，也不把模拟器 ABI 当发布包。
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'arm64-v8a'
+            universalApk false
+        }
+    }
+    packaging {
+        resources {
+            // BouncyCastle 的 Picnic 后量子算法预计算表约 1.2 MB；本应用仅使用
+            // SM2/SM3/SM4，不会加载 Picnic，排除它不会影响已有加解密能力。
+            excludes += ['org/bouncycastle/pqc/crypto/picnic/**']
+        }
+        jniLibs {
+            // 压缩 .so，安装时由系统提取；显著降低下载包体积。
+            useLegacyPackaging = true
+        }
     }
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    //noinspection GradleDependency
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.preference:preference:1.2.0'
+    implementation 'androidx.core:core:1.19.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.14.0'
     implementation 'de.hdodenhof:circleimageview:3.0.1'
-    implementation 'com.guolindev.permissionx:permissionx:1.7.1'
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
-    implementation 'com.google.zxing:core:3.5.1'
-    implementation 'com.github.jenly1314:zxing-lite:2.3.0'
-    implementation 'com.github.bumptech.glide:glide:4.14.2'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
-    implementation 'com.geyifeng.immersionbar:immersionbar:3.2.2'
-    implementation 'com.geyifeng.immersionbar:immersionbar-ktx:3.2.2'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.google.zxing:core:3.5.4'
+    implementation 'org.bouncycastle:bcprov-jdk15to18:1.82'
+    // 社区维护的 FFmpegKit 8.1 LTS：支持 SDK 35+、16 KB 内存页和 HTTPS/HLS。
+    implementation 'dev.ffmpegkit-maintained:ffmpeg-kit-full:8.1.7'
+    // maintained 8.1.7 的 POM 漏报了 FFmpegKitConfig 的运行时依赖，必须显式补齐。
+    implementation 'com.arthenica:smart-exception-java:0.2.1'
+    def shizukuVersion = '13.1.5'
+    implementation "dev.rikka.shizuku:api:$shizukuVersion"
+    implementation "dev.rikka.shizuku:provider:$shizukuVersion"
 }

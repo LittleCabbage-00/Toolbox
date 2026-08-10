@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="browser_surface_variant">#252A30</color>
+    <color name="browser_outline">#8D9199</color>
+    <color name="browser_on_surface">#E2E2E6</color>
+    <color name="browser_on_surface_variant">#C2C7CF</color>
+    <color name="browser_secondary_container">#354A5F</color>
+    <color name="browser_on_secondary_container">#D0E4FF</color>
+    <color name="toolbox_card">#1C2025</color>
+    <color name="toolbox_card_outline">#3B424A</color>
+    <color name="toolbox_terminal">#090C0F</color>
+    <color name="toolbox_terminal_text">#C5F5DE</color>
+    <color name="toolbox_icon">#C2C7CF</color>
+</resources>

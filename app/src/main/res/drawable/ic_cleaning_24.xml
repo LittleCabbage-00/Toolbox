@@ -1,0 +1,1 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24"><path android:fillColor="@color/toolbox_icon" android:pathData="M16.5,3l-1,2H11l-1,-2H5v2h14V3h-2.5zM6,7v13c0,1.1 0.9,2 2,2h8c1.1,0 2,-0.9 2,-2V7H6zM9,10h2v8H9v-8zM13,10h2v8h-2v-8z" /></vector>
