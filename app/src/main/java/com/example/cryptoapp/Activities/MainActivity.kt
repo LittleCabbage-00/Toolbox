@@ -14,6 +14,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.TransitionDrawable
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
@@ -181,6 +182,8 @@ class MainActivity : BaseActivity() {
                 return@ensureTodayUhd
             }
             val landscape = day.landscapeUhdFile(repo.cacheDir)
+            Log.d(TAG, "ensureBing: portraitScreen=" + isScreenPortrait(this) +
+                " landscapeLen=" + landscape.length() + " screenDim=" + screenMaxDim())
             if (isScreenPortrait(this) && landscape.exists()) {
                 // 竖屏：确保按屏幕比例生成/重建竖屏图（旧 9:16 缓存比例不符会被重建），
                 // 显示才不会"只占一部分"。确保成功后回调并显示。
@@ -190,6 +193,9 @@ class MainActivity : BaseActivity() {
                         return@ensurePortrait
                     }
                     val bitmap = repo.decodeSampled(portrait, screenMaxDim())
+                    Log.d(TAG, "ensureBing: portrait file=" + portrait.absolutePath +
+                        " len=" + portrait.length() + " bmp=" +
+                        (if (bitmap != null) "${bitmap.width}x${bitmap.height}" else "null"))
                     if (bitmap == null) {
                         wallpaperLoading = false
                         return@ensurePortrait
@@ -207,6 +213,9 @@ class MainActivity : BaseActivity() {
                 return@ensureTodayUhd
             }
             val bitmap = repo.decodeSampled(landscape, screenMaxDim())
+            Log.d(TAG, "ensureBing: landscape file=" + landscape.absolutePath +
+                " len=" + landscape.length() + " bmp=" +
+                (if (bitmap != null) "${bitmap.width}x${bitmap.height}" else "null"))
             if (bitmap == null) {
                 wallpaperLoading = false
                 return@ensureTodayUhd
@@ -246,6 +255,8 @@ class MainActivity : BaseActivity() {
         if (wallpaperReady) return
         val repo = BingWallpaperRepository.get(this)
         val image = firstCachedDisplay(repo)
+        Log.d(TAG, "showCached: file=" + image.absolutePath + " exists=" + image.exists() +
+            " len=" + image.length())
         if (!image.exists()) {
             // 首次安装无缓存：先铺深色底，避免下载完成前的纯白刺眼。
             bingImage.setImageDrawable(ColorDrawable(Color.parseColor("#1A1A1A")))
@@ -253,6 +264,8 @@ class MainActivity : BaseActivity() {
         }
         // 首帧占位：小图解码极快，保证第一帧就有内容。
         val placeholder = repo.decodeSampled(image, 640)
+        Log.d(TAG, "showCached: placeholder=" +
+            (if (placeholder != null) "${placeholder.width}x${placeholder.height}" else "null"))
         if (placeholder != null) {
             bingImage.setImageBitmap(placeholder)
             wallpaperReady = true
@@ -421,6 +434,7 @@ class MainActivity : BaseActivity() {
     }
 
     private companion object {
+        private const val TAG = "BingDiag"
         private fun isScreenPortrait(context: Context): Boolean =
             context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
     }

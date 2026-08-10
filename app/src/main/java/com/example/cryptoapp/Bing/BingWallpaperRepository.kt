@@ -7,6 +7,7 @@ import android.graphics.BitmapRegionDecoder
 import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
@@ -70,6 +71,9 @@ class BingWallpaperRepository private constructor(context: Context) {
     }
 
     companion object {
+        /** 4K JPEG 的最小合理字节数；低于此值视为截断/损坏的半成品文件。 */
+        private const val MIN_UHD_BYTES = 200_000L
+        private const val DIAG_TAG = "BingDiag"
         @Volatile private var instance: BingWallpaperRepository? = null
         @JvmStatic fun get(context: Context): BingWallpaperRepository {
             return instance ?: synchronized(this) {
@@ -169,9 +173,9 @@ class BingWallpaperRepository private constructor(context: Context) {
 
     /** 确保竖屏 4K 已生成，回调主线程（可能为 null = 生成失败）。 */
     fun ensurePortrait(day: BingWallpaperDay, onReady: (File?) -> Unit) {
-        val out = day.portraitUhdFile(cacheDir)
-        if (out.exists()) { mainHandler.post { onReady(out) }; return }
         ioExecutor.execute {
+            // 始终走 generatePortrait：它内部会检查缓存比例，旧版 9:16 缓存比例不符
+            // 会被重建，而不是直接复用（否则全面屏上竖屏显示"只占一部分"）。
             val generated = generatePortrait(day)
             mainHandler.post { onReady(generated) }
         }
@@ -306,18 +310,18 @@ class BingWallpaperRepository private constructor(context: Context) {
         }
     }
 
-    /** 轮询等待文件出现且非空（另一并发任务正在写入它）。 */
+    /** 轮询等待文件出现且达到最小有效大小（另一并发任务正在写入它）。 */
     private fun waitForFile(file: File, timeoutMs: Long): Boolean {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
-            if (file.exists() && file.length() > 0) return true
+            if (file.exists() && file.length() >= MIN_UHD_BYTES) return true
             try {
                 Thread.sleep(200)
             } catch (ignored: InterruptedException) {
                 return false
             }
         }
-        return file.exists() && file.length() > 0
+        return file.exists() && file.length() >= MIN_UHD_BYTES
     }
 
     /**
@@ -326,21 +330,31 @@ class BingWallpaperRepository private constructor(context: Context) {
      * 返回是否成功；异常在内部处理，调用方无需再 try/catch。
      */
     private fun downloadFile(url: String, target: File): Boolean {
-        for (attempt in 1..2) {
+        for (attempt in 1..3) {
             try {
                 val call = httpClient.newCall(BingUrls.request(url))
                 call.execute().use { response ->
                     if (!response.isSuccessful || response.body == null) throw IOException("HTTP ${response.code}")
-                    response.body!!.byteStream().use { input ->
+                    val body = response.body!!
+                    val expected = body.contentLength()
+                    val written = body.byteStream().use { input ->
                         FileOutputStream(target).use { output -> input.copyTo(output) }
                     }
+                    Log.d(DIAG_TAG, "download: expected=$expected written=$written len=${target.length()}")
+                    // byteStream().copyTo 在传输被截断但以干净 EOF 结束时不会抛异常，
+                    // 会留下半成品并返回。用 Content-Length 校验实际字节数，不匹配即判失败。
+                    // 这正是"图片只显示一部分、像下载了一半"的根因。
+                    if (expected >= 0 && written != expected) {
+                        throw IOException("truncated: $written/$expected bytes")
+                    }
+                    if (written <= 0) throw IOException("empty body")
                 }
                 if (target.length() > 0) return true
                 target.delete()
             } catch (e: Exception) {
                 target.delete()
             }
-            if (attempt == 1) {
+            if (attempt < 3) {
                 try { Thread.sleep(800) } catch (ignored: InterruptedException) { return false }
             }
         }
@@ -349,10 +363,13 @@ class BingWallpaperRepository private constructor(context: Context) {
 
     private fun onTodayReady(day: BingWallpaperDay, onReady: (BingWallpaperDay) -> Unit, onError: (Exception) -> Unit) {
         val file = day.landscapeUhdFile(cacheDir)
-        if (!file.exists()) {
+        // 文件存在但字节数过小，多半是旧版本流式下载留下的截断半成品，视为无效并重下。
+        val validFile = file.exists() && file.length() >= MIN_UHD_BYTES
+        if (!validFile) {
             if (downloadGuard.add(day.startDate)) {
                 var ok = false
                 try {
+                    if (file.exists()) file.delete()
                     ok = downloadFile(day.landscapeUhdUrl, file)
                 } finally {
                     downloadGuard.remove(day.startDate)
@@ -371,8 +388,8 @@ class BingWallpaperRepository private constructor(context: Context) {
                 }
             }
         }
-        if (!file.exists()) {
-            mainHandler.post { onError(IOException("UHD 文件缺失")) }
+        if (!file.exists() || file.length() < MIN_UHD_BYTES) {
+            mainHandler.post { onError(IOException("UHD 文件缺失或损坏")) }
             return
         }
         // 镜像到 legacy 单图，保证 showCachedWallpaper() 首帧秒显。
@@ -417,6 +434,7 @@ class BingWallpaperRepository private constructor(context: Context) {
             val cropW = minOf(srcW, (srcH * targetAspect).toInt())
             val cropH = srcH
             val offX = (srcW - cropW) / 2
+            Log.d(DIAG_TAG, "genPortrait: src=${srcW}x${srcH} aspect=$targetAspect crop=${cropW}x${cropH}")
             val cropped = decoder.decodeRegion(
                 Rect(offX, 0, offX + cropW, cropH),
                 BitmapFactory.Options().apply { inSampleSize = 1 })
@@ -425,6 +443,7 @@ class BingWallpaperRepository private constructor(context: Context) {
             // 输出为 1080 × (1080 × aspect)，等比放大，保持纵横比。
             val outH = 3840
             val outW = (outH * cropped.width / cropped.height.toFloat()).toInt()
+            Log.d(DIAG_TAG, "genPortrait: out=${outW}x${outH}")
             val portrait = Bitmap.createScaledBitmap(cropped, outW, outH, true)
             if (cropped !== portrait) cropped.recycle()
             FileOutputStream(out).use { portrait.compress(Bitmap.CompressFormat.JPEG, 95, it) }
