@@ -31,7 +31,7 @@ class StringCrypto(_password: String, _useMD5:Boolean=true, _useUrlSafe:Boolean=
         //创建cipher对象
         val cipher = Cipher.getInstance("AES")
         cipher.init(Cipher.DECRYPT_MODE,keySpec)
-        //因为传过来的是Base64加密后的字符串，所以先Base64解密
+        // 密文使用 Base64 编码保存；这里先解码，再进行真正的 AES 解密。
         val decoder = if (useUrlSafe) Base64.getUrlDecoder() else Base64.getDecoder()
         val encrypt = cipher.doFinal(decoder.decode(input))
         return String(encrypt)
