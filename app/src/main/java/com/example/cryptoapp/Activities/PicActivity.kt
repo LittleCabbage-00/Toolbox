@@ -1,114 +1,111 @@
 package com.example.cryptoapp.Activities
 
-import android.app.Activity
-import android.content.Intent
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
+import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.cryptoapp.Base.BaseActivity
-import com.example.cryptoapp.BytesCrypto
+import com.example.cryptoapp.FileCrypto
+import com.example.cryptoapp.Utils.CryptoEngine
 import com.example.cryptoapp.Utils.FileUtil
-import com.example.cryptoapp.R
+import com.example.cryptoapp.databinding.ActivityPicBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_main.toolbar
-import kotlinx.android.synthetic.main.activity_pic.*
-import kotlinx.android.synthetic.main.activity_pic.passwordEditText
-import java.io.FileInputStream
+import com.google.android.material.textfield.TextInputLayout
+import java.io.File
+import java.util.concurrent.Executors
 
-
-class PicActivity : BaseActivity(), View.OnClickListener {
-    private val REQUEST_CODE_FOR_LOAD_FILE = 1
-    private var fromFileUri: Uri? = null
+/** 多算法加密图片解密预览；文件解密和 Bitmap 解析均在后台执行。 */
+class PicActivity : BaseActivity() {
+    private lateinit var binding: ActivityPicBinding
+    private var sourceUri: Uri? = null
+    private var algorithm = FileCrypto.Algorithm.AES_GCM
+    private val worker = Executors.newSingleThreadExecutor()
+    private val openDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri ?: return@registerForActivityResult
+        sourceUri = uri
+        binding.readPicEditText.text = FileUtil.uriToFileName(uri, this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pic)
-        setSupportActionBar(toolbar)
+        binding = ActivityPicBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        readPicButton.setOnClickListener(this)
-        decryptPicButton.setOnClickListener(this)
+        title = "加密图片解密"
+        sourceUri = savedInstanceState?.getString("source_uri")?.let(Uri::parse)
+        algorithm = savedInstanceState?.getString("algorithm")?.let { name -> FileCrypto.Algorithm.values().firstOrNull { it.name == name } }
+            ?: FileCrypto.Algorithm.AES_GCM
+        sourceUri?.let { binding.readPicEditText.text = FileUtil.uriToFileName(it, this) }
+        configureAlgorithms()
+        binding.readPicButton.setOnClickListener { openDocument.launch(arrayOf("*/*")) }
+        binding.generateKeyButton.setOnClickListener { generateKeyPair() }
+        binding.decryptPicButton.setOnClickListener { decryptPreview() }
     }
 
-    override fun onStart() {
-        super.onStart()
-        setTitle("图片解密")
+    private fun configureAlgorithms() {
+        val values = FileCrypto.Algorithm.values()
+        binding.algorithmInput.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, values.map { it.title }))
+        binding.algorithmInput.setText(algorithm.title, false)
+        applyAlgorithmUi()
+        binding.algorithmInput.setOnItemClickListener { _, _, position, _ -> algorithm = values[position]; applyAlgorithmUi() }
     }
 
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.readPicButton -> {
-                setFromFileUri()
-            }
-            R.id.decryptPicButton -> {
-                picDecryptShow()
-            }
-        }
+    private fun applyAlgorithmUi() {
+        binding.secretLayout.hint = if (algorithm.asymmetric) "解密私钥" else "密码"
+        binding.secretLayout.endIconMode = if (algorithm.asymmetric) TextInputLayout.END_ICON_NONE else TextInputLayout.END_ICON_PASSWORD_TOGGLE
+        binding.generateKeyButton.visibility = if (algorithm.asymmetric) View.VISIBLE else View.GONE
     }
 
-    private fun setFromFileUri() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = "*/*"
-        startActivityForResult(intent, REQUEST_CODE_FOR_LOAD_FILE)
-
+    private fun generateKeyPair() {
+        val type = if (algorithm == FileCrypto.Algorithm.RSA_OAEP) CryptoEngine.Algorithm.RSA_OAEP else CryptoEngine.Algorithm.SM2
+        runCatching { CryptoEngine.generateKeyPair(type) }.onSuccess { keys ->
+            val all = "公钥（加密）\n${keys.publicKey}\n\n私钥（解密）\n${keys.privateKey}"
+            MaterialAlertDialogBuilder(this).setTitle("${algorithm.title} 密钥对").setMessage(all)
+                .setNeutralButton("复制全部") { _, _ -> copy(all) }
+                .setNegativeButton("使用私钥") { _, _ -> binding.passwordEditText.setText(keys.privateKey) }
+                .setPositiveButton("关闭", null).show()
+        }.onFailure { message(it.message ?: "生成密钥失败") }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            REQUEST_CODE_FOR_LOAD_FILE -> {
-                if (resultCode == Activity.RESULT_OK && data != null) {
-                    data.data?.let { uri ->
-                        readPicEditText.setText(FileUtil.uriToFileName(uri, this))
-                        fromFileUri = uri
-                    }
-                }
-            }
-        }
-    }
-
-    private fun picDecryptShow() {
-        if (fromFileUri != null) {
-            val inputFileResolver = contentResolver.openFileDescriptor(fromFileUri!!, "r")
-            val password = passwordEditText.text.toString()
-            inputFileResolver?.fileDescriptor?.let {
-                val fileInputStream = FileInputStream(it)
-                // 设置图片缓冲区，最大为20M
-                val fromFileByteArray = ByteArray(20971520)
-                val len = fileInputStream.read(fromFileByteArray)
+    private fun decryptPreview() {
+        val uri = sourceUri ?: return message("请先选择加密图片")
+        val secret = binding.passwordEditText.text?.toString().orEmpty()
+        if (secret.isBlank()) return message(if (algorithm.asymmetric) "请粘贴解密私钥" else "密码不能为空")
+        binding.decryptPicButton.isEnabled = false
+        worker.execute {
+            val bitmap = runCatching {
+                val encrypted = File.createTempFile("toolbox-picture-", ".tbx", cacheDir)
+                val decrypted = File.createTempFile("toolbox-picture-dec-", ".img", cacheDir)
                 try {
-                    val decryptPicByteArray = BytesCrypto(password).decrypt(fromFileByteArray.sliceArray(0 until len))
-                    // 将字节数组转为Bitmap
-                    val decryptPicBitmap = BitmapFactory.decodeByteArray(decryptPicByteArray, 0, decryptPicByteArray.size)
-                    decryptImageView.setImageBitmap(decryptPicBitmap)
-                } catch (e: Exception) {
-                    Log.d("Decrypt Error", "decrypt img exception")
-                    decryptImageView.setImageBitmap(BitmapFactory.decodeResource(this.resources,
-                        R.drawable.error_img
-                    ))
-                    Snackbar.make(decryptImageView, "解密图片时出现错误", Snackbar.LENGTH_SHORT).show()
-                }
+                    contentResolver.openInputStream(uri)!!.use { input -> encrypted.outputStream().use(input::copyTo) }
+                    require(encrypted.length() <= MAX_IMAGE_BYTES) { "文件超过 32 MB" }
+                    require(FileCrypto(secret, algorithm).decrypt(encrypted, decrypted)) { "密码、私钥或文件格式不匹配" }
+                    BitmapFactory.decodeFile(decrypted.absolutePath) ?: error("解密结果不是有效图片")
+                } finally { encrypted.delete(); decrypted.delete() }
+            }
+            runOnUiThread {
+                binding.decryptPicButton.isEnabled = true
+                bitmap.onSuccess(binding.decryptImageView::setImageBitmap).onFailure { message(it.message ?: "解密图片失败") }
             }
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)
-        return true
+    private fun copy(value: String) {
+        (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("Toolbox key pair", value))
+        message("已复制到剪贴板")
     }
-
-    override fun onOptionsItemSelected(item: MenuItem):Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                this.finish()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
+    private fun message(text: String) = Snackbar.make(binding.root, text, Snackbar.LENGTH_LONG).show()
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString("source_uri", sourceUri?.toString()); outState.putString("algorithm", algorithm.name)
+        super.onSaveInstanceState(outState)
     }
+    override fun onDestroy() { worker.shutdownNow(); super.onDestroy() }
+    companion object { private const val MAX_IMAGE_BYTES = 32L * 1024 * 1024 }
 }

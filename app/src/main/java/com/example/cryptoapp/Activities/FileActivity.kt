@@ -1,209 +1,174 @@
 package com.example.cryptoapp.Activities
 
-import android.app.Activity
-import android.content.Intent
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
-import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import com.example.cryptoapp.*
+import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.cryptoapp.Base.BaseActivity
+import com.example.cryptoapp.FileCrypto
+import com.example.cryptoapp.Utils.CryptoEngine
 import com.example.cryptoapp.Utils.FileUtil
-import com.example.cryptoapp.Utils.StringCrypto
+import com.example.cryptoapp.databinding.ActivityFileBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_file.*
-import kotlinx.android.synthetic.main.activity_file.decryptButton
-import kotlinx.android.synthetic.main.activity_file.encryptButton
-import kotlinx.android.synthetic.main.activity_file.passwordEditText
-import kotlinx.android.synthetic.main.activity_main.toolbar
-import java.io.*
-import java.lang.ref.WeakReference
-import kotlin.concurrent.thread
+import com.google.android.material.textfield.TextInputLayout
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.concurrent.Executors
 
-//class FileActivity : BaseActivity(), View.OnClickListener {
-class FileActivity:BaseActivity(){
-    private val REQUEST_CODE_FOR_LOAD_FILE = 1
-    private val REQUEST_CODE_FOR_CREATE_FILE = 2
-    private var fromFileUri: Uri? = null
-    private var toFileUri: Uri? = null
-    private val startProgress = 1
-    private val finishProgress = 2
-    private val cryptoFinishToastMessage = 3
-    private val cryptoErrorToastMessage = 4
-    private val handler = MyHandler(this)
+/** 基于 Storage Access Framework 的流式多算法文件加解密页面。 */
+class FileActivity : BaseActivity() {
+    private lateinit var binding: ActivityFileBinding
+    private var sourceUri: Uri? = null
+    private var destinationUri: Uri? = null
+    private var algorithm = FileCrypto.Algorithm.AES_GCM
+    private val worker = Executors.newSingleThreadExecutor()
 
-    //防止Handler造成的内存泄露，使用内部类
-    private class MyHandler(activity: FileActivity) : Handler() {
-        private val mActivity: WeakReference<FileActivity> = WeakReference(activity)
-
-        override fun handleMessage(msg: Message) {
-            if (mActivity.get() == null) {
-                return
-            }
-            val activity = mActivity.get()
-            if (activity != null) {
-                when (msg.what) {
-                    activity.startProgress -> activity.progressBar.visibility = View.VISIBLE
-                    activity.finishProgress -> activity.progressBar.visibility = View.GONE
-                    activity.cryptoFinishToastMessage -> Snackbar.make(activity.fileView, "任务已完成", Snackbar.LENGTH_SHORT).show()
-                    activity.cryptoErrorToastMessage -> Snackbar.make(activity.fileView, "任务发生错误", Snackbar.LENGTH_SHORT).show()
-                }
-            }
+    private val openDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri ?: return@registerForActivityResult
+        runCatching {
+            contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
+        sourceUri = uri
+        binding.readPathEditText.text = FileUtil.uriToFileName(uri, this)
+    }
+
+    private val createDocument = registerForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+        uri ?: return@registerForActivityResult
+        destinationUri = uri
+        binding.savePathEditText.text = FileUtil.uriToFileName(uri, this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_file)
-        setSupportActionBar(toolbar)
+        binding = ActivityFileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        title = "文件加密与解密"
+
+        restoreState(savedInstanceState)
+        configureAlgorithmPicker()
+        binding.readFile.setOnClickListener { openDocument.launch(arrayOf("*/*")) }
+        binding.saveFile.setOnClickListener { createDocument.launch(suggestedOutputName()) }
+        binding.generateKeyButton.setOnClickListener { generateKeyPair() }
+        binding.encryptButton.setOnClickListener { runCrypto(encrypt = true) }
+        binding.decryptButton.setOnClickListener { runCrypto(encrypt = false) }
     }
 
-    override fun onStart() {
-        super.onStart()
-        setTitle("文件加密解密")
-
-        readFile.setOnClickListener { setFromFileUri() }
-        saveFile.setOnClickListener { setToFileUri() }
-        encryptButton.setOnClickListener { fileCryptoTask("ENCRYPT") }
-        decryptButton.setOnClickListener { fileCryptoTask("DECRYPT") }
-    }
-
-    private fun fileCryptoTask(option: String) {
-        if (toFileUri != null && fromFileUri != null) {
-            thread {
-                val startMsg = Message()
-                startMsg.what = startProgress
-                handler.sendMessage(startMsg)
-                val flag = fileHandle(fromFileUri!!, option)
-                println(flag)
-                val finishMsg = Message()
-                finishMsg.what = finishProgress
-                handler.sendMessage(finishMsg)
-                if (flag) {
-                    val cryptoFinishMsg = Message()
-                    cryptoFinishMsg.what = cryptoFinishToastMessage
-                    handler.sendMessage(cryptoFinishMsg)
-                } else {
-                    val cryptoErrorMsg = Message()
-                    cryptoErrorMsg.what = cryptoErrorToastMessage
-                    handler.sendMessage(cryptoErrorMsg)
-                }
-            }
-        } else {
-            Snackbar.make(fileView, "输入或输出路径错误", Snackbar.LENGTH_SHORT).show()
+    private fun configureAlgorithmPicker() {
+        val algorithms = FileCrypto.Algorithm.values()
+        binding.algorithmInput.setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, algorithms.map { it.title })
+        )
+        binding.algorithmInput.setText(algorithm.title, false)
+        applyAlgorithmUi()
+        binding.algorithmInput.setOnItemClickListener { _, _, position, _ ->
+            algorithm = algorithms[position]
+            applyAlgorithmUi()
         }
     }
 
-    private fun setFromFileUri() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = "*/*"
-        startActivityForResult(intent, REQUEST_CODE_FOR_LOAD_FILE)
+    private fun applyAlgorithmUi() {
+        binding.secretLayout.hint = if (algorithm.asymmetric) "加密粘贴公钥，解密粘贴私钥" else "密码"
+        binding.secretLayout.endIconMode = if (algorithm.asymmetric) TextInputLayout.END_ICON_NONE
+        else TextInputLayout.END_ICON_PASSWORD_TOGGLE
+        binding.generateKeyButton.visibility = if (algorithm.asymmetric) View.VISIBLE else View.GONE
     }
 
-    private fun setToFileUri() {
-        val password = passwordEditText.text.toString()
-        val readName = readPathEditText.text.toString()
-        // 通过输入文件名是否包含特殊后缀来判断输出文件名默认值是加密还是解密后的字符串
-        val outputName = if (readName.contains(".cf", ignoreCase = true)) {
-            fileNameHandle(readName.substring(0, readName.lastIndexOf('.')), password, "DECRYPT")
-        } else {
-            fileNameHandle(readName, password, "ENCRYPT") + ".cf"
-        }
-
-        val intent =Intent(Intent.ACTION_CREATE_DOCUMENT)
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = "*/*"
-        intent.putExtra(Intent.EXTRA_TITLE, outputName)
-        startActivityForResult(intent, REQUEST_CODE_FOR_CREATE_FILE)
-    }
-
-
-
-    override fun onActivityResult(requestCode: Int,resultCode: Int, data:Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            REQUEST_CODE_FOR_LOAD_FILE -> {
-                if (resultCode == Activity.RESULT_OK && data != null) {
-                    data.data?.let { uri ->
-                        readPathEditText.setText(FileUtil.uriToFileName(uri, this))
-                        fromFileUri = uri
-                    }
-                }
+    private fun generateKeyPair() {
+        val textAlgorithm = if (algorithm == FileCrypto.Algorithm.RSA_OAEP) {
+            CryptoEngine.Algorithm.RSA_OAEP
+        } else CryptoEngine.Algorithm.SM2
+        runCatching { CryptoEngine.generateKeyPair(textAlgorithm) }
+            .onSuccess { keys ->
+                val all = "公钥（加密）\n${keys.publicKey}\n\n私钥（解密，请妥善保管）\n${keys.privateKey}"
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("${algorithm.title} 密钥对")
+                    .setMessage(all)
+                    .setNeutralButton("复制全部") { _, _ -> copy(all) }
+                    .setNegativeButton("使用私钥") { _, _ -> binding.secretInput.setText(keys.privateKey) }
+                    .setPositiveButton("使用公钥") { _, _ -> binding.secretInput.setText(keys.publicKey) }
+                    .show()
             }
-            REQUEST_CODE_FOR_CREATE_FILE -> {
-                if (resultCode == Activity.RESULT_OK && data != null) {
-                    data.data?.let { uri ->
-                        savePathEditText.setText(FileUtil.uriToFileName(uri, this))
-                        toFileUri = uri
-                    }
-                }
+            .onFailure { message(it.message ?: "生成密钥失败") }
+    }
+
+    private fun suggestedOutputName(): String {
+        val input = binding.readPathEditText.text.toString().ifBlank { "toolbox-file" }
+        return if (input.endsWith(".tbx", true)) input.dropLast(4).ifBlank { "decrypted-file" } else "$input.tbx"
+    }
+
+    private fun runCrypto(encrypt: Boolean) {
+        val input = sourceUri
+        val output = destinationUri
+        val secret = binding.secretInput.text?.toString().orEmpty()
+        if (input == null || output == null) return message("请先选择源文件和目标文件")
+        if (secret.isBlank()) return message(if (algorithm.asymmetric) "请粘贴对应的公钥或私钥" else "密码不能为空")
+        setBusy(true)
+        worker.execute {
+            val success = runCatching {
+                contentResolver.openFileDescriptor(input, "r")?.use { inputFd ->
+                    contentResolver.openFileDescriptor(output, "w")?.use { outputFd ->
+                        FileInputStream(inputFd.fileDescriptor).use { from ->
+                            FileOutputStream(outputFd.fileDescriptor).use { to ->
+                                val crypto = FileCrypto(secret, algorithm)
+                                if (encrypt) crypto.encrypt(from, to) else crypto.decrypt(from, to)
+                            }
+                        }
+                    } ?: false
+                } ?: false
+            }.getOrDefault(false)
+            runOnUiThread {
+                setBusy(false)
+                message(if (success) "任务已完成" else "任务失败，请检查密码、密钥和文件格式")
             }
         }
     }
 
-    fun fileNameHandle(inputName: String, password:String, option: String): String {
-        var outputName = ""
-        if (option == "ENCRYPT") {
-            outputName = try {
-                StringCrypto(password).encrypt(inputName)
-            } catch (e: Exception) {
-                Log.d("Encrypt Error", "Encrypt input name exception!")
-                "EncryptNameError"
-            }
-        } else if (option == "DECRYPT"){
-            outputName = try {
-                StringCrypto(password).decrypt(inputName)
-            } catch (e: Exception) {
-                Log.d("Decrypt Error", "Decrypt input name exception!")
-                "DecryptNameError"
-            }
-        } else {
-            outputName = ""
-        }
-        return outputName
+    private fun setBusy(busy: Boolean) {
+        binding.progressBar.visibility = if (busy) View.VISIBLE else View.GONE
+        binding.encryptButton.isEnabled = !busy
+        binding.decryptButton.isEnabled = !busy
     }
 
-    private fun fileHandle(uri: Uri, option: String): Boolean {
-        val inputFileResolver = contentResolver.openFileDescriptor(uri, "r")
-        val outputFileResolver = contentResolver.openFileDescriptor(toFileUri!!, "w")
-        val password = passwordEditText.text.toString()
-        var successFlag = false
-        if (outputFileResolver != null) {
-            val outputFileStream = FileOutputStream(outputFileResolver.fileDescriptor)
-            inputFileResolver?.fileDescriptor?.let {
-                val fileInputStream = FileInputStream(it)
-                if (option == "ENCRYPT") {
-                    successFlag = FileCrypto(password).encrypt(fileInputStream, outputFileStream)
-                } else if (option == "DECRYPT"){
-                    successFlag = FileCrypto(password).decrypt(fileInputStream, outputFileStream)
-                }
-                fileInputStream.close()
-            }
-            outputFileStream.close()
-        }
-        inputFileResolver?.close()
-        outputFileResolver?.close()
-        return successFlag
+    private fun restoreState(state: Bundle?) {
+        sourceUri = state?.getString(STATE_SOURCE)?.let(Uri::parse)
+        destinationUri = state?.getString(STATE_DESTINATION)?.let(Uri::parse)
+        algorithm = state?.getString(STATE_ALGORITHM)?.let { name ->
+            FileCrypto.Algorithm.values().firstOrNull { it.name == name }
+        } ?: FileCrypto.Algorithm.AES_GCM
+        sourceUri?.let { binding.readPathEditText.text = FileUtil.uriToFileName(it, this) }
+        destinationUri?.let { binding.savePathEditText.text = FileUtil.uriToFileName(it, this) }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.crypt_func_toolbar, menu)
-        return true
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString(STATE_SOURCE, sourceUri?.toString())
+        outState.putString(STATE_DESTINATION, destinationUri?.toString())
+        outState.putString(STATE_ALGORITHM, algorithm.name)
+        super.onSaveInstanceState(outState)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem):Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                this.finish()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
+    private fun copy(value: String) {
+        (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+            .setPrimaryClip(ClipData.newPlainText("Toolbox key pair", value))
+        message("已复制到剪贴板")
+    }
+
+    private fun message(text: String) = Snackbar.make(binding.fileView, text, Snackbar.LENGTH_LONG).show()
+
+    override fun onDestroy() {
+        worker.shutdownNow()
+        super.onDestroy()
+    }
+
+    companion object {
+        private const val STATE_SOURCE = "source_uri"
+        private const val STATE_DESTINATION = "destination_uri"
+        private const val STATE_ALGORITHM = "file_algorithm"
     }
 }
