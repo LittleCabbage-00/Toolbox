@@ -86,6 +86,26 @@
         </LinearLayout>
     </com.google.android.material.appbar.MaterialToolbar>
 
+    <!-- 类似桌面 Chrome 书签栏：由设置开关控制，横向滚动避免挤压地址栏。 -->
+    <HorizontalScrollView
+        android:id="@+id/bookmarkBar"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="?attr/colorSurface"
+        android:fillViewport="false"
+        android:overScrollMode="always"
+        android:scrollbars="horizontal"
+        android:visibility="gone">
+        <LinearLayout
+            android:id="@+id/bookmarkItems"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp" />
+    </HorizontalScrollView>
+
     <FrameLayout
         android:id="@+id/webContainer"
         android:layout_width="match_parent"

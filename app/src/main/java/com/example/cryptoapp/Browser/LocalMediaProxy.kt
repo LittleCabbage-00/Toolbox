@@ -402,18 +402,23 @@ class LocalMediaProxy @Throws(IOException::class) constructor(
     private fun buildRequest(remoteUrl: String, head: Boolean, range: String, skipCapturedHeaders: Boolean): Request {
         val request = Request.Builder().url(remoteUrl)
         if (head) request.head()
+        var capturedReferer: String? = null
         if (!skipCapturedHeaders) {
             for ((key, value) in capturedHeaders) {
                 // Referer 统一用下载时传入的完整页面 URL（浏览器播放时就是页面完整地址），
                 // 捕获头里的裸域 Referer（如 https://cn.pornhub.com/）会破坏 CDN 校验。
-                if ("Referer".equals(key, ignoreCase = true)) continue
+                if ("Referer".equals(key, ignoreCase = true)) {
+                    capturedReferer = value
+                    continue
+                }
                 request.header(key, value)
             }
         }
         if (userAgent.isNotEmpty()) request.header("User-Agent", userAgent)
         if (cookies.isNotEmpty()) request.header("Cookie", cookies)
         // 完整页面 Referer 总是设置，不被捕获头的裸域 Referer 覆盖。
-        if (referer.isNotEmpty()) request.header("Referer", referer)
+        if (!capturedReferer.isNullOrEmpty()) request.header("Referer", capturedReferer)
+        else if (referer.isNotEmpty()) request.header("Referer", referer)
         if (range.isNotEmpty()) request.header("Range", range)
         return request.build()
     }

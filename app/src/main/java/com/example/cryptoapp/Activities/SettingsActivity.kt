@@ -19,9 +19,12 @@ import com.example.cryptoapp.Bing.Orientation
 import com.example.cryptoapp.Bing.SaveResult
 import com.example.cryptoapp.Browser.BrowserHistoryStore
 import com.example.cryptoapp.Browser.BrowserPreferences
+import com.example.cryptoapp.Browser.AdBlockRuleStore
 import com.example.cryptoapp.databinding.SettingsActivityBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import java.text.DateFormat
+import java.util.Date
 
 /** 软件设置页。每个选项都直接对应浏览器或主页中的实际行为。 */
 class SettingsActivity : BaseActivity() {
@@ -29,6 +32,7 @@ class SettingsActivity : BaseActivity() {
     private val preferences by lazy {
         getSharedPreferences(BrowserPreferences.CONFIG, Context.MODE_PRIVATE)
     }
+    private val adBlockRules by lazy { AdBlockRuleStore.get(this) }
 
     /** API ≤ 28 保存到公共目录前需要 WRITE_EXTERNAL_STORAGE 运行时权限；API ≥ 29 MediaStore 无需权限。 */
     private val storagePermissionLauncher = registerForActivityResult(
@@ -55,9 +59,14 @@ class SettingsActivity : BaseActivity() {
             save(BrowserPreferences.SAVE_HISTORY, value)
         }
         binding.showSearchHistorySwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.SHOW_SEARCH_HISTORY, value) }
+        binding.showBookmarkBarSwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.SHOW_BOOKMARK_BAR, value) }
         binding.javascriptSwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.JAVASCRIPT_ENABLED, value) }
         binding.blockThirdPartyCookiesSwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.BLOCK_THIRD_PARTY_COOKIES, value) }
-        binding.desktopModeSwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.DESKTOP_MODE_DEFAULT, value) }
+        binding.adBlockSwitch.setOnCheckedChangeListener { _, value ->
+            adBlockRules.setEnabled(value)
+            bindAdBlockStatus()
+        }
+        binding.updateAdBlockRulesButton.setOnClickListener { updateAdBlockRules() }
         binding.videoFormatRow.setOnClickListener { showMediaFormatPicker(video = true) }
         binding.audioFormatRow.setOnClickListener { showMediaFormatPicker(video = false) }
         binding.searchEngineRow.setOnClickListener { showSearchEnginePicker() }
@@ -80,14 +89,37 @@ class SettingsActivity : BaseActivity() {
         }
         saveHistorySwitch.isChecked = preferences.getBoolean(BrowserPreferences.SAVE_HISTORY, true)
         showSearchHistorySwitch.isChecked = preferences.getBoolean(BrowserPreferences.SHOW_SEARCH_HISTORY, true)
+        showBookmarkBarSwitch.isChecked = preferences.getBoolean(BrowserPreferences.SHOW_BOOKMARK_BAR, false)
         javascriptSwitch.isChecked = preferences.getBoolean(BrowserPreferences.JAVASCRIPT_ENABLED, true)
         blockThirdPartyCookiesSwitch.isChecked = preferences.getBoolean(BrowserPreferences.BLOCK_THIRD_PARTY_COOKIES, true)
-        desktopModeSwitch.isChecked = preferences.getBoolean(BrowserPreferences.DESKTOP_MODE_DEFAULT, false)
+        adBlockSwitch.isChecked = adBlockRules.isEnabled()
+        bindAdBlockStatus()
         videoFormatValue.text = preferences.getString(BrowserPreferences.SNIFF_VIDEO_FORMAT, "mp4")?.uppercase()
         audioFormatValue.text = preferences.getString(BrowserPreferences.SNIFF_AUDIO_FORMAT, "mp3")?.uppercase()
         searchEngineValue.text = preferences.getString(BrowserPreferences.METHOD_NAME, "必应")
         homepageValue.text = preferences.getString(BrowserPreferences.HOME_URL, "https://cn.bing.com")
         clearHistoryButton.isEnabled = BrowserHistoryStore(this@SettingsActivity).getAll().isNotEmpty()
+    }
+
+    private fun bindAdBlockStatus() {
+        val status = adBlockRules.status()
+        val time = if (status.updatedAt > 0) DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+            .format(Date(status.updatedAt)) else "随应用内置"
+        binding.adBlockStatusValue.text = "${status.source} · ${status.count} 条网络规则 · $time"
+    }
+
+    private fun updateAdBlockRules() {
+        binding.updateAdBlockRulesButton.isEnabled = false
+        binding.updateAdBlockRulesButton.text = "正在更新规则…"
+        Thread {
+            val result = adBlockRules.update()
+            runOnUiThread {
+                binding.updateAdBlockRulesButton.isEnabled = true
+                binding.updateAdBlockRulesButton.text = "更新广告拦截规则"
+                bindAdBlockStatus()
+                message(result.message)
+            }
+        }.start()
     }
 
     private fun showSearchEnginePicker() {

@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
@@ -42,6 +43,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
@@ -54,8 +56,10 @@ import com.example.cryptoapp.Base.BaseActivity
 import com.example.cryptoapp.Browser.BrowserDownloadResolver
 import com.example.cryptoapp.Browser.BrowserDownloadService
 import com.example.cryptoapp.Browser.BrowserFavoriteStore
+import com.example.cryptoapp.Browser.BrowserFavoriteFolder
 import com.example.cryptoapp.Browser.BrowserHistoryStore
 import com.example.cryptoapp.Browser.BrowserPreferences
+import com.example.cryptoapp.Browser.AdBlockRuleStore
 import com.example.cryptoapp.Browser.MediaResourceAggregator
 import com.example.cryptoapp.R
 import com.google.android.material.button.MaterialButton
@@ -87,9 +91,12 @@ class SearchActivity : BaseActivity() {
     private lateinit var forward: MaterialButton
     private lateinit var tabButton: MaterialButton
     private lateinit var tabCount: TextView
+    private lateinit var bookmarkBar: View
+    private lateinit var bookmarkItems: LinearLayout
     private var current: BrowserTab? = null
     private lateinit var browserState: SharedPreferences
     private lateinit var config: SharedPreferences
+    private lateinit var adBlockRules: AdBlockRuleStore
     private lateinit var historyStore: BrowserHistoryStore
     private var mediaTimelineProbeRunning = false
     private var browserResumed = false
@@ -148,6 +155,7 @@ class SearchActivity : BaseActivity() {
         setContentView(R.layout.activity_search)
         browserState = getSharedPreferences(BROWSER_STATE, MODE_PRIVATE)
         config = getSharedPreferences(BrowserPreferences.CONFIG, MODE_PRIVATE)
+        adBlockRules = AdBlockRuleStore.get(this)
         historyStore = BrowserHistoryStore(this)
         favoriteStore = BrowserFavoriteStore(this)
         webContainer = findViewById(R.id.webContainer)
@@ -158,6 +166,9 @@ class SearchActivity : BaseActivity() {
         forward = findViewById(R.id.goForward)
         tabButton = findViewById(R.id.navTabs)
         tabCount = findViewById(R.id.tabCount)
+        bookmarkBar = findViewById(R.id.bookmarkBar)
+        bookmarkItems = findViewById(R.id.bookmarkItems)
+        renderBookmarkBar()
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -238,12 +249,7 @@ class SearchActivity : BaseActivity() {
         view.settings.javaScriptEnabled = config.getBoolean(BrowserPreferences.JAVASCRIPT_ENABLED, true)
         CookieManager.getInstance().setAcceptThirdPartyCookies(view,
             !config.getBoolean(BrowserPreferences.BLOCK_THIRD_PARTY_COOKIES, true))
-        val mode = browserState.getString(KEY_UA_MODE, UA_DEFAULT)
-        var ua: String? = null
-        if (UA_DESKTOP == mode || (UA_DEFAULT == mode
-                && config.getBoolean(BrowserPreferences.DESKTOP_MODE_DEFAULT, false))) ua = desktopUserAgent()
-        else if (UA_CUSTOM == mode) ua = browserState.getString(KEY_CUSTOM_UA, "")
-        view.settings.userAgentString = ua ?: null
+        view.settings.userAgentString = resolvedUserAgent()
     }
 
     private fun newTab(input: String) {
@@ -350,7 +356,7 @@ class SearchActivity : BaseActivity() {
             },
             BrowserMenuAction("添加收藏", R.drawable.ic_bookmark_add_24) { addCurrentFavorite() },
             BrowserMenuAction("收藏夹", R.drawable.ic_bookmark_24) {
-                historyLauncher.launch(Intent(this, BrowserFavoritesActivity::class.java))
+                startActivity(Intent(this, BrowserFavoritesActivity::class.java))
             },
             BrowserMenuAction("刷新网页", R.drawable.ic_refresh_24) { current?.webView?.reload() },
             BrowserMenuAction("页内查找", R.drawable.ic_find_in_page_24) { showFindInPage() },
@@ -361,6 +367,12 @@ class SearchActivity : BaseActivity() {
                 startActivity(Intent(this, BrowserDownloadsActivity::class.java))
             },
             BrowserMenuAction("User-Agent", R.drawable.ic_language_24) { showUserAgentSettings() },
+            BrowserMenuAction(if (adBlockRules.isEnabled()) "广告拦截：开" else "广告拦截：关", R.drawable.ic_block_24) {
+                val enabled = !adBlockRules.isEnabled()
+                adBlockRules.setEnabled(enabled)
+                current?.webView?.reload()
+                Toast.makeText(this, if (enabled) "已开启网页广告拦截" else "已关闭网页广告拦截", Toast.LENGTH_SHORT).show()
+            },
             BrowserMenuAction("网页信息", R.drawable.ic_info_24) { showPageInfo() },
             BrowserMenuAction("清理数据", R.drawable.ic_cleaning_24) { confirmClearBrowserData() },
             BrowserMenuAction("浏览器设置", R.drawable.ic_settings_24) {
@@ -513,7 +525,88 @@ class SearchActivity : BaseActivity() {
     private fun addCurrentFavorite() {
         val tab = current ?: return
         val added = favoriteStore.add(safeTitle(tab), tab.url)
+        renderBookmarkBar()
         Toast.makeText(this, if (added) "已加入收藏夹" else "已更新收藏", Toast.LENGTH_SHORT).show()
+    }
+
+    /** 渲染紧凑书签栏。名称最多四个字符，完整标题仍保留在收藏管理页。 */
+    private fun renderBookmarkBar() {
+        if (!::bookmarkBar.isInitialized) return
+        val visible = config.getBoolean(BrowserPreferences.SHOW_BOOKMARK_BAR, false)
+        bookmarkBar.visibility = if (visible) View.VISIBLE else View.GONE
+        if (!visible) return
+        bookmarkItems.removeAllViews()
+        val favorites = favoriteStore.getAll()
+        // 根目录网址直接显示；已归类的网址只通过其文件夹入口访问，避免书签栏无限变长。
+        favorites.filter { it.folderId == null }.forEach { item ->
+            val chip = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(8), 0, dp(8), 0); minimumWidth = dp(62)
+                foreground = obtainSelectableItemBackgroundBorderless()
+                isClickable = true; contentDescription = item.title
+                setOnClickListener { navigate(item.url) }
+            }
+            val icon = AppCompatImageView(this).apply {
+                val bytes = item.icon?.let { encoded -> runCatching { Base64.decode(encoded, Base64.DEFAULT) }.getOrNull() }
+                val bitmap = bytes?.let { value -> BitmapFactory.decodeByteArray(value, 0, value.size) }
+                if (bitmap == null) setImageResource(R.drawable.web_internet) else setImageBitmap(bitmap)
+                scaleType = ImageView.ScaleType.CENTER_INSIDE
+            }
+            chip.addView(icon, LinearLayout.LayoutParams(dp(18), dp(18)))
+            val name = TextView(this).apply {
+                text = item.title.take(4); maxLines = 1; ellipsize = TextUtils.TruncateAt.END
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f); setPadding(dp(4), 0, 0, 0)
+            }
+            chip.addView(name, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+            bookmarkItems.addView(chip, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        }
+        favoriteStore.getFolders().filter { folder -> favorites.any { it.folderId == folder.id } }.forEach { folder ->
+            val chip = createBookmarkFolderChip(folder)
+            bookmarkItems.addView(chip, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        }
+    }
+
+    /** 文件夹使用色调容器，与普通网址的平面项目明确区分，贴近桌面 Chrome 书签栏。 */
+    private fun createBookmarkFolderChip(folder: BrowserFavoriteFolder): View {
+        val card = MaterialCardView(this).apply {
+            radius = dp(10).toFloat(); cardElevation = 0f; strokeWidth = 0
+            setCardBackgroundColor(themeColor(this,
+                com.google.android.material.R.attr.colorSecondaryContainer, R.color.browser_secondary_container))
+            isClickable = true; contentDescription = "书签文件夹：${folder.name}"
+        }
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(8), 0, dp(8), 0); minimumWidth = dp(68)
+        }
+        content.addView(AppCompatImageView(this).apply {
+            setImageResource(R.drawable.file_folder); scaleType = ImageView.ScaleType.CENTER_INSIDE
+            imageTintList = ColorStateList.valueOf(themeColor(this,
+                com.google.android.material.R.attr.colorOnSecondaryContainer, R.color.browser_on_secondary_container))
+        }, LinearLayout.LayoutParams(dp(18), dp(18)))
+        content.addView(TextView(this).apply {
+            text = folder.name.take(4); maxLines = 1; ellipsize = TextUtils.TruncateAt.END
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f); setPadding(dp(4), 0, 0, 0)
+            setTextColor(themeColor(this, com.google.android.material.R.attr.colorOnSecondaryContainer,
+                R.color.browser_on_secondary_container))
+        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        card.addView(content, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        card.setOnClickListener { showBookmarkFolder(card, folder) }
+        return card
+    }
+
+    private fun showBookmarkFolder(anchor: View, folder: BrowserFavoriteFolder) {
+        val values = favoriteStore.getAll().filter { it.folderId == folder.id }
+        PopupMenu(this, anchor).apply {
+            values.forEachIndexed { index, item -> menu.add(0, index, index, item.title) }
+            setOnMenuItemClickListener { menuItem -> navigate(values[menuItem.itemId].url); true }
+            show()
+        }
+    }
+
+    private fun obtainSelectableItemBackgroundBorderless(): android.graphics.drawable.Drawable? {
+        val value = TypedValue()
+        return if (theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, value, true))
+            ContextCompat.getDrawable(this, value.resourceId) else null
     }
 
     private fun showSniffedResources() {
@@ -957,14 +1050,22 @@ class SearchActivity : BaseActivity() {
     }
 
     private fun showUserAgentSettings() {
-        val choices = arrayOf("跟随软件设置", "移动端", "桌面端", "自定义")
-        MaterialAlertDialogBuilder(this).setTitle("User-Agent").setItems(choices) { _, which ->
+        val choices = arrayOf("移动端", "桌面端", "自定义")
+        val currentMode = effectiveUserAgentMode()
+        val selected = when (currentMode) {
+            UA_DESKTOP -> 1
+            UA_CUSTOM -> 2
+            else -> 0
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle("User-Agent（当前：${userAgentModeName(currentMode)}）")
+            .setSingleChoiceItems(choices, selected) { dialog, which ->
             when (which) {
-                0 -> applyUserAgentMode(UA_DEFAULT, null)
-                1 -> applyUserAgentMode(UA_MOBILE, null)
-                2 -> applyUserAgentMode(UA_DESKTOP, null)
+                0 -> applyUserAgentMode(UA_MOBILE, null)
+                1 -> applyUserAgentMode(UA_DESKTOP, null)
                 else -> showCustomUserAgent()
             }
+            dialog.dismiss()
         }.show()
     }
 
@@ -994,11 +1095,45 @@ class SearchActivity : BaseActivity() {
             applySettings(tab.webView)
             tab.webView.reload()
         }
+        Toast.makeText(this, "已切换为${userAgentModeName(mode)}，网页正在重新加载", Toast.LENGTH_SHORT).show()
     }
 
+    /**
+     * 不从 WebView UA 中简单删除 Mobile：其中仍含 Android / wv 等移动端标记，
+     * 站点会继续返回移动页面。桌面与移动模式均使用完整的浏览器 UA。
+     */
+    private fun resolvedUserAgent(): String {
+        return when (effectiveUserAgentMode()) {
+            UA_DESKTOP -> desktopUserAgent()
+            UA_CUSTOM -> browserState.getString(KEY_CUSTOM_UA, "")
+                ?.takeIf { it.isNotBlank() } ?: mobileUserAgent()
+            else -> mobileUserAgent()
+        }
+    }
+
+    /** 旧版本的“跟随软件设置”无明确入口，迁移时统一回退为移动端。 */
+    private fun effectiveUserAgentMode(): String =
+        browserState.getString(KEY_UA_MODE, UA_MOBILE)
+            ?.takeIf { it != UA_DEFAULT } ?: UA_MOBILE
+
+    private fun mobileUserAgent(): String =
+        "Mozilla/5.0 (Linux; Android ${Build.VERSION.RELEASE}; ${Build.MODEL}) " +
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromiumVersion()} Mobile Safari/537.36"
+
     private fun desktopUserAgent(): String =
-        WebSettings.getDefaultUserAgent(this).replace("; wv", "")
-            .replace(" Mobile ", " ").replace("Version/4.0 ", "")
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+            "(KHTML, like Gecko) Chrome/${chromiumVersion()} Safari/537.36"
+
+    private fun chromiumVersion(): String =
+        Regex("Chrome/([^\\s]+)").find(WebSettings.getDefaultUserAgent(this))
+            ?.groupValues?.getOrNull(1) ?: "131.0.0.0"
+
+    private fun userAgentModeName(mode: String): String = when (mode) {
+        UA_MOBILE -> "移动端 UA"
+        UA_DESKTOP -> "桌面端 UA"
+        UA_CUSTOM -> "自定义 UA"
+        else -> "移动端 UA"
+    }
 
     private fun updateNavigation() {
         val tab = current
@@ -1474,6 +1609,9 @@ class SearchActivity : BaseActivity() {
         override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
             val url = request.url.toString()
             recordResource(view, url)
+            // 顶层文档绝不能拦截：规则误命中导航地址会导致 CSS、脚本等全部失去页面上下文。
+            // 只对图片、脚本、iframe、XHR 等子资源返回空响应。
+            if (!request.isForMainFrame && adBlockRules.shouldBlock(url)) return adBlockRules.blockedResponse()
             val tab = tabFor(view)
             if (tab != null && (url.startsWith("http://") || url.startsWith("https://"))) {
                 val serialized = JSONObject(request.requestHeaders).toString()
@@ -1535,6 +1673,7 @@ class SearchActivity : BaseActivity() {
         }
 
         override fun onPageFinished(view: WebView, url: String) {
+            if (adBlockRules.isEnabled()) view.evaluateJavascript(AD_ELEMENT_HIDE_INSTALL, null)
             val tab = tabFor(view)
             if (tab != null) {
                 tab.url = url
@@ -1560,6 +1699,8 @@ class SearchActivity : BaseActivity() {
 
         override fun onReceivedIcon(view: WebView, icon: Bitmap) {
             if (current != null && current!!.webView == view) favicon.setImageBitmap(icon)
+            favoriteStore.updateIcon(view.url, icon)
+            if (config.getBoolean(BrowserPreferences.SHOW_BOOKMARK_BAR, false)) renderBookmarkBar()
         }
     }
 
@@ -1570,12 +1711,19 @@ class SearchActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        renderBookmarkBar()
         browserResumed = true
         for (tab in tabs) {
             applySettings(tab.webView)
             if (tab != current) tab.webView.onPause()
         }
         if (current != null) current!!.webView.onResume()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent.getStringExtra("web_address")?.takeIf { it.isNotBlank() }?.let(::navigate)
     }
 
     override fun onPause() {
@@ -1634,5 +1782,16 @@ class SearchActivity : BaseActivity() {
             "var A=function(u){try{if(u){u=String(u);if(R.test(u)){if(L.length>=512)L.splice(0,1);L.push(new URL(u,location.href).href)}}}catch(e){}};" +
             "var F=window.fetch;if(F&&F!==window.__tbWrapFetch){window.__tbWrapFetch=F;window.fetch=function(){try{var i=arguments[0];if(typeof i==='string')A(i);else if(i&&i.url)A(i.url)}catch(e){}return F.apply(this,arguments)}};" +
             "var X=XMLHttpRequest.prototype.open;if(X&&X!==window.__tbWrapXhr){window.__tbWrapXhr=X;XMLHttpRequest.prototype.open=function(m,u){try{A(u)}catch(e){}return X.apply(this,arguments)}};})()"
+
+        /**
+         * 网络规则无法覆盖页面内联广告位时的补充层。选择器刻意保持保守，避免使用 .ad
+         * 这类泛化类名误伤正文或正常布局；样式标签幂等更新，不重复插入。
+         */
+        private const val AD_ELEMENT_HIDE_INSTALL =
+            "(function(){var id='toolbox-ad-hide-style',s=document.getElementById(id);" +
+            "if(!s){s=document.createElement('style');s.id=id;(document.head||document.documentElement).appendChild(s)};" +
+            "s.textContent='.adsbygoogle,[id^=google_ads],[id^=div-gpt-ad],[data-ad-client],[data-ad-slot]," +
+            "iframe[src*=\\\"doubleclick.net\\\"],iframe[src*=\\\"googlesyndication.com\\\"]' +" +
+            "'{display:none!important;visibility:hidden!important}';})()"
     }
 }

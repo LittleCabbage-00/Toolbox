@@ -42,6 +42,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="18sp" />
 
             <TextView
@@ -66,6 +67,16 @@
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textSize="14sp" />
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/editButton"
+            style="@style/Widget.Toolbox.IconButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="编辑收藏"
+            android:text=""
+            android:visibility="gone"
+            app:icon="@drawable/ic_edit_24" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/deleteButton"

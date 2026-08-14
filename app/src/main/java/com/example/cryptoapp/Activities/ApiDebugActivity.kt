@@ -79,7 +79,6 @@ class ApiDebugActivity : BaseActivity() {
         binding.methodInput.setText("GET", false)
         binding.sendButton.setOnClickListener { sendRequest() }
         binding.addFieldButton.setOnClickListener { addJsonRow() }
-        binding.generateButton.setOnClickListener { generateAndSend() }
         binding.addHeaderButton.setOnClickListener { addHeaderRow() }
         binding.headerModeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked) return@addOnButtonCheckedListener
@@ -300,18 +299,19 @@ class ApiDebugActivity : BaseActivity() {
         jsonRows.add(JsonRow(key, value, type))
     }
 
-    private fun generateAndSend() {
+    /** 将表单字段转为 JSON；Raw 模式则保留用户原文，由发送入口统一处理。 */
+    private fun formBody(): String? {
         val json = JSONObject()
         val seen = HashSet<String>()
         jsonRows.forEachIndexed { index, row ->
             val key = row.key.text?.toString()?.trim().orEmpty()
             if (key.isEmpty()) {
                 message("第 ${index + 1} 行的字段名为空")
-                return
+                return null
             }
             if (!seen.add(key)) {
                 message("字段名重复：$key")
-                return
+                return null
             }
             val value = row.value.text?.toString()?.trim().orEmpty()
             when (row.type.selectedItem.toString()) {
@@ -321,7 +321,7 @@ class ApiDebugActivity : BaseActivity() {
                         if (value.contains('.')) value.toDouble() else value.toLong()
                     }.getOrElse {
                         message("字段 $key 不是合法数字")
-                        return
+                        return null
                     }
                     json.put(key, number)
                 }
@@ -331,7 +331,7 @@ class ApiDebugActivity : BaseActivity() {
                         "false", "0", "否" -> false
                         else -> {
                             message("字段 $key 应为 true/false/1/0")
-                            return
+                            return null
                         }
                     }
                     json.put(key, parsed)
@@ -339,11 +339,11 @@ class ApiDebugActivity : BaseActivity() {
                 "JSON" -> {
                     if (value.isEmpty()) {
                         message("字段 $key 的 JSON 为空")
-                        return
+                        return null
                     }
                     val parsed = runCatching { JSONTokener(value).nextValue() }.getOrElse {
                         message("字段 $key 的 JSON 不合法")
-                        return
+                        return null
                     }
                     json.put(key, parsed)
                 }
@@ -351,12 +351,9 @@ class ApiDebugActivity : BaseActivity() {
         }
         if (json.length() == 0) {
             message("请先填写字段")
-            return
+            return null
         }
-        binding.bodyInput.setText(json.toString(2))
-        binding.modeRaw.isChecked = true
-        if (requestMethod() == "GET") binding.methodInput.setText("POST", false)
-        sendRequest()
+        return json.toString()
     }
 
     private fun urlInput(): String {
@@ -454,17 +451,21 @@ class ApiDebugActivity : BaseActivity() {
         headerRows.add(HeaderRow(keyInput, valueInput))
     }
 
-    private fun sendRequest() = background("正在发送请求…") {
-        val input = urlInput()
+    private fun sendRequest() {
+        val input = runCatching(::urlInput).getOrElse { message(it.message ?: "地址无效"); return }
+        val headers = runCatching(::currentHeadersText).mapCatching(::parseHeaders)
+            .getOrElse { message(it.message ?: "请求头无效"); return }
+        val formMode = binding.modeForm.isChecked
+        val bodyText = if (formMode) formBody() ?: return else binding.bodyInput.text?.toString().orEmpty()
         val method = requestMethod()
-        val headers = parseHeaders(currentHeadersText())
+        val bodySupported = method != "GET" && method != "HEAD"
+        if (formMode && bodySupported) binding.bodyInput.setText(bodyText)
+        background("正在发送请求…") {
         val builder = Request.Builder().url(input)
         headers.forEach { (key, value) -> builder.header(key, value) }
-        val bodyText = binding.bodyInput.text?.toString().orEmpty()
-        val bodySupported = method != "GET" && method != "HEAD"
         if (bodySupported) {
             val mediaType = if (headers.any { it.first.equals("Content-Type", true) }) null
-            else if (bodyText.trimStart().startsWith("{") || bodyText.trimStart().startsWith("["))
+            else if (formMode || bodyText.trimStart().startsWith("{") || bodyText.trimStart().startsWith("["))
                 "application/json; charset=utf-8"
             else "text/plain; charset=utf-8"
             builder.method(method, bodyText.toByteArray(Charsets.UTF_8).toRequestBody(mediaType?.toMediaType()))
@@ -534,6 +535,7 @@ class ApiDebugActivity : BaseActivity() {
                     appendLine("  （二进制内容 ${formatBytes(previewBytes.size.toLong())}，跳过预览）")
                 }
             }.trim()
+        }
         }
     }
 

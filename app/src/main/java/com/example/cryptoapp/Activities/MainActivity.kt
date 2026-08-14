@@ -45,6 +45,7 @@ class MainActivity : BaseActivity() {
     private lateinit var bingImage: ImageView
     private lateinit var toolbar: Toolbar
     private lateinit var config: SharedPreferences
+    private lateinit var navigation: NavigationView
     @Volatile
     private var wallpaperLoading = false
     /** 真正显示过壁纸图片才算 true；深色底占位不算，避免铺底后永久锁死后续加载。 */
@@ -69,7 +70,7 @@ class MainActivity : BaseActivity() {
         drawer = findViewById(R.id.drawerLayout)
         bingImage = findViewById(R.id.image_bing)
         toolbar = findViewById(R.id.toolbar)
-        val navigation = findViewById<NavigationView>(R.id.navView)
+        navigation = findViewById(R.id.navView)
         val searchText = findViewById<TextView>(R.id.search_text_tv)
         val searchButton = findViewById<ImageView>(R.id.search_button)
         positionSearchAtLowerThird()
@@ -91,8 +92,11 @@ class MainActivity : BaseActivity() {
             }
         }, 350L)
 
-        navigation.setCheckedItem(R.id.home)
+        setNavigationSelection(R.id.home)
         navigation.setNavigationItemSelectedListener { item ->
+            // 菜单分组用于标题展示，默认会允许每个分组各保留一个选中项。
+            // 统一清除后再选中，确保抽屉内始终只有当前入口高亮。
+            setNavigationSelection(item.itemId)
             handleNavigation(item.itemId)
             drawer.closeDrawer(GravityCompat.START)
             true
@@ -109,6 +113,13 @@ class MainActivity : BaseActivity() {
             cancelWallpaperLoad()
             bingImage.setImageDrawable(null)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 抽屉所属的 MainActivity 就是主页本身；从任意工具页返回后，恢复“主页”高亮，
+        // 避免工具入口仍被选中而实际画面已经是主页。
+        if (::navigation.isInitialized) setNavigationSelection(R.id.home)
     }
 
     /** 把搜索框定位到屏幕下 1/3 处：距屏幕底部高度 = 屏高/3，随屏幕尺寸相对变化。 */
@@ -143,6 +154,18 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private fun setNavigationSelection(selectedId: Int) {
+        fun clear(menu: android.view.Menu) {
+            for (index in 0 until menu.size()) {
+                val item = menu.getItem(index)
+                item.isChecked = false
+                item.subMenu?.let(::clear)
+            }
+        }
+        clear(navigation.menu)
+        navigation.menu.findItem(selectedId)?.isChecked = true
+    }
+
     private fun openScannerWithPermission() {
         // 扫码页在真正创建相机预览前申请权限；即使拒绝也能使用图库识别。
         startActivity(Intent(this, CaptureActivity::class.java))
@@ -160,9 +183,9 @@ class MainActivity : BaseActivity() {
                 .putInt("method_num", 0)
                 .putBoolean(BrowserPreferences.SAVE_HISTORY, true)
                 .putBoolean(BrowserPreferences.SHOW_SEARCH_HISTORY, true)
+                .putBoolean(BrowserPreferences.SHOW_BOOKMARK_BAR, false)
                 .putBoolean(BrowserPreferences.JAVASCRIPT_ENABLED, true)
                 .putBoolean(BrowserPreferences.BLOCK_THIRD_PARTY_COOKIES, true)
-                .putBoolean(BrowserPreferences.DESKTOP_MODE_DEFAULT, false)
                 .putBoolean("isFirstIn", false)
                 .apply()
         }

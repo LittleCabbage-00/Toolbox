@@ -142,6 +142,7 @@
                     </LinearLayout>
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/saveHistorySwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="保存浏览历史记录" />
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/showSearchHistorySwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="搜索界面显示历史记录" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/showBookmarkBarSwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="浏览器地址栏下方显示收藏栏" />
                     <com.google.android.material.button.MaterialButton android:id="@+id/openHistoryButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="查看历史记录" app:icon="@drawable/ic_history_24" app:iconSize="20dp" />
                     <com.google.android.material.button.MaterialButton android:id="@+id/clearHistoryButton" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="清空全部历史记录" android:textColor="?attr/colorError" app:icon="@drawable/ic_delete_24" app:iconTint="?attr/colorError" />
                 </LinearLayout>
@@ -164,7 +165,9 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/javascriptSwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="允许 JavaScript" />
                     <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/blockThirdPartyCookiesSwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="阻止第三方 Cookie" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/desktopModeSwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="新标签默认使用桌面模式" />
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/adBlockSwitch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="屏蔽网页广告" />
+                    <TextView android:id="@+id/adBlockStatusValue" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_marginTop="2dp" android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/updateAdBlockRulesButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="更新广告拦截规则" app:icon="@drawable/ic_refresh_24" app:iconSize="20dp" />
                     <com.google.android.material.button.MaterialButton android:id="@+id/clearBrowserDataButton" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="清理 Cookie、缓存和网页存储" app:icon="@drawable/ic_delete_24" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
