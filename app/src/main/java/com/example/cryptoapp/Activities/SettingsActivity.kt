@@ -48,8 +48,6 @@ class SettingsActivity : BaseActivity() {
 
         bindCurrentValues()
         binding.wallpaperSwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.BING_WALLPAPER, value) }
-        binding.bingAutoSaveSwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.BING_SAVE_AUTO, value) }
-        binding.bingPortraitSaveSwitch.setOnCheckedChangeListener { _, value -> save(BrowserPreferences.BING_SAVE_PORTRAIT, value) }
         binding.saveTodayWallpaperButton.setOnClickListener { saveTodayWallpaper() }
         binding.openWallpaperGalleryButton.setOnClickListener {
             startActivity(Intent(this, BingWallpaperGalleryActivity::class.java))
@@ -80,8 +78,6 @@ class SettingsActivity : BaseActivity() {
 
     private fun bindCurrentValues() = with(binding) {
         wallpaperSwitch.isChecked = preferences.getBoolean(BrowserPreferences.BING_WALLPAPER, true)
-        bingAutoSaveSwitch.isChecked = preferences.getBoolean(BrowserPreferences.BING_SAVE_AUTO, true)
-        bingPortraitSaveSwitch.isChecked = preferences.getBoolean(BrowserPreferences.BING_SAVE_PORTRAIT, false)
         themeModeValue.text = when (preferences.getString(BrowserPreferences.THEME_MODE, "system")) {
             "light" -> "浅色"
             "dark" -> "深色"
@@ -226,7 +222,7 @@ class SettingsActivity : BaseActivity() {
             return
         }
         val repo = BingWallpaperRepository.get(this)
-        val includePortrait = preferences.getBoolean(BrowserPreferences.BING_SAVE_PORTRAIT, false)
+        val includePortrait = false
         repo.ensureTodayUhd({ day ->
             saveDayWithDedup(repo, day, Orientation.LANDSCAPE)
             if (includePortrait) saveDayWithDedup(repo, day, Orientation.PORTRAIT)

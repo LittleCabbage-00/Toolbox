@@ -1,10 +1,8 @@
 package com.example.cryptoapp.Activities
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -20,11 +18,8 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.GravityCompat
@@ -53,13 +48,6 @@ class MainActivity : BaseActivity() {
     private var wallpaperReady = false
     /** 首次启动网络未就绪时的延时重试计数，最多重试 2 次避免无限循环。 */
     private var wallpaperRetryCount = 0
-
-    /** API ≤ 28 自动保存到公共目录前需要 WRITE_EXTERNAL_STORAGE 运行时权限。 */
-    private val storagePermissionLauncher: ActivityResultLauncher<String> = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) maybeAutoSaveToday()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -175,8 +163,6 @@ class MainActivity : BaseActivity() {
         if (config.getBoolean("isFirstIn", true)) {
             config.edit()
                 .putBoolean("bing_pic_check", true)
-                .putBoolean(BrowserPreferences.BING_SAVE_AUTO, true)
-                .putBoolean(BrowserPreferences.BING_SAVE_PORTRAIT, false)
                 .putString("home_url", "https://cn.bing.com")
                 .putString("search_method", "https://cn.bing.com/search?q=")
                 .putString("method_name", "必应")
@@ -193,7 +179,7 @@ class MainActivity : BaseActivity() {
 
     // ------------------------------------------------------------------ Bing 壁纸
 
-    /** 入口：先展示本地缓存避免白屏，再后台确认 Bing 是否换图、启动后台预取、自动保存。 */
+    /** 入口：先展示本地缓存避免白屏，再后台确认 Bing 是否换图并启动后台预取。 */
     private fun ensureBingWallpaper() {
         showCachedWallpaper()
         val repo = BingWallpaperRepository.get(this)
@@ -264,7 +250,6 @@ class MainActivity : BaseActivity() {
             }
         })
         repo.startBackgroundPrefetch()
-        maybeAutoSaveToday()
     }
 
     /**
@@ -350,20 +335,6 @@ class MainActivity : BaseActivity() {
 
     private fun screenMaxDim(): Int =
         maxOf(resources.displayMetrics.widthPixels, resources.displayMetrics.heightPixels)
-
-    /** 自动保存今天的壁纸：先确保权限，静默去重不弹窗。 */
-    private fun maybeAutoSaveToday() {
-        if (!config.getBoolean(BrowserPreferences.BING_SAVE_AUTO, true)) return
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
-            && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-            storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            return
-        }
-        BingWallpaperRepository.get(this).autoSaveToday(
-            config.getBoolean(BrowserPreferences.BING_SAVE_PORTRAIT, false),
-            { _ -> })
-    }
 
     /** 600ms 交叉淡化：有旧图时新旧交叉，首次加载从透明淡入，避免直接闪现。 */
     private fun crossFadeWallpaper(newBitmap: Bitmap) {

@@ -8,8 +8,6 @@ object BrowserPreferences {
     const val METHOD_NAME = "method_name"
     const val METHOD_INDEX = "method_num"
     const val BING_WALLPAPER = "bing_pic_check"
-    const val BING_SAVE_AUTO = "bing_save_auto"
-    const val BING_SAVE_PORTRAIT = "bing_save_portrait"
     const val SAVE_HISTORY = "save_browser_history"
     const val SHOW_SEARCH_HISTORY = "show_search_history"
     const val SHOW_BOOKMARK_BAR = "show_bookmark_bar"

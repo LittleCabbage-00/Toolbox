@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 小号 Material 工具叠在极简网页窗口上，表达网页工具与调试能力。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 背景网页：窗口、顶栏与一条内容线，避免细碎装饰。 -->
+    <path
+        android:fillColor="#00FFFFFF"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="3"
+        android:strokeLineJoin="round"
+        android:pathData="M37,62L71,62L71,79L37,79Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M38.5,67L69.5,67L69.5,70L38.5,70Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M43,74L60,74L60,76.5L43,76.5Z" />
+    <!-- 缩小后的官方 Material build 轮廓。 -->
+    <group
+        android:scaleX="1.55"
+        android:scaleY="1.55"
+        android:translateX="34"
+        android:translateY="27">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M22.7,19L13.6,9.9C14.5,7.56 14,4.8 12.1,2.9C10.14,0.92 7.1,0.5 4.8,1.6L8.44,5.24L5.61,8.07L1.97,4.43C0.87,6.73 1.3,9.77 3.28,11.75C5.17,13.64 7.93,14.13 10.27,13.23L19.37,22.33C19.84,22.8 20.61,22.8 21.08,22.33L22.69,20.72C23.17,20.25 23.17,19.48 22.7,19Z" />
+    </group>
+</vector>

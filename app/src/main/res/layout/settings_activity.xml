@@ -90,16 +90,6 @@
                 android:layout_height="wrap_content"
                 >
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/bingAutoSaveSwitch"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="自动保存每日壁纸" />
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/bingPortraitSaveSwitch"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="同时保存竖屏 4K 版" />
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/saveTodayWallpaperButton"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
