@@ -101,10 +101,17 @@ public class CaptureActivity extends BaseActivity implements Callback {
     private FloatingActionButton flash;
     private boolean resultDialogShowing;
     private boolean cameraPermissionGranted;
+    /** Surface 已存在不等于权限已获授；两者都就绪后才打开预览。 */
+    private boolean scannerResumed;
+    private boolean surfaceCallbackAttached;
     private final ActivityResultLauncher<String> cameraPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), granted -> {
                 cameraPermissionGranted = granted;
-                if (granted && !isFinishing()) setupCameraSurface();
+                // 首次授权时 Surface 往往已创建。通过 post 回到下一帧再检查 isValid，
+                // 避免只添加回调却错过已发出的 surfaceCreated，从而黑屏。
+                if (granted && scannerResumed && !isFinishing()) {
+                    findViewById(R.id.scanner_view).post(this::startCameraPreview);
+                }
                 else if (!granted) showCameraPermissionHelp();
             });
 
@@ -272,12 +279,11 @@ public class CaptureActivity extends BaseActivity implements Callback {
     @Override
     protected void onResume() {
         super.onResume();
-        if (!cameraPermissionGranted) return;
-        setupCameraSurface();
-
+        // 从系统设置返回时重新读取权限状态，避免此前拒绝过一次后预览永远不再启动。
+        cameraPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED;
         decodeFormats = null;
         characterSet = null;
-
         playBeep = true;
         AudioManager audioService = (AudioManager) getSystemService(AUDIO_SERVICE);
         if (audioService.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
@@ -285,23 +291,31 @@ public class CaptureActivity extends BaseActivity implements Callback {
         }
         initBeepSound();
         vibrate = true;
+        scannerResumed = true;
+        if (cameraPermissionGranted) startCameraPreview();
     }
 
-    /** 只有相机权限确认后才创建预览 Surface，图库识别不需要任何存储权限。 */
-    private void setupCameraSurface() {
+    /** 只有权限、Activity 与 Surface 都就绪后才打开相机，图库识别不需要任何存储权限。 */
+    private void startCameraPreview() {
+        if (!cameraPermissionGranted || !scannerResumed || isFinishing()) return;
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.scanner_view);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
 
-        if (hasSurface) {
+        // 授权回调发生在首次创建 Surface 之后时，hasSurface 仍可能为 false；
+        // 直接检查 Surface 有效性可确保第一次授权后立即得到相机预览。
+        if (hasSurface || surfaceHolder.getSurface().isValid()) {
+            hasSurface = true;
             initCamera(surfaceHolder);
-        } else {
+        } else if (!surfaceCallbackAttached) {
             surfaceHolder.addCallback(this);
             surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+            surfaceCallbackAttached = true;
         }
     }
 
     @Override
     protected void onPause() {
+        scannerResumed = false;
         super.onPause();
         if (handler != null) {
             handler.quitSynchronously();
@@ -438,7 +452,7 @@ public class CaptureActivity extends BaseActivity implements Callback {
     public void surfaceCreated(SurfaceHolder holder) {
         if (!hasSurface) {
             hasSurface = true;
-            initCamera(holder);
+            if (cameraPermissionGranted && scannerResumed) initCamera(holder);
         }
 
     }

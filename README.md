@@ -1,6 +1,12 @@
 # Toolbox Android 工具箱
 
-采用 Material Design、支持深色模式与 Edge-to-Edge 的本地 Android 工具箱。当前版本 3.1.0，`compileSdk` / `targetSdk` 为 37，最低支持 Android 8.0（API 26）。
+采用 Material Design、支持深色模式与 Edge-to-Edge 的本地 Android 工具箱。当前版本 3.1.1，`compileSdk` / `targetSdk` 为 37，最低支持 Android 8.0（API 26）。
+
+## 3.1.1 修复
+
+- 修复扫码器首次请求并授予相机权限后预览保持黑屏的问题；现在会重新检查已存在的 `SurfaceView` 并立即启动相机预览。
+- 移除仓库内 Claude 本地配置，不再携带该工具的贡献者或权限信息。
+- 新增 GitHub Actions：推送 `v*` 标签后自动构建、签名 `arm64-v8a` APK、上传构建产物并创建 GitHub Release。
 
 ## 3.1.0 概览
 
