@@ -27,6 +27,10 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # 覆盖 action 默认的 "tools platform-tools"：旧 tools 包已从新 SDK 仓库移除，
+          # 会在 setup 阶段直接失败。只安装本项目实际需要的平台和构建工具。
+          packages: "platform-tools platforms;android-37 build-tools;37.0.0"
 
       - name: Build arm64 release APK
         run: ./gradlew :app:assembleRelease --no-daemon
