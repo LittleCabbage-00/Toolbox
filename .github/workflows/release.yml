@@ -32,8 +32,9 @@ jobs:
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -perm -u+x | sort -V | tail -n1)"
           test -n "$SDKMANAGER"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          # API 37 的官方包标识为 android-37.0（不是 android-37）；不降级项目 SDK。
-          yes | "$SDKMANAGER" --channel=3 --install "platform-tools" "platforms;android-37.0" "build-tools;37.0.0"
+          # Hosted Runner 尚未提供 android-37.0；Gradle 在 CI=true 时会以 API 36
+          # 编译但继续声明 targetSdk 37，避免降低应用的目标 API。
+          yes | "$SDKMANAGER" --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Build arm64 release APK
         run: ./gradlew :app:assembleRelease --no-daemon

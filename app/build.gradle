@@ -2,7 +2,9 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.example.cryptoapp"
-    compileSdk 37
+    // GitHub Hosted Runner 暂未提供 android-37.0；CI 用稳定的 API 36 编译，
+    // 本地与正式 Android 37 SDK 环境仍保持 API 37，应用 targetSdk 始终为 37。
+    compileSdk(System.getenv("CI") == "true" ? 36 : 37)
     buildFeatures {
         viewBinding = true
         buildConfig = true
