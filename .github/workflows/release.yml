@@ -28,18 +28,17 @@ jobs:
       - name: Install required Android SDK packages
         shell: bash
         run: |
-          # 不使用 setup-android：该 action 在当前 Runner 映像会请求已废弃的 tools 包。
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -perm -u+x | sort -V | tail -n1)"
           test -n "$SDKMANAGER"
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
-          # Hosted Runner 尚未提供 android-37.0；Gradle 在 CI=true 时会以 API 36
-          # 编译但继续声明 targetSdk 37，避免降低应用的目标 API。
-          # 许可证已在上一步接受；安装时不要使用 yes 管道，避免 sdkmanager 正常结束后
-          # yes 收到 SIGPIPE，使 Actions 的 pipefail 误判步骤失败。
-          "$SDKMANAGER" --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          # yes 可能在 sdkmanager 退出后遇到 SIGPIPE；只判断 sdkmanager 的退出状态。
+          (set +o pipefail; yes 2>/dev/null | "$SDKMANAGER" --licenses >/dev/null)
+          # 新版 SDK 使用包含次版本号的平台包名。
+          "$SDKMANAGER" --channel=3 --install "platforms;android-37.0" "build-tools;37.0.0"
+          test -f "$ANDROID_HOME/platforms/android-37.0/android.jar"
+          test -x "$ANDROID_HOME/build-tools/37.0.0/apksigner"
 
       - name: Build arm64 release APK
-        run: ./gradlew :app:assembleRelease --no-daemon
+        run: bash ./gradlew :app:assembleRelease --no-daemon
 
       # 此仓库当前未配置私钥 Secret。为保证 Release 附件可安装，CI 使用临时
       # debug keystore 签名；正式商店分发可在后续接入自己的签名 Secret。
@@ -51,10 +50,11 @@ jobs:
             -storepass android -keypass android -dname "CN=Toolbox, OU=Release, O=Toolbox, C=CN"
           UNSIGNED="app/build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk"
           SIGNED="app/build/outputs/apk/release/Toolbox-${GITHUB_REF_NAME}-arm64-v8a.apk"
-          "$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n1)/apksigner" sign \
+          APKSIGNER="$ANDROID_HOME/build-tools/37.0.0/apksigner"
+          "$APKSIGNER" sign \
             --ks "$RUNNER_TEMP/release.keystore" --ks-key-alias toolbox \
             --ks-pass pass:android --key-pass pass:android --out "$SIGNED" "$UNSIGNED"
-          "$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n1)/apksigner" verify --verbose "$SIGNED"
+          "$APKSIGNER" verify --verbose "$SIGNED"
 
       - name: Upload APK workflow artifact
         uses: actions/upload-artifact@v4
