@@ -34,7 +34,9 @@ jobs:
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           # Hosted Runner 尚未提供 android-37.0；Gradle 在 CI=true 时会以 API 36
           # 编译但继续声明 targetSdk 37，避免降低应用的目标 API。
-          yes | "$SDKMANAGER" --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          # 许可证已在上一步接受；安装时不要使用 yes 管道，避免 sdkmanager 正常结束后
+          # yes 收到 SIGPIPE，使 Actions 的 pipefail 误判步骤失败。
+          "$SDKMANAGER" --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Build arm64 release APK
         run: ./gradlew :app:assembleRelease --no-daemon
